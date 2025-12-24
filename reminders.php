@@ -332,8 +332,8 @@ foreach ($reminders as $reminder) {
         </nav>
 
 
-    <div class="container-fluid">
-        <div class="row">
+        <div class="container-fluid">
+            <div class="row">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-12">
@@ -453,35 +453,35 @@ foreach ($reminders as $reminder) {
 
     <script>
         // Sidebar toggle
-        document.getElementById("sidebarToggle").addEventListener("click", function () {
-          const sidebar = document.querySelector(".sidebar");
-          const mainContent = document.querySelector(".main-content");
+        document.getElementById("sidebarToggle").addEventListener("click", function() {
+            const sidebar = document.querySelector(".sidebar");
+            const mainContent = document.querySelector(".main-content");
 
-          if (window.innerWidth <= 768) {
-            sidebar.classList.toggle("active");
-          } else {
-            sidebar.classList.toggle("closed");
-            if (sidebar.classList.contains("closed")) {
-              mainContent.style.marginLeft = "0";
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle("active");
             } else {
-              mainContent.style.marginLeft = "250px";
+                sidebar.classList.toggle("closed");
+                if (sidebar.classList.contains("closed")) {
+                    mainContent.style.marginLeft = "0";
+                } else {
+                    mainContent.style.marginLeft = "250px";
+                }
             }
-          }
         });
 
         // Auto-hide sidebar on mobile when clicking outside
-        document.addEventListener("click", function (event) {
-          const sidebar = document.querySelector(".sidebar");
-          const toggleBtn = document.getElementById("sidebarToggle");
+        document.addEventListener("click", function(event) {
+            const sidebar = document.querySelector(".sidebar");
+            const toggleBtn = document.getElementById("sidebarToggle");
 
-          if (
-            window.innerWidth <= 768 &&
-            !sidebar.contains(event.target) &&
-            !toggleBtn.contains(event.target) &&
-            sidebar.classList.contains("active")
-          ) {
-            sidebar.classList.remove("active");
-          }
+            if (
+                window.innerWidth <= 768 &&
+                !sidebar.contains(event.target) &&
+                !toggleBtn.contains(event.target) &&
+                sidebar.classList.contains("active")
+            ) {
+                sidebar.classList.remove("active");
+            }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
