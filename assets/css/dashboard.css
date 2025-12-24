@@ -1,0 +1,154 @@
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --light-bg: #f8f9fa;
+}
+
+body {
+  background-color: var(--light-bg);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+  background-color: var(--secondary-color);
+  color: white;
+  min-height: 100vh;
+  position: fixed;
+  width: 200px;
+  transition: all 0.3s;
+  z-index: 1000;
+}
+
+.sidebar.closed {
+  margin-left: -200px;
+}
+
+.main-content {
+  margin-left: 200px;
+  padding: 15px;
+  transition: all 0.3s;
+}
+
+.main-content.expanded {
+  margin-left: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    margin-left: -200px;
+  }
+
+  .sidebar.active {
+    margin-left: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .main-content.active {
+    margin-left: 200px;
+  }
+}
+
+.navbar {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  margin-bottom: 20px;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card .card-body {
+  padding: 1.5rem;
+}
+
+.stat-card i {
+  font-size: 2.5rem;
+  opacity: 0.8;
+}
+
+.stat-card .stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.stat-card .stat-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.recent-table {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.recent-table h5 {
+  color: var(--secondary-color);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--light-bg);
+}
+
+.table th {
+  border-top: none;
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-paid {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-partial {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, var(--primary-color), #2980b9);
+  color: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+}

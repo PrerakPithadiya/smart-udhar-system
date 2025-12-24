@@ -1,0 +1,106 @@
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --light-bg: #f8f9fa;
+}
+
+body {
+  background-color: var(--light-bg);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar {
+  background-color: var(--secondary-color);
+  color: white;
+  min-height: 100vh;
+  position: fixed;
+  width: 200px;
+  transition: margin-left 0.3s ease;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.sidebar.closed {
+  margin-left: -200px; /* Hide sidebar */
+}
+
+.main-content {
+  margin-left: 200px; /* Default margin when sidebar is open */
+  padding: 20px;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  width: calc(100% - 200px); /* Adjust width dynamically */
+}
+
+.main-content.expanded {
+  margin-left: 0; /* Sidebar closed */
+  width: 100%; /* Full width when sidebar is closed */
+}
+
+.sidebar-header {
+  padding: 20px;
+  background-color: var(--primary-color);
+}
+
+.sidebar-header h4 {
+  margin: 0;
+  color: white;
+}
+
+.sidebar-header .shop-name {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.sidebar .nav-link {
+  color: #b3b3b3;
+  padding: 12px 20px;
+  border-left: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--primary-color);
+}
+
+.sidebar .nav-link i {
+  width: 20px;
+  margin-right: 10px;
+}
+
+.customer-card {
+  border-radius: 10px;
+  transition: all 0.3s;
+  border: 1px solid #e0e0e0;
+}
+
+.customer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.customer-avatar {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.balance-badge {
+  font-size: 1.1rem;
+  padding: 8px 15px;
+  border-radius: 20px;
+}

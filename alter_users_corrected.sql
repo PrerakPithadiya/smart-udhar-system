@@ -1,0 +1,3 @@
+ALTER TABLE users
+ADD COLUMN logout_at DATETIME DEFAULT NULL AFTER last_login,
+CHANGE last_login last_login_at DATETIME DEFAULT NULL;

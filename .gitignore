@@ -1,0 +1,32 @@
+# File: smart-udhar-system/.gitignore
+
+# Environment files
+.env
+config.php
+
+# Logs
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Composer
+vendor/
+composer.lock
+
+# Node modules
+node_modules/
+
+# Cache
+cache/
+
+# Temporary files
+tmp/
