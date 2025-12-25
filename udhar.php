@@ -48,6 +48,8 @@ function generateBillNumber($conn, $user_id)
 
 // Process form submissions
 if (isset($_POST['add_udhar'])) {
+    $category = isset($_POST['category']) ? sanitizeInput($_POST['category']) : '';
+
     // Add new udhar entry with items
     $customer_id = intval($_POST['customer_id']);
     $transaction_date = sanitizeInput($_POST['transaction_date']);
@@ -121,34 +123,8 @@ if (isset($_POST['add_udhar'])) {
 
             // Insert udhar transaction - FIXED INSERT STATEMENT
             // Insert udhar transaction - ADD STATUS COLUMN
-            $stmt = $conn->prepare("INSERT INTO udhar_transactions 
-    (customer_id, transaction_date, description, amount, due_date, notes, 
-     bill_no, total_amount, cgst_amount, sgst_amount, igst_amount, 
-     discount, discount_type, round_off, grand_total, bill_notes, remaining_amount, status) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-            $status = 'pending';
-            $stmt->bind_param(
-                "issssssdddddddsdds",
-                $customer_id,
-                $transaction_date,
-                $description,
-                $grand_total,
-                $due_date,
-                $notes,
-                $bill_no,
-                $total_amount,
-                $cgst_amount,
-                $sgst_amount,
-                $igst_amount,
-                $discount_amount,
-                $discount_type,
-                $round_off,
-                $grand_total,
-                $notes,
-                $grand_total,
-                $status  // ADD THIS - status parameter
-            );
+            $stmt = $conn->prepare("INSERT INTO udhar_transactions (customer_id, bill_no, transaction_date, due_date, amount, cgst_amount, sgst_amount, igst_amount, discount, discount_type, round_off, description, notes, status, user_id, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)");
+            $stmt->bind_param("issssddddsssssis", $customer_id, $bill_no, $transaction_date, $due_date, $total_amount, $cgst_amount, $sgst_amount, $igst_amount, $discount, $discount_type, $round_off, $description, $notes, $_SESSION['user_id'], $category);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error creating udhar transaction: " . $stmt->error);
@@ -325,7 +301,7 @@ $stmt->close();
 // Get all udhar entries for listing
 $search = isset($_GET['search']) ? sanitizeInput($_GET['search']) : '';
 $status_filter = isset($_GET['status']) ? sanitizeInput($_GET['status']) : '';
-$customer_filter = isset($_GET['customer']) ? intval($_GET['customer']) : 0;
+$category_filter = isset($_GET['category']) ? sanitizeInput($_GET['category']) : '';
 
 $where_clause = "WHERE c.user_id = " . $_SESSION['user_id'];
 $params = [];
@@ -336,14 +312,19 @@ if (!empty($search)) {
     $params = array_fill(0, 3, $search_term);
 }
 
-if (!empty($status_filter) && in_array($status_filter, ['pending', 'partially_paid', 'paid'])) {
-    $where_clause .= " AND ut.status = ?";
-    $params[] = $status_filter;
+if (!empty($status_filter)) {
+    if ($status_filter == 'overdue') {
+        // Filter for overdue bills: due_date is in the past and status is not 'paid'
+        $where_clause .= " AND ut.due_date < CURDATE() AND ut.status IN ('pending', 'partially_paid')";
+    } elseif (in_array($status_filter, ['pending', 'partially_paid', 'paid'])) {
+        $where_clause .= " AND ut.status = ?";
+        $params[] = $status_filter;
+    }
 }
 
-if ($customer_filter > 0) {
-    $where_clause .= " AND ut.customer_id = ?";
-    $params[] = $customer_filter;
+if (!empty($category_filter)) {
+    $where_clause .= " AND ut.category = ?";
+    $params[] = $category_filter;
 }
 
 // Get total udhar count
@@ -1435,16 +1416,16 @@ $page_title = "Udhar Entry Management";
                                                     <option value="partially_paid" <?php echo $status_filter == 'partially_paid' ? 'selected' : ''; ?>>Partially
                                                         Paid</option>
                                                     <option value="paid" <?php echo $status_filter == 'paid' ? 'selected' : ''; ?>>Paid</option>
+                                                    <option value="overdue" <?php echo $status_filter == 'overdue' ? 'selected' : ''; ?>>Overdue Bills</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
-                                                <select name="customer" class="form-select" onchange="this.form.submit()">
-                                                    <option value="">All Customers</option>
-                                                    <?php foreach ($customers as $cust): ?>
-                                                        <option value="<?php echo $cust['id']; ?>" <?php echo $customer_filter == $cust['id'] ? 'selected' : ''; ?>>
-                                                            <?php echo htmlspecialchars($cust['name']); ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
+                                                <select name="category" class="form-select" onchange="this.form.submit()">
+                                                    <option value="">All Categories</option>
+                                                    <option value="Fertilizers" <?php echo $category_filter == 'Fertilizers' ? 'selected' : ''; ?>>Fertilizers</option>
+                                                    <option value="Seeds" <?php echo $category_filter == 'Seeds' ? 'selected' : ''; ?>>Seeds</option>
+                                                    <option value="Insecticides" <?php echo $category_filter == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
+                                                    <option value="Others" <?php echo $category_filter == 'Others' ? 'selected' : ''; ?>>Others</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
@@ -1552,10 +1533,6 @@ $page_title = "Udhar Entry Management";
                                                             <td>
                                                                 <strong
                                                                     class="udhar-bill-number"><?php echo htmlspecialchars($entry['bill_no']); ?></strong>
-                                                                <?php if (!empty($entry['description'])): ?>
-                                                                    <br><small
-                                                                        class="text-muted"><?php echo htmlspecialchars(substr($entry['description'], 0, 30)); ?>...</small>
-                                                                <?php endif; ?>
                                                             </td>
                                                             <td>
                                                                 <div class="udhar-customer-info">
@@ -1617,8 +1594,8 @@ $page_title = "Udhar Entry Management";
                                                                         class="btn btn-sm btn-outline-info" title="View">
                                                                         <i class="bi bi-eye"></i>
                                                                     </a>
-                                                                    <a href="udhar.php?action=edit&id=<?php echo $entry['id']; ?>"
-                                                                        class="btn btn-sm btn-outline-warning" title="Edit">
+                                                                    <a href="edit_bill.php?id=<?php echo $entry['id']; ?>"
+                                                                        class="btn btn-sm btn-outline-warning" title="Edit Bill">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
                                                                     <button type="button" class="btn btn-sm btn-outline-danger"
@@ -1678,17 +1655,14 @@ $page_title = "Udhar Entry Management";
                                             <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
                                             <div class="bill-form-row">
                                                 <div class="bill-form-group">
-                                                    <label for="customer_id"><i class="bi bi-person"></i> Customer
-                                                        *</label>
-                                                    <select class="bill-form-control" id="customer_id" name="customer_id"
+                                                    <label for="category"><i class="bi bi-tags"></i> Category *</label>
+                                                    <select class="bill-form-control" id="category" name="category"
                                                         required>
-                                                        <option value="">Select Customer</option>
-                                                        <?php foreach ($customers as $cust): ?>
-                                                            <option value="<?php echo $cust['id']; ?>" <?php echo $customer_id == $cust['id'] ? 'selected' : ''; ?>>
-                                                                <?php echo htmlspecialchars($cust['name']); ?>
-                                                                (<?php echo htmlspecialchars($cust['mobile']); ?>)
-                                                            </option>
-                                                        <?php endforeach; ?>
+                                                        <option value="">Select Category</option>
+                                                        <option value="Fertilizers">Fertilizers</option>
+                                                        <option value="Seeds">Seeds</option>
+                                                        <option value="Insecticides">Insecticides</option>
+                                                        <option value="Others">Others</option>
                                                     </select>
                                                 </div>
 
@@ -1760,42 +1734,47 @@ $page_title = "Udhar Entry Management";
                                         </div>
 
                                         <!-- Totals Section -->
-                                        <div class="bill-form-section">
-                                            <h5><i class="bi bi-calculator"></i> Bill Summary</h5>
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <div class="bill-form-group">
-                                                                <label>Discount</label>
-                                                                <div class="input-group">
-                                                                    <input type="number" class="bill-form-control"
-                                                                        id="discount" name="discount" step="0.01" min="0"
-                                                                        placeholder="0.00" value="0">
-                                                                    <select class="bill-form-control" id="discount_type"
-                                                                        name="discount_type" style="max-width: 120px;">
-                                                                        <option value="fixed">₹ Fixed</option>
-                                                                        <option value="percentage">% Percentage</option>
-                                                                    </select>
+                                        <div class="bill-form-section bill-summary-enhanced">
+                                            <div class="row g-4 align-items-stretch">
+                                                <div class="col-lg-8 mb-3 mb-lg-0">
+                                                    <div class="card h-100 shadow-sm p-4">
+                                                        <h5 class="mb-4"><i class="bi bi-calculator"></i> Bill Summary</h5>
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <div class="bill-form-group">
+                                                                    <label for="discount"
+                                                                        class="form-label">Discount</label>
+                                                                    <div class="input-group">
+                                                                        <input type="number" class="bill-form-control"
+                                                                            id="discount" name="discount" step="0.01"
+                                                                            min="0" placeholder="0.00" value="0">
+                                                                        <select class="bill-form-control" id="discount_type"
+                                                                            name="discount_type" style="max-width: 120px;">
+                                                                            <option value="fixed">₹ Fixed</option>
+                                                                            <option value="percentage">% Percentage</option>
+                                                                        </select>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="bill-form-group">
-                                                                <label>Round Off</label>
-                                                                <div class="input-group">
-                                                                    <input type="number" class="bill-form-control"
-                                                                        id="round_off" name="round_off" step="0.01"
-                                                                        placeholder="0.00" value="0">
-                                                                    <span class="input-group-text">₹</span>
+                                                            <div class="col-md-6">
+                                                                <div class="bill-form-group">
+                                                                    <label for="round_off" class="form-label">Round
+                                                                        Off</label>
+                                                                    <div class="input-group">
+                                                                        <input type="number" class="bill-form-control"
+                                                                            id="round_off" name="round_off" step="0.01"
+                                                                            placeholder="0.00" value="0">
+                                                                        <span class="input-group-text">₹</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <div class="bill-summary-card">
-                                                        <table class="bill-summary-table">
+                                                <div class="col-lg-4">
+                                                    <div
+                                                        class="bill-summary-card shadow-sm h-100 d-flex flex-column justify-content-between">
+                                                        <table class="bill-summary-table mb-0">
                                                             <tr>
                                                                 <td class="summary-label">Sub Total:</td>
                                                                 <td class="summary-value"><span id="subTotal">0.00</span>

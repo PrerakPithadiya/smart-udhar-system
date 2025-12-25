@@ -54,6 +54,7 @@ $stmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,18 +66,22 @@ $stmt->close();
             size: A5;
             margin: 10mm;
         }
-        
+
         @media print {
             body {
                 margin: 0;
                 padding: 0;
             }
+
             body * {
                 visibility: hidden;
             }
-            .print-area, .print-area * {
+
+            .print-area,
+            .print-area * {
                 visibility: visible;
             }
+
             .print-area {
                 position: absolute;
                 left: 0;
@@ -86,17 +91,20 @@ $stmt->close();
                 margin: 0;
                 padding: 0;
             }
+
             .no-print {
                 display: none !important;
             }
+
             .page-break {
                 page-break-after: always;
             }
+
             .avoid-break {
                 page-break-inside: avoid;
             }
         }
-        
+
         /* A5 container styling */
         .bill-container {
             width: 148mm;
@@ -106,9 +114,9 @@ $stmt->close();
             font-size: 9pt;
             margin: 0 auto;
             background: white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Compact header */
         .bill-header {
             text-align: center;
@@ -116,37 +124,37 @@ $stmt->close();
             margin-bottom: 4mm;
             border-bottom: 1px solid #000;
         }
-        
+
         .shop-title {
             font-size: 14pt;
             font-weight: bold;
             margin-bottom: 2px;
             text-transform: uppercase;
         }
-        
+
         .shop-details {
             font-size: 8pt;
             color: #555;
             line-height: 1.2;
         }
-        
+
         /* Compact info tables */
         .info-table {
             font-size: 8pt;
             margin-bottom: 4mm;
         }
-        
+
         .info-table th {
             width: 25mm;
             padding: 2px 5px;
             font-weight: bold;
             white-space: nowrap;
         }
-        
+
         .info-table td {
             padding: 2px 5px;
         }
-        
+
         /* Compact items table */
         .items-table {
             width: 100%;
@@ -154,7 +162,7 @@ $stmt->close();
             border-collapse: collapse;
             margin-bottom: 4mm;
         }
-        
+
         .items-table th,
         .items-table td {
             border: 1px solid #000;
@@ -162,22 +170,43 @@ $stmt->close();
             text-align: center;
             line-height: 1.2;
         }
-        
+
         .items-table th {
             background-color: #f0f0f0;
             font-weight: bold;
             padding: 4px;
         }
-        
+
         /* Column widths for compact layout */
-        .col-sno { width: 8mm; }
-        .col-desc { width: 45mm; text-align: left !important; }
-        .col-hsn { width: 15mm; }
-        .col-qty { width: 12mm; }
-        .col-unit { width: 12mm; }
-        .col-rate { width: 18mm; }
-        .col-amount { width: 20mm; }
-        
+        .col-sno {
+            width: 8mm;
+        }
+
+        .col-desc {
+            width: 45mm;
+            text-align: left !important;
+        }
+
+        .col-hsn {
+            width: 15mm;
+        }
+
+        .col-qty {
+            width: 12mm;
+        }
+
+        .col-unit {
+            width: 12mm;
+        }
+
+        .col-rate {
+            width: 18mm;
+        }
+
+        .col-amount {
+            width: 20mm;
+        }
+
         /* Totals section */
         .totals-table {
             width: 60mm;
@@ -185,21 +214,21 @@ $stmt->close();
             font-size: 8pt;
             margin-bottom: 4mm;
         }
-        
+
         .totals-table th,
         .totals-table td {
             padding: 3px 5px;
             text-align: right;
         }
-        
+
         .totals-table th {
             width: 35mm;
         }
-        
+
         .totals-table td {
             width: 25mm;
         }
-        
+
         .grand-total {
             font-weight: bold;
             font-size: 9pt;
@@ -207,7 +236,7 @@ $stmt->close();
             border-bottom: 2px solid #000;
             padding: 4px 5px !important;
         }
-        
+
         /* Footer */
         .bill-footer {
             clear: both;
@@ -217,19 +246,19 @@ $stmt->close();
             font-size: 7pt;
             color: #555;
         }
-        
+
         .signature-box {
             margin-top: 15mm;
             text-align: center;
         }
-        
+
         .signature-line {
             width: 50mm;
             border-top: 1px solid #000;
             margin: 5px auto;
             padding-top: 2px;
         }
-        
+
         /* Watermark */
         .watermark {
             position: fixed;
@@ -237,11 +266,11 @@ $stmt->close();
             left: 50%;
             transform: translate(-50%, -50%) rotate(-45deg);
             font-size: 80px;
-            color: rgba(0,0,0,0.05);
+            color: rgba(0, 0, 0, 0.05);
             z-index: -1;
             font-weight: bold;
         }
-        
+
         /* Status badges */
         .status-badge {
             padding: 2px 8px;
@@ -249,11 +278,22 @@ $stmt->close();
             font-size: 7pt;
             font-weight: bold;
         }
-        
-        .status-paid { background-color: #d4edda; color: #155724; }
-        .status-partial { background-color: #fff3cd; color: #856404; }
-        .status-pending { background-color: #f8d7da; color: #721c24; }
-        
+
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-partial {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
         /* Description and notes */
         .description-box {
             font-size: 8pt;
@@ -262,7 +302,7 @@ $stmt->close();
             background-color: #f8f9fa;
             border-left: 3px solid #007bff;
         }
-        
+
         /* Print message */
         .print-message {
             font-size: 7pt;
@@ -270,20 +310,22 @@ $stmt->close();
             color: #666;
             margin-top: 2mm;
         }
-        
+
         /* Responsive for screen view */
         @media screen {
             body {
                 background-color: #f5f5f5;
                 padding: 20px;
             }
+
             .bill-container {
-                box-shadow: 0 0 20px rgba(0,0,0,0.2);
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
                 margin: 20px auto;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container-fluid mt-3 no-print">
         <div class="row">
@@ -296,24 +338,25 @@ $stmt->close();
                         <button class="btn btn-primary" onclick="window.print()">
                             <i class="bi bi-printer"></i> Print Bill
                         </button>
-                        <a href="udhar.php?action=view&id=<?php echo $udhar_id; ?>" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Back
+                        <a href="udhar.php" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to List
                         </a>
                     </div>
                 </div>
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> This bill is optimized for A5 paper size (148mm x 210mm). Press Ctrl+P to print.
+                    <i class="bi bi-info-circle"></i> This bill is optimized for A5 paper size (148mm x 210mm). Press
+                    Ctrl+P to print.
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Bill Content -->
     <div class="print-area">
         <div class="bill-container avoid-break">
             <!-- Watermark -->
             <div class="watermark">UDHAR</div>
-            
+
             <!-- Bill Header -->
             <div class="bill-header">
                 <div class="shop-title"><?php echo htmlspecialchars($udhar['shop_name']); ?></div>
@@ -326,7 +369,7 @@ $stmt->close();
                     <?php endif; ?>
                 </div>
             </div>
-            
+
             <!-- Bill Information -->
             <div class="row">
                 <div class="col-6">
@@ -363,19 +406,20 @@ $stmt->close();
                         </tr>
                         <tr>
                             <th>Address:</th>
-                            <td><?php echo htmlspecialchars(substr($udhar['customer_address'], 0, 30)); 
-                                if (strlen($udhar['customer_address']) > 30) echo '...'; ?></td>
+                            <td><?php echo htmlspecialchars(substr($udhar['customer_address'], 0, 30));
+                            if (strlen($udhar['customer_address']) > 30)
+                                echo '...'; ?></td>
                         </tr>
                     </table>
                 </div>
             </div>
-            
+
             <?php if (!empty($udhar['description'])): ?>
                 <div class="description-box">
                     <strong>Description:</strong> <?php echo htmlspecialchars($udhar['description']); ?>
                 </div>
             <?php endif; ?>
-            
+
             <!-- Bill Items -->
             <table class="items-table">
                 <thead>
@@ -391,60 +435,106 @@ $stmt->close();
                 </thead>
                 <tbody>
                     <?php foreach ($udhar_items as $index => $item): ?>
-                    <tr>
-                        <td><?php echo $index + 1; ?></td>
-                        <td class="col-desc"><?php echo htmlspecialchars($item['item_name']); ?></td>
-                        <td><?php echo htmlspecialchars($item['hsn_code']); ?></td>
-                        <td><?php echo number_format($item['quantity'], 2); ?></td>
-                        <td>
-                            <?php 
-                            $unit = !empty($item['item_unit']) ? $item['item_unit'] : 
-                                   (!empty($item['unit']) ? $item['unit'] : 'PCS');
-                            echo htmlspecialchars($unit);
-                            ?>
-                        </td>
-                        <td>₹<?php echo number_format($item['unit_price'], 2); ?></td>
-                        <td>₹<?php echo number_format($item['total_amount'], 2); ?></td>
-                    </tr>
+                        <tr>
+                            <td><?php echo $index + 1; ?></td>
+                            <td class="col-desc"><?php echo htmlspecialchars($item['item_name']); ?></td>
+                            <td><?php echo htmlspecialchars($item['hsn_code']); ?></td>
+                            <td><?php echo number_format($item['quantity'], 2); ?></td>
+                            <td>
+                                <?php
+                                $unit = !empty($item['item_unit']) ? $item['item_unit'] :
+                                    (!empty($item['unit']) ? $item['unit'] : 'PCS');
+                                echo htmlspecialchars($unit);
+                                ?>
+                            </td>
+                            <td>₹<?php echo number_format($item['unit_price'], 2); ?></td>
+                            <td>₹<?php echo number_format($item['total_amount'], 2); ?></td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"
+                            style="text-align: right; font-weight: bold; border: 1px solid #000; padding: 3px 4px;">
+                            Total Items:</td>
+                        <td colspan="4"
+                            style="text-align: left; font-weight: bold; border: 1px solid #000; padding: 3px 4px;">
+                            <?php echo count($udhar_items); ?>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
-            
+
             <!-- Bill Totals -->
             <table class="totals-table">
                 <tr>
                     <th>Sub Total:</th>
                     <td>₹<?php echo number_format($udhar['total_amount'], 2); ?></td>
                 </tr>
-                <?php if ($udhar['cgst_amount'] > 0): ?>
-                <tr>
-                    <th>CGST:</th>
-                    <td>₹<?php echo number_format($udhar['cgst_amount'], 2); ?></td>
-                </tr>
+                <?php
+                // Calculate total GST/Tax
+                $total_tax = $udhar['cgst_amount'] + $udhar['sgst_amount'] + $udhar['igst_amount'];
+
+                // Calculate what's being added to subtotal
+                $charges_added = $udhar['grand_total'] - $udhar['total_amount'] + $udhar['discount'] - $udhar['round_off'];
+
+                // If there's a difference but no tax breakdown, show it as total charges
+                if ($charges_added > 0.01):
+                    ?>
+                    <tr style="border-top: 1px solid #ddd;">
+                        <th colspan="2"
+                            style="text-align: left; font-size: 7.5pt; padding: 2px 5px; background-color: #f8f9fa;">
+                            Additional Charges:</th>
+                    </tr>
+                    <?php if ($udhar['cgst_amount'] > 0): ?>
+                        <tr>
+                            <th style="padding-left: 15px;">CGST:</th>
+                            <td>₹<?php echo number_format($udhar['cgst_amount'], 2); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($udhar['sgst_amount'] > 0): ?>
+                        <tr>
+                            <th style="padding-left: 15px;">SGST:</th>
+                            <td>₹<?php echo number_format($udhar['sgst_amount'], 2); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($udhar['igst_amount'] > 0): ?>
+                        <tr>
+                            <th style="padding-left: 15px;">IGST:</th>
+                            <td>₹<?php echo number_format($udhar['igst_amount'], 2); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php if ($total_tax > 0): ?>
+                        <tr style="background-color: #f0f0f0;">
+                            <th>Total Tax (GST):</th>
+                            <td>₹<?php echo number_format($total_tax, 2); ?></td>
+                        </tr>
+                    <?php elseif ($charges_added > 0.01): ?>
+                        <tr style="background-color: #f0f0f0;">
+                            <th>Tax/Charges:</th>
+                            <td>₹<?php echo number_format($charges_added, 2); ?></td>
+                        </tr>
+                    <?php endif; ?>
                 <?php endif; ?>
-                <?php if ($udhar['sgst_amount'] > 0): ?>
-                <tr>
-                    <th>SGST:</th>
-                    <td>₹<?php echo number_format($udhar['sgst_amount'], 2); ?></td>
-                </tr>
-                <?php endif; ?>
-                <?php if ($udhar['igst_amount'] > 0): ?>
-                <tr>
-                    <th>IGST:</th>
-                    <td>₹<?php echo number_format($udhar['igst_amount'], 2); ?></td>
-                </tr>
-                <?php endif; ?>
+
                 <?php if ($udhar['discount'] > 0): ?>
-                <tr>
-                    <th>Discount:</th>
-                    <td>-₹<?php echo number_format($udhar['discount'], 2); ?></td>
-                </tr>
+                    <tr style="border-top: 1px solid #ddd;">
+                        <th colspan="2"
+                            style="text-align: left; font-size: 7.5pt; padding: 2px 5px; background-color: #f8f9fa;">
+                            Deductions:</th>
+                    </tr>
+                    <tr>
+                        <th style="padding-left: 15px;">Discount:</th>
+                        <td>-₹<?php echo number_format($udhar['discount'], 2); ?></td>
+                    </tr>
                 <?php endif; ?>
+
                 <?php if ($udhar['round_off'] != 0): ?>
-                <tr>
-                    <th>Round Off:</th>
-                    <td>₹<?php echo number_format($udhar['round_off'], 2); ?></td>
-                </tr>
+                    <tr>
+                        <th>Round Off:</th>
+                        <td><?php echo ($udhar['round_off'] >= 0 ? '+' : '') . '₹' . number_format($udhar['round_off'], 2); ?>
+                        </td>
+                    </tr>
                 <?php endif; ?>
                 <tr class="grand-total">
                     <th>Grand Total:</th>
@@ -463,13 +553,13 @@ $stmt->close();
                     </td>
                 </tr>
             </table>
-            
+
             <?php if (!empty($udhar['notes'])): ?>
                 <div style="clear: both; margin-top: 3mm; font-size: 8pt;">
                     <strong>Notes:</strong> <?php echo htmlspecialchars($udhar['notes']); ?>
                 </div>
             <?php endif; ?>
-            
+
             <!-- Footer -->
             <div class="bill-footer">
                 <div class="row">
@@ -486,23 +576,21 @@ $stmt->close();
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="print-message">
                     <div>Thank you for your business!</div>
-                    <div>This is a computer generated bill.</div>
-                    <div>Printed on: <?php echo date('d/m/Y, h:i A'); ?> | 
-                         Print: <?php echo ($udhar['print_count'] ?? 0) + 1; ?></div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script>
         // Auto print after page load (optional)
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             // Uncomment to auto-print
             // setTimeout(function() { window.print(); }, 500);
         });
     </script>
 </body>
+
 </html>
