@@ -851,7 +851,7 @@ $page_title = "Payment Management";
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
                                             <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page - 1; ?>">
-                                                Previous
+                                                <i class="bi bi-chevron-left"></i>
                                             </a>
                                         </li>
 
@@ -865,7 +865,7 @@ $page_title = "Payment Management";
 
                                         <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
                                             <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page + 1; ?>">
-                                                Next
+                                                <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </li>
                                     </ul>

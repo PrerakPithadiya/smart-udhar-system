@@ -1,0 +1,23 @@
+PHP Warning:  PHP Startup: Unable to load dynamic library 'mysqli' (tried: C:\php\ext\mysqli (The specified module could not be found), C:\php\ext\php_mysqli.dll (The specified module could not be found)) in Unknown on line 0
+PHP Warning:  PHP Startup: Unable to load dynamic library 'pdo_mysql' (tried: C:\php\ext\pdo_mysql (The specified module could not be found), C:\php\ext\php_pdo_mysql.dll (The specified module could not be found)) in Unknown on line 0
+PHP Warning:  PHP Startup: Unable to load dynamic library 'oci8_19' (tried: C:\php\ext\oci8_19 (The specified module could not be found), C:\php\ext\php_oci8_19.dll (The specified module could not be found)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'mysqli' (tried: C:\php\ext\mysqli (The specified module could not be found), C:\php\ext\php_mysqli.dll (The specified module could not be found)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'pdo_mysql' (tried: C:\php\ext\pdo_mysql (The specified module could not be found), C:\php\ext\php_pdo_mysql.dll (The specified module could not be found)) in Unknown on line 0
+
+Warning: PHP Startup: Unable to load dynamic library 'oci8_19' (tried: C:\php\ext\oci8_19 (The specified module could not be found), C:\php\ext\php_oci8_19.dll (The specified module could not be found)) in Unknown on line 0
+Testing Database Connection...
+Host: 127.0.0.1
+Port: 3306
+User: root
+DB Name: smart_udhar_system
+PHP Fatal error:  Uncaught Error: Class "mysqli" not found in C:\xampp\htdocs\smart-udhar-system-2\test_db_debug.php:15
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\smart-udhar-system-2\test_db_debug.php on line 15
+
+Fatal error: Uncaught Error: Class "mysqli" not found in C:\xampp\htdocs\smart-udhar-system-2\test_db_debug.php:15
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\smart-udhar-system-2\test_db_debug.php on line 15

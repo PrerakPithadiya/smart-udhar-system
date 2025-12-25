@@ -919,6 +919,44 @@ body {
     font-size: 15px;
 }
 
+/* Items Filter Bar Modern Layout */
+.items-filter-bar {
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+.category-select-group {
+    min-width: 200px;
+}
+.items-filter-bar .form-select,
+.items-filter-bar .form-control {
+    height: 44px;
+    border-radius: 8px;
+    font-size: 15px;
+    box-shadow: none;
+}
+.items-search-box {
+    width: 100%;
+    position: relative;
+}
+.items-search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+.items-search-box .form-control {
+    padding-left: 2.5rem;
+}
+
 /* Additional Utility Classes */
 .text-gradient {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));

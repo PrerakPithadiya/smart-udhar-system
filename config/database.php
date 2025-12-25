@@ -2,25 +2,26 @@
 // File: smart-udhar-system/config/database.php
 
 // Database configuration
-define('DB_HOST', 'localhost:3307');
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', 3307);
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'smart_udhar_db');
-define('SITE_URL', 'http://localhost/smart-udhar-system/');
+define('SITE_URL', 'http://localhost/smart-udhar-system-2/');
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Database connection function
+// Updated database connection function
 function getDBConnection()
 {
     static $conn = null;
 
     if ($conn === null) {
         try {
-            $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+            $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
             if ($conn->connect_error) {
                 throw new Exception("Connection failed: " . $conn->connect_error);
@@ -29,7 +30,7 @@ function getDBConnection()
             $conn->set_charset("utf8mb4");
         } catch (Exception $e) {
             error_log("Database connection error: " . $e->getMessage());
-            die("Database connection error. Please try again later.");
+            die("Database connection error. Please check your database configuration or contact support.");
         }
     }
 

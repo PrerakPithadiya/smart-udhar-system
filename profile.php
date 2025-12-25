@@ -9,6 +9,27 @@ if (!$user) {
     exit();
 }
 
+// Handle account deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
+    $conn = getDBConnection();
+    $user_id = $_SESSION['user_id'];
+    // Delete user from users table (CASCADE will remove user_logs)
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+    $conn->close();
+    // Destroy session
+    $_SESSION = array();
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+    }
+    session_destroy();
+    header('Location: index.php?account_deleted=1');
+    exit();
+}
+
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $full_name = sanitizeInput($_POST['full_name']);
@@ -165,10 +186,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                         <textarea class="form-control" name="address" rows="3"><?php echo htmlspecialchars($user['address']); ?></textarea>
                                     </div>
                                     
-                                    <div class="d-flex justify-content-end">
+                                    <div class="d-flex justify-content-between">
                                         <button type="submit" name="update_profile" class="btn btn-primary">
                                             <i class="bi bi-save"></i> Update Profile
                                         </button>
+                                        <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');" style="display:inline-block; margin-left:10px;">
+                                            <button type="submit" name="delete_account" class="btn btn-danger">
+                                                <i class="bi bi-trash"></i> Delete Account
+                                            </button>
+                                        </form>
                                     </div>
                                 </form>
                             </div>

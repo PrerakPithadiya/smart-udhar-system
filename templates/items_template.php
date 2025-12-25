@@ -132,26 +132,22 @@
                                     <h5 class="mb-0">All Items (<?php echo $total_items; ?>)</h5>
                                 </div>
                                 <div class="col-md-8">
-                                    <form method="GET" class="row g-2">
-                                        <input type="hidden" name="action" value="list">
-                                        <div class="col-md-4">
-                                            <select name="category" class="form-select" onchange="this.form.submit()">
-                                                <option value="">All Categories</option>
-                                                <option value="Fertilizers" <?php echo $category_filter == 'Fertilizers' ? 'selected' : ''; ?>>Fertilizers</option>
-                                                <option value="Seeds" <?php echo $category_filter == 'Seeds' ? 'selected' : ''; ?>>Seeds</option>
-                                                <option value="Insecticides" <?php echo $category_filter == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
-                                                <option value="Others" <?php echo $category_filter == 'Others' ? 'selected' : ''; ?>>Others</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="items-search-box">
-                                                <i class="bi bi-search search-icon"></i>
-                                                <input type="text" name="search" class="form-control"
-                                                    placeholder="Search by item name, code or HSN..."
-                                                    value="<?php echo htmlspecialchars($search); ?>" onchange="this.form.submit()">
-                                            </div>
-                                        </div>
-                                    </form>
+                                    <form method="GET" class="items-filter-bar d-flex align-items-center gap-3 mb-3">
+    <input type="hidden" name="action" value="list">
+    <div class="category-select-group">
+        <select name="category" class="form-select" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            <option value="Fertilizers" <?php echo $category_filter == 'Fertilizers' ? 'selected' : ''; ?>>Fertilizers</option>
+            <option value="Seeds" <?php echo $category_filter == 'Seeds' ? 'selected' : ''; ?>>Seeds</option>
+            <option value="Insecticides" <?php echo $category_filter == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
+            <option value="Others" <?php echo $category_filter == 'Others' ? 'selected' : ''; ?>>Others</option>
+        </select>
+    </div>
+    <div class="items-search-box flex-grow-1 position-relative">
+        <i class="bi bi-search search-icon position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+        <input type="text" name="search" class="form-control ps-5" placeholder="Search by item name, code or HSN..." value="<?php echo htmlspecialchars($search); ?>" onchange="this.form.submit()">
+    </div>
+</form>
                                 </div>
                             </div>
                         </div>

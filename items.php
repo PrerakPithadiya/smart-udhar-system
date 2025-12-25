@@ -208,6 +208,7 @@ $page_title = "Items Management";
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="assets/css/items.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
@@ -513,7 +514,7 @@ $page_title = "Items Management";
                                                 <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
                                                     <a class="page-link"
                                                         href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page - 1; ?>">
-                                                        Previous
+                                                        <i class="bi bi-chevron-left"></i>
                                                     </a>
                                                 </li>
 
@@ -529,7 +530,7 @@ $page_title = "Items Management";
                                                 <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
                                                     <a class="page-link"
                                                         href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page + 1; ?>">
-                                                        Next
+                                                        <i class="bi bi-chevron-right"></i>
                                                     </a>
                                                 </li>
                                             </ul>

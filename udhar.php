@@ -1640,7 +1640,7 @@ $page_title = "Udhar Entry Management";
                                                     <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
                                                         <a class="page-link"
                                                             href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&customer=<?php echo $customer_filter; ?>&page=<?php echo $page - 1; ?>">
-                                                            Previous
+                                                            <i class="bi bi-chevron-left"></i>
                                                         </a>
                                                     </li>
 
@@ -1656,7 +1656,7 @@ $page_title = "Udhar Entry Management";
                                                     <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
                                                         <a class="page-link"
                                                             href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&customer=<?php echo $customer_filter; ?>&page=<?php echo $page + 1; ?>">
-                                                            Next
+                                                            <i class="bi bi-chevron-right"></i>
                                                         </a>
                                                     </li>
                                                 </ul>

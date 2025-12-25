@@ -1,17 +1,8 @@
 <?php
-// File: smart-udhar-system/config/database.php
+// Include the main configuration file
+require_once __DIR__ . '/../config/database.php';
 
-// Database configuration
-define('DB_HOST', 'localhost:3307');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'smart_udhar_db');
-define('SITE_URL', 'http://localhost/smart-udhar-system/');
 
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 // Database connection function
 function getDBConnection()
@@ -20,7 +11,7 @@ function getDBConnection()
 
     if ($conn === null) {
         try {
-            $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+            $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
             if ($conn->connect_error) {
                 throw new Exception("Connection failed: " . $conn->connect_error);
