@@ -112,10 +112,15 @@ $stmt->close();
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-            <div class="shop-name">
-                <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+            <div class="sidebar-header-content">
+                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
+                <div class="shop-name">
+                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+                </div>
             </div>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
         </div>
 
         <ul class="nav flex-column">
@@ -184,13 +189,14 @@ $stmt->close();
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
         <!-- Top Navbar -->
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-                <button class="mobile-menu-btn" id="sidebarToggle">
-                    <i class="bi bi-list"></i>
-                </button>
-
                 <div class="d-flex align-items-center ms-auto">
                     <div class="me-3">
                         <small class="text-muted">Welcome,</small>

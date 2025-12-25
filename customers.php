@@ -194,10 +194,15 @@ $stmt->close();
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-            <div class="shop-name">
-                <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+            <div class="sidebar-header-content">
+                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
+                <div class="shop-name">
+                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+                </div>
             </div>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
         </div>
 
         <ul class="nav flex-column">
@@ -265,69 +270,94 @@ $stmt->close();
     </div>
 
 
-    <div class="container-fluid">
-        <div class="row">
+    <div class="main-content">
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
 
-            <div class="main-content">
-                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                        <button class="btn btn-outline-secondary me-2" id="sidebarToggle">
-                            <i class="bi bi-list"></i>
-                        </button>
-                        <h1 class="h2">
-                            <i class="bi bi-people-fill"></i> Customer Management
-                        </h1>
-                        <div class="btn-toolbar mb-2 mb-md-0">
-                            <?php if ($action == 'list'): ?>
-                                <a href="customers.php?action=add" class="btn btn-primary">
-                                    <i class="bi bi-person-plus"></i> Add New Customer
-                                </a>
-                            <?php else: ?>
-                                <a href="customers.php" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left"></i> Back to List
-                                </a>
-                            <?php endif; ?>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div class="d-flex align-items-center">
+                <h1 class="h2 mb-0">
+                    <i class="bi bi-people-fill"></i> Customer Management
+                </h1>
+            </div>
+            <div class="btn-toolbar">
+                <?php if ($action == 'list'): ?>
+                    <a href="customers.php?action=add" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Add New Customer
+                    </a>
+                <?php else: ?>
+                    <a href="customers.php" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Display Messages -->
+        <?php displayMessage(); ?>
+
+        <?php if ($action == 'list'): ?>
+            <!-- Filter and Search Section -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <input type="hidden" name="action" value="list">
+                        
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-funnel"></i> Filter by Status
+                            </label>
+                            <select name="status" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Status</option>
+                                <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active Only</option>
+                                <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive Only</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-search"></i> Search Customers
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" name="search" id="customer-search" class="form-control"
+                                    placeholder="Search by name, mobile or email..."
+                                    value="<?php echo htmlspecialchars($search); ?>"
+                                    data-api-url="api/search_customers.php">
+                                <?php if (!empty($search)): ?>
+                                    <a href="customers.php?action=list" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Customer List View -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people"></i> All Customers 
+                            <span class="badge bg-primary rounded-pill"><?php echo $total_customers; ?></span>
+                        </h5>
+                        <div class="text-muted small">
+                            Showing <?php echo count($customers); ?> of <?php echo $total_customers; ?> customers
                         </div>
                     </div>
-
-                    <!-- Display Messages -->
-                    <?php displayMessage(); ?>
-
-                    <?php if ($action == 'list'): ?>
-                        <!-- Customer List View -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h5 class="mb-0">All Customers (<?php echo $total_customers; ?>)</h5>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <form method="GET" class="row g-2">
-                                            <input type="hidden" name="action" value="list">
-                                            <div class="col-md-4">
-                                                <select name="status" class="form-select" onchange="this.form.submit()">
-                                                    <option value="">All Status</option>
-                                                    <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active</option>
-                                                    <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="search-box">
-                                                    <i class="bi bi-search search-icon"></i>
-                                                    <input type="text" name="search" class="form-control"
-                                                        placeholder="Search by name, mobile or email..."
-                                                        value="<?php echo htmlspecialchars($search); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <button type="submit" class="btn btn-outline-primary w-100">
-                                                    <i class="bi bi-filter"></i> Filter
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                </div>
                             <div class="card-body">
                                 <?php if (empty($customers)): ?>
                                     <div class="text-center py-5">
@@ -419,24 +449,45 @@ $stmt->close();
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>
-                                                            <div class="action-buttons">
+                                                            <div class="btn-group" role="group">
                                                                 <a href="customers.php?action=view&id=<?php echo $customer['id']; ?>"
-                                                                    class="btn btn-sm btn-outline-info" title="View">
+                                                                    class="btn btn-sm btn-outline-info" title="View Details">
                                                                     <i class="bi bi-eye"></i>
                                                                 </a>
                                                                 <a href="customers.php?action=edit&id=<?php echo $customer['id']; ?>"
-                                                                    class="btn btn-sm btn-outline-primary" title="Edit">
+                                                                    class="btn btn-sm btn-outline-primary" title="Edit Customer">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
-                                                                <a href="udhar.php?action=add&customer_id=<?php echo $customer['id']; ?>"
-                                                                    class="btn btn-sm btn-outline-success" title="Add Udhar">
-                                                                    <i class="bi bi-plus-circle"></i>
-                                                                </a>
-                                                                <a href="payments.php?action=add&customer_id=<?php echo $customer['id']; ?>"
-                                                                    class="btn btn-sm btn-outline-warning" title="Receive Payment">
-                                                                    <i class="bi bi-cash"></i>
-                                                                </a>
+                                                                <div class="btn-group" role="group">
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                                            data-bs-toggle="dropdown" aria-expanded="false" title="More Actions">
+                                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                                        <li>
+                                                                            <a class="dropdown-item" href="udhar.php?action=add&customer_id=<?php echo $customer['id']; ?>">
+                                                                                <i class="bi bi-plus-circle text-success"></i> Add Udhar Entry
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="dropdown-item" href="payments.php?action=add&customer_id=<?php echo $customer['id']; ?>">
+                                                                                <i class="bi bi-cash text-warning"></i> Receive Payment
+                                                                            </a>
+                                                                        </li>
+                                                                        <li><hr class="dropdown-divider"></li>
+                                                                        <li>
+                                                                            <a class="dropdown-item text-danger" href="#" 
+                                                                               onclick="if(confirm('Are you sure you want to delete this customer?')) { document.getElementById('deleteForm<?php echo $customer['id']; ?>').submit(); } return false;">
+                                                                                <i class="bi bi-trash"></i> Delete Customer
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
+                                                            <form id="deleteForm<?php echo $customer['id']; ?>" method="POST" style="display:none;">
+                                                                <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+                                                                <input type="hidden" name="delete_customer" value="1">
+                                                            </form>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
@@ -947,10 +998,8 @@ $stmt->close();
                             </div>
                         </div>
                     <?php endif; ?>
-                </main>
+                </div>
             </div>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -958,6 +1007,22 @@ $stmt->close();
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
     <!-- Link to external JavaScript file -->
     <script src="assets/js/customers.js"></script>
+    <!-- Search Suggestions Feature -->
+    <script src="assets/js/search_suggestions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize search suggestions for customer search
+            const customerSearch = new SearchSuggestions('#customer-search', {
+                apiUrl: 'api/search_customers.php',
+                minChars: 1,
+                delay: 300,
+                onSelect: function(suggestion) {
+                    // When a suggestion is selected, redirect to the customer details page
+                    window.location.href = `customers.php?action=view&id=${suggestion.id}`;
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

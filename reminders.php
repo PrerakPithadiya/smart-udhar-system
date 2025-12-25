@@ -79,58 +79,175 @@ foreach ($reminders as $reminder) {
         }
 
         .sidebar {
-            background-color: var(--secondary-color);
-            color: white;
+            background: linear-gradient(180deg, var(--secondary-color) 0%, #1a252f 100%);
+            color: #e5e7eb;
             min-height: 100vh;
             position: fixed;
-            width: 250px;
-            transition: all 0.3s;
+            width: 260px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
+            left: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar.closed {
+            margin-left: -260px;
         }
 
         .sidebar-header {
-            padding: 20px;
-            background-color: var(--primary-color);
+            padding: 24px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header-content {
+            flex: 1;
+        }
+
+        .sidebar-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 18px;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .sidebar-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sidebar-toggle-btn i {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.closed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        /* Arrow tab toggle - visible when sidebar is closed */
+        .floating-toggle-btn {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
+            border: none;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            color: white;
+            width: 28px;
+            height: 70px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px;
+            z-index: 1001;
+            padding-left: 4px;
+        }
+
+        .floating-toggle-btn:hover {
+            width: 32px;
+            box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(135deg, #2980b9 0%, var(--primary-color) 100%);
+        }
+
+        .floating-toggle-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .sidebar.closed + .main-content .floating-toggle-btn {
+            display: flex;
         }
 
         .sidebar-header h4 {
             margin: 0;
             color: white;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .sidebar-header .shop-name {
-            font-size: 0.9rem;
-            opacity: 0.9;
+            font-size: 0.85rem;
+            opacity: 0.95;
+            margin-top: 5px;
+            font-weight: 400;
         }
 
         .sidebar .nav-link {
-            color: #b3b3b3;
-            padding: 12px 20px;
+            color: #9ca3af;
+            padding: 14px 20px;
             border-left: 3px solid transparent;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            font-size: 14px;
         }
 
-        .sidebar .nav-link:hover,
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-left-color: var(--primary-color);
+            transform: translateX(2px);
+        }
+
         .sidebar .nav-link.active {
             color: white;
-            background-color: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(90deg, rgba(52, 152, 219, 0.15) 0%, transparent 100%);
             border-left-color: var(--primary-color);
+            font-weight: 600;
         }
 
         .sidebar .nav-link i {
             width: 20px;
-            margin-right: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .main-content {
-            margin-left: 250px;
+            margin-left: 260px;
             padding: 20px;
             transition: all 0.3s;
         }
 
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
-                margin-left: -250px;
+                margin-left: -260px;
             }
 
             .sidebar.active {
@@ -142,7 +259,7 @@ foreach ($reminders as $reminder) {
             }
 
             .main-content.active {
-                margin-left: 250px;
+                margin-left: 260px;
             }
         }
 
@@ -223,10 +340,15 @@ foreach ($reminders as $reminder) {
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-            <div class="shop-name">
-                <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+            <div class="sidebar-header-content">
+                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
+                <div class="shop-name">
+                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+                </div>
             </div>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
         </div>
 
         <ul class="nav flex-column">
@@ -295,41 +417,11 @@ foreach ($reminders as $reminder) {
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Top Navbar -->
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <button class="mobile-menu-btn" id="sidebarToggle">
-                    <i class="bi bi-list"></i>
-                </button>
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
 
-                <div class="d-flex align-items-center ms-auto">
-                    <div class="me-3">
-                        <small class="text-muted">Welcome,</small>
-                        <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profile.php">
-                                    <i class="bi bi-person"></i> Profile
-                                </a></li>
-                            <li><a class="dropdown-item" href="settings.php">
-                                    <i class="bi bi-gear"></i> Settings
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="logout.php">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
 
 
         <div class="container-fluid">
@@ -453,34 +545,48 @@ foreach ($reminders as $reminder) {
 
     <script>
         // Sidebar toggle
-        document.getElementById("sidebarToggle").addEventListener("click", function() {
+        // Sidebar toggle function
+        function toggleSidebar() {
             const sidebar = document.querySelector(".sidebar");
             const mainContent = document.querySelector(".main-content");
 
             if (window.innerWidth <= 768) {
                 sidebar.classList.toggle("active");
+                mainContent.classList.toggle("active");
             } else {
                 sidebar.classList.toggle("closed");
-                if (sidebar.classList.contains("closed")) {
-                    mainContent.style.marginLeft = "0";
-                } else {
-                    mainContent.style.marginLeft = "250px";
-                }
+                mainContent.classList.toggle("expanded");
             }
-        });
+        }
+
+        // Sidebar toggle button inside sidebar
+        const sidebarToggleBtn = document.getElementById("sidebarToggle");
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener("click", toggleSidebar);
+        }
+
+        // Floating toggle button (visible when sidebar is closed)
+        const floatingToggleBtn = document.getElementById("floatingToggle");
+        if (floatingToggleBtn) {
+            floatingToggleBtn.addEventListener("click", toggleSidebar);
+        }
 
         // Auto-hide sidebar on mobile when clicking outside
         document.addEventListener("click", function(event) {
             const sidebar = document.querySelector(".sidebar");
             const toggleBtn = document.getElementById("sidebarToggle");
+            const floatingBtn = document.getElementById("floatingToggle");
+            const mainContent = document.querySelector(".main-content");
 
             if (
                 window.innerWidth <= 768 &&
                 !sidebar.contains(event.target) &&
                 !toggleBtn.contains(event.target) &&
+                !floatingBtn.contains(event.target) &&
                 sidebar.classList.contains("active")
             ) {
                 sidebar.classList.remove("active");
+                mainContent.classList.remove("active");
             }
         });
     </script>

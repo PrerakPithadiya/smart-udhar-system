@@ -213,10 +213,15 @@ $page_title = "Items Management";
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-            <div class="shop-name">
-                <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+            <div class="sidebar-header-content">
+                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
+                <div class="shop-name">
+                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
+                </div>
             </div>
+            <button class="sidebar-toggle-btn" id="sidebarToggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
         </div>
 
         <ul class="nav flex-column">
@@ -285,41 +290,11 @@ $page_title = "Items Management";
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Top Navbar -->
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <button class="mobile-menu-btn" id="sidebarToggle">
-                    <i class="bi bi-list"></i>
-                </button>
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
 
-                <div class="d-flex align-items-center ms-auto">
-                    <div class="me-3">
-                        <small class="text-muted">Welcome,</small>
-                        <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profile.php">
-                                    <i class="bi bi-person"></i> Profile
-                                </a></li>
-                            <li><a class="dropdown-item" href="settings.php">
-                                    <i class="bi bi-gear"></i> Settings
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="logout.php">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
 
 
         <div class="container-fluid items-container">
@@ -361,18 +336,13 @@ $page_title = "Items Management";
                                                 <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-7">
+                                        <div class="col-md-9">
                                             <div class="items-search-box">
                                                 <i class="bi bi-search search-icon"></i>
                                                 <input type="text" name="search" class="form-control"
                                                     placeholder="Search by item name, code or HSN..."
-                                                    value="<?php echo htmlspecialchars($search); ?>">
+                                                    value="<?php echo htmlspecialchars($search); ?>" onchange="this.form.submit()">
                                             </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="submit" class="btn btn-outline-primary w-100">
-                                                <i class="bi bi-filter"></i> Filter
-                                            </button>
                                         </div>
                                     </form>
                                 </div>
