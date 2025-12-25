@@ -203,8 +203,7 @@ $stmt->close();
                         <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>
                     </div>
                     <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -401,7 +400,8 @@ $stmt->close();
                                     <?php foreach ($recent_payments as $payment): ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($payment['customer_name']); ?></td>
-                                            <td class="fw-bold text-success">₹<?php echo number_format($payment['amount'], 2); ?></td>
+                                            <td class="fw-bold text-success">
+                                                ₹<?php echo number_format($payment['amount'], 2); ?></td>
                                             <td><?php echo date('d M Y', strtotime($payment['payment_date'])); ?></td>
                                             <td>
                                                 <span class="badge bg-light text-dark">
@@ -451,7 +451,8 @@ $stmt->close();
                                             <td><?php echo $index + 1; ?></td>
                                             <td><?php echo htmlspecialchars($customer['name']); ?></td>
                                             <td><?php echo htmlspecialchars($customer['mobile']); ?></td>
-                                            <td class="fw-bold text-danger">₹<?php echo number_format($customer['balance'], 2); ?></td>
+                                            <td class="fw-bold text-danger">
+                                                ₹<?php echo number_format($customer['balance'], 2); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -498,6 +499,7 @@ $stmt->close();
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/common.js"></script>
     <script src="assets/js/dashboard.js"></script>
 </body>
 

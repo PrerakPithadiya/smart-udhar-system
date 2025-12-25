@@ -1,202 +1,3 @@
-<?php
-// File: smart-udhar-system/items.php
-
-require_once 'config/database.php';
-requireLogin();
-
-$conn = getDBConnection();
-
-// Handle actions
-$action = isset($_GET['action']) ? $_GET['action'] : 'list';
-$item_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
-// Process form submissions
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['add_item'])) {
-        // Add new item
-        $item_name = sanitizeInput($_POST['item_name']);
-        $item_code = sanitizeInput($_POST['item_code']);
-        $hsn_code = sanitizeInput($_POST['hsn_code']);
-        $price = floatval($_POST['price']);
-        $cgst_rate = floatval($_POST['cgst_rate']);
-        $sgst_rate = floatval($_POST['sgst_rate']);
-        $igst_rate = floatval($_POST['igst_rate']);
-        $unit = sanitizeInput($_POST['unit']);
-        $description = sanitizeInput($_POST['description']);
-        $category = sanitizeInput($_POST['category']);
-
-        // Validation
-        $errors = [];
-
-        if (empty($item_name)) {
-            $errors[] = "Item name is required";
-        }
-
-        if ($price <= 0) {
-            $errors[] = "Price must be greater than 0";
-        }
-
-        if (empty($errors)) {
-            // Check if item already exists for this user
-            $check_stmt = $conn->prepare("SELECT id FROM items WHERE user_id = ? AND item_name = ?");
-            $check_stmt->bind_param("is", $_SESSION['user_id'], $item_name);
-            $check_stmt->execute();
-
-            if ($check_stmt->get_result()->num_rows > 0) {
-                setMessage("Item with this name already exists!", "warning");
-            } else {
-                $stmt = $conn->prepare("INSERT INTO items (user_id, item_name, item_code, hsn_code, price, cgst_rate, sgst_rate, igst_rate, unit, description, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("isssddddsss", $_SESSION['user_id'], $item_name, $item_code, $hsn_code, $price, $cgst_rate, $sgst_rate, $igst_rate, $unit, $description, $category);
-
-                if ($stmt->execute()) {
-                    setMessage("Item added successfully!", "success");
-                    header("Location: items.php");
-                    exit();
-                } else {
-                    setMessage("Error adding item: " . $stmt->error, "danger");
-                }
-                $stmt->close();
-            }
-            $check_stmt->close();
-        } else {
-            setMessage(implode("<br>", $errors), "danger");
-        }
-    }
-
-    if (isset($_POST['update_item'])) {
-        // Update item
-        $id = intval($_POST['item_id']);
-        $item_name = sanitizeInput($_POST['item_name']);
-        $item_code = sanitizeInput($_POST['item_code']);
-        $hsn_code = sanitizeInput($_POST['hsn_code']);
-        $price = floatval($_POST['price']);
-        $cgst_rate = floatval($_POST['cgst_rate']);
-        $sgst_rate = floatval($_POST['sgst_rate']);
-        $igst_rate = floatval($_POST['igst_rate']);
-        $unit = sanitizeInput($_POST['unit']);
-        $description = sanitizeInput($_POST['description']);
-        $category = sanitizeInput($_POST['category']);
-
-        $stmt = $conn->prepare("UPDATE items SET item_name = ?, item_code = ?, hsn_code = ?, price = ?, cgst_rate = ?, sgst_rate = ?, igst_rate = ?, unit = ?, description = ?, category = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
-        $stmt->bind_param("isssdddddssii", $item_name, $item_code, $hsn_code, $price, $cgst_rate, $sgst_rate, $igst_rate, $unit, $description, $category, $id, $_SESSION['user_id']);
-
-        if ($stmt->execute()) {
-            setMessage("Item updated successfully!", "success");
-            header("Location: items.php");
-            exit();
-        } else {
-            setMessage("Error updating item: " . $stmt->error, "danger");
-        }
-        $stmt->close();
-    }
-
-    if (isset($_POST['delete_item'])) {
-        // Delete item
-        $id = intval($_POST['item_id']);
-
-        // Check if item is used in any transactions
-        $check_stmt = $conn->prepare("SELECT COUNT(*) as count FROM udhar_items WHERE item_id = ?");
-        $check_stmt->bind_param("i", $id);
-        $check_stmt->execute();
-        $result = $check_stmt->get_result();
-        $row = $result->fetch_assoc();
-        $check_stmt->close();
-
-        if ($row['count'] > 0) {
-            setMessage("Cannot delete item that is used in transactions. Mark as inactive instead.", "warning");
-        } else {
-            $stmt = $conn->prepare("DELETE FROM items WHERE id = ? AND user_id = ?");
-            $stmt->bind_param("ii", $id, $_SESSION['user_id']);
-
-            if ($stmt->execute()) {
-                setMessage("Item deleted successfully!", "success");
-            } else {
-                setMessage("Error deleting item: " . $stmt->error, "danger");
-            }
-            $stmt->close();
-        }
-        header("Location: items.php");
-        exit();
-    }
-}
-
-// Get item for edit
-$item = null;
-if ($item_id > 0 && ($action == 'edit' || $action == 'view')) {
-    $stmt = $conn->prepare("SELECT * FROM items WHERE id = ? AND user_id = ?");
-    $stmt->bind_param("ii", $item_id, $_SESSION['user_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $item = $result->fetch_assoc();
-    $stmt->close();
-}
-
-// Get all items for listing
-$search = isset($_GET['search']) ? sanitizeInput($_GET['search']) : '';
-$category_filter = isset($_GET['category']) ? sanitizeInput($_GET['category']) : '';
-
-$where_clause = "WHERE user_id = " . $_SESSION['user_id'];
-$params = [];
-
-if (!empty($search)) {
-    $where_clause .= " AND (item_name LIKE ? OR item_code LIKE ? OR hsn_code LIKE ?)";
-    $search_term = "%$search%";
-    $params = array_fill(0, 3, $search_term);
-}
-
-
-if (!empty($category_filter)) {
-    $where_clause .= " AND category = ?";
-    $params[] = $category_filter;
-}
-
-// Get total items count
-$count_query = "SELECT COUNT(*) as total FROM items $where_clause";
-$count_stmt = $conn->prepare($count_query);
-if (!empty($params)) {
-    $types = str_repeat('s', count($params));
-    $count_stmt->bind_param($types, ...$params);
-}
-$count_stmt->execute();
-$count_result = $count_stmt->get_result();
-$total_items = $count_result->fetch_assoc()['total'];
-$count_stmt->close();
-
-// Pagination
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 15;
-$offset = ($page - 1) * $limit;
-$total_pages = ceil($total_items / $limit);
-
-// Get items with pagination
-$order_by = isset($_GET['order_by']) ? sanitizeInput($_GET['order_by']) : 'item_name';
-$order_dir = isset($_GET['order_dir']) ? sanitizeInput($_GET['order_dir']) : 'ASC';
-
-// Validate order parameters
-$allowed_columns = ['item_name', 'item_code', 'hsn_code', 'price', 'created_at'];
-$order_by = in_array($order_by, $allowed_columns) ? $order_by : 'item_name';
-$order_dir = in_array(strtoupper($order_dir), ['ASC', 'DESC']) ? strtoupper($order_dir) : 'ASC';
-
-$query = "SELECT * FROM items $where_clause ORDER BY $order_by $order_dir LIMIT ? OFFSET ?";
-$stmt = $conn->prepare($query);
-
-if (!empty($params)) {
-    $params[] = $limit;
-    $params[] = $offset;
-    $types = str_repeat('s', count($params) - 2) . 'ii';
-    $stmt->bind_param($types, ...$params);
-} else {
-    $stmt->bind_param("ii", $limit, $offset);
-}
-
-$stmt->execute();
-$items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-$page_title = "Items Management";
-
-// HTML Template
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -304,16 +105,12 @@ $page_title = "Items Management";
         <div class="container-fluid items-container">
             <div class="row">
                 <div class="col-12">
-                    <div
-                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1 class="h2">
                             <i class="bi bi-box-seam"></i> Items Management
                         </h1>
                         <div class="btn-toolbar mb-2 mb-md-0">
                             <?php if ($action == 'list'): ?>
-                                <a href="import_items.php" class="btn btn-secondary me-2">
-                                    <i class="bi bi-cloud-upload"></i> Import Items
-                                </a>
                                 <a href="items.php?action=add" class="btn btn-primary">
                                     <i class="bi bi-plus-circle"></i> Add New Item
                                 </a>
@@ -351,8 +148,7 @@ $page_title = "Items Management";
                                                 <i class="bi bi-search search-icon"></i>
                                                 <input type="text" name="search" class="form-control"
                                                     placeholder="Search by item name, code or HSN..."
-                                                    value="<?php echo htmlspecialchars($search); ?>"
-                                                    onchange="this.form.submit()">
+                                                    value="<?php echo htmlspecialchars($search); ?>" onchange="this.form.submit()">
                                             </div>
                                         </div>
                                     </form>
@@ -420,12 +216,10 @@ $page_title = "Items Management";
                                             <thead>
                                                 <tr>
                                                     <th>
-                                                        <a
-                                                            href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&order_by=item_name&order_dir=<?php echo $order_by == 'item_name' && $order_dir == 'ASC' ? 'DESC' : 'ASC'; ?>">
+                                                        <a href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&order_by=item_name&order_dir=<?php echo $order_by == 'item_name' && $order_dir == 'ASC' ? 'DESC' : 'ASC'; ?>">
                                                             Item Name
                                                             <?php if ($order_by == 'item_name'): ?>
-                                                                <i
-                                                                    class="bi bi-chevron-<?php echo $order_dir == 'ASC' ? 'up' : 'down'; ?>"></i>
+                                                                <i class="bi bi-chevron-<?php echo $order_dir == 'ASC' ? 'up' : 'down'; ?>"></i>
                                                             <?php endif; ?>
                                                         </a>
                                                     </th>
@@ -447,12 +241,9 @@ $page_title = "Items Management";
                                                                     <?php echo strtoupper(substr($itm['item_name'], 0, 1)); ?>
                                                                 </div>
                                                                 <div>
-                                                                    <h6 class="mb-0">
-                                                                        <?php echo htmlspecialchars($itm['item_name']); ?>
-                                                                    </h6>
+                                                                    <h6 class="mb-0"><?php echo htmlspecialchars($itm['item_name']); ?></h6>
                                                                     <?php if (!empty($itm['description'])): ?>
-                                                                        <small
-                                                                            class="text-muted"><?php echo htmlspecialchars(substr($itm['description'], 0, 30)); ?>...</small>
+                                                                        <small class="text-muted"><?php echo htmlspecialchars(substr($itm['description'], 0, 30)); ?>...</small>
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </div>
@@ -466,22 +257,17 @@ $page_title = "Items Management";
                                                         </td>
                                                         <td>
                                                             <?php if ($itm['igst_rate'] > 0): ?>
-                                                                <span class="item-gst-badge">IGST:
-                                                                    <?php echo $itm['igst_rate']; ?>%</span>
+                                                                <span class="item-gst-badge">IGST: <?php echo $itm['igst_rate']; ?>%</span>
                                                             <?php else: ?>
-                                                                <span class="item-gst-badge">CGST:
-                                                                    <?php echo $itm['cgst_rate']; ?>%</span>
-                                                                <span class="item-gst-badge">SGST:
-                                                                    <?php echo $itm['sgst_rate']; ?>%</span>
+                                                                <span class="item-gst-badge">CGST: <?php echo $itm['cgst_rate']; ?>%</span>
+                                                                <span class="item-gst-badge">SGST: <?php echo $itm['sgst_rate']; ?>%</span>
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>
-                                                            <span
-                                                                class="item-unit-badge"><?php echo htmlspecialchars($itm['unit']); ?></span>
+                                                            <span class="item-unit-badge"><?php echo htmlspecialchars($itm['unit']); ?></span>
                                                         </td>
                                                         <td>
-                                                            <span
-                                                                class="item-unit-badge"><?php echo htmlspecialchars($itm['category'] ?: 'N/A'); ?></span>
+                                                            <span class="item-unit-badge"><?php echo htmlspecialchars($itm['category'] ?: 'N/A'); ?></span>
                                                         </td>
                                                         <td>
                                                             <div class="item-row-actions">
@@ -511,24 +297,21 @@ $page_title = "Items Management";
                                         <nav aria-label="Page navigation">
                                             <ul class="pagination justify-content-center">
                                                 <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
-                                                    <a class="page-link"
-                                                        href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page - 1; ?>">
+                                                    <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page - 1; ?>">
                                                         Previous
                                                     </a>
                                                 </li>
 
                                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                                     <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                                        <a class="page-link"
-                                                            href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $i; ?>">
+                                                        <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $i; ?>">
                                                             <?php echo $i; ?>
                                                         </a>
                                                     </li>
                                                 <?php endfor; ?>
 
                                                 <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
-                                                    <a class="page-link"
-                                                        href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page + 1; ?>">
+                                                    <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page + 1; ?>">
                                                         Next
                                                     </a>
                                                 </li>
@@ -575,8 +358,8 @@ $page_title = "Items Management";
                                 <div class="item-form-row">
                                     <div class="item-form-group">
                                         <label for="price"><i class="bi bi-currency-rupee"></i> Price *</label>
-                                        <input type="number" class="item-form-control" id="price" name="price" step="0.01"
-                                            min="0.01" placeholder="0.00" required
+                                        <input type="number" class="item-form-control" id="price" name="price"
+                                            step="0.01" min="0.01" placeholder="0.00" required
                                             value="<?php echo $action == 'edit' && $item ? number_format($item['price'], 2, '.', '') : '0.00'; ?>">
                                     </div>
 
@@ -624,8 +407,7 @@ $page_title = "Items Management";
                                 <div class="item-form-group">
                                     <label for="description"><i class="bi bi-card-text"></i> Description</label>
                                     <textarea class="item-form-control" id="description" name="description"
-                                        placeholder="Enter item description"
-                                        rows="3"><?php echo $action == 'edit' && $item ? htmlspecialchars($item['description']) : ''; ?></textarea>
+                                        placeholder="Enter item description" rows="3"><?php echo $action == 'edit' && $item ? htmlspecialchars($item['description']) : ''; ?></textarea>
                                 </div>
 
                                 <div class="item-form-group">
@@ -640,14 +422,12 @@ $page_title = "Items Management";
                                 </div>
 
                                 <?php if ($action == 'edit' && $item): ?>
-
                                     <!-- Item Preview -->
                                     <div class="item-preview-card">
                                         <h5>Item Preview</h5>
                                         <div class="item-preview-row">
                                             <div class="item-preview-label">Current Price:</div>
-                                            <div class="item-preview-value">₹<?php echo number_format($item['price'], 2); ?>
-                                            </div>
+                                            <div class="item-preview-value">₹<?php echo number_format($item['price'], 2); ?></div>
                                         </div>
                                         <div class="item-preview-row">
                                             <div class="item-preview-label">Tax Calculation:</div>
@@ -713,15 +493,13 @@ $page_title = "Items Management";
                                                 <tr>
                                                     <th>Unit:</th>
                                                     <td>
-                                                        <span
-                                                            class="item-unit-badge"><?php echo htmlspecialchars($item['unit']); ?></span>
+                                                        <span class="item-unit-badge"><?php echo htmlspecialchars($item['unit']); ?></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Category:</th>
                                                     <td>
-                                                        <span
-                                                            class="item-unit-badge"><?php echo htmlspecialchars($item['category'] ?: 'N/A'); ?></span>
+                                                        <span class="item-unit-badge"><?php echo htmlspecialchars($item['category'] ?: 'N/A'); ?></span>
                                                     </td>
                                                 </tr>
                                             </table>
@@ -731,8 +509,7 @@ $page_title = "Items Management";
                                                 <tr>
                                                     <th>Price:</th>
                                                     <td class="fw-bold">
-                                                        <span
-                                                            class="item-price-badge">₹<?php echo number_format($item['price'], 2); ?></span>
+                                                        <span class="item-price-badge">₹<?php echo number_format($item['price'], 2); ?></span>
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -770,8 +547,7 @@ $page_title = "Items Management";
                                             <p class="mb-1">SGST: ₹<?php echo number_format($sgst_amount, 2); ?></p>
                                         <?php endif; ?>
                                         <hr>
-                                        <h5 class="text-primary">Total: ₹<?php echo number_format($total_with_tax, 2); ?>
-                                        </h5>
+                                        <h5 class="text-primary">Total: ₹<?php echo number_format($total_with_tax, 2); ?></h5>
                                     </div>
                                 </div>
                             </div>
@@ -790,8 +566,7 @@ $page_title = "Items Management";
 
                             <div class="mt-4 pt-3 border-top">
                                 <small class="text-muted">
-                                    <i class="bi bi-clock"></i> Created:
-                                    <?php echo date('d M Y, h:i A', strtotime($item['created_at'])); ?>
+                                    <i class="bi bi-clock"></i> Created: <?php echo date('d M Y, h:i A', strtotime($item['created_at'])); ?>
                                     <?php if ($item['created_at'] != $item['updated_at']): ?>
                                         | Updated: <?php echo date('d M Y, h:i A', strtotime($item['updated_at'])); ?>
                                     <?php endif; ?>
@@ -806,7 +581,6 @@ $page_title = "Items Management";
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/common.js"></script>
     <script src="assets/js/items.js"></script>
 </body>
 

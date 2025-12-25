@@ -1,22 +1,14 @@
 <?php
 // File: smart-udhar-system/index.php
 
-// Start session
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Include database configuration and functions
+require_once 'core/database.php';
 
-// Include the central database configuration and functions
-require_once 'config/database.php';
-
-// Get the database connection
+// Get database connection
 $conn = getDBConnection();
 
 // Check if already logged in
-if (isset($_SESSION['user_id'])) {
-    header('Location: dashboard.php');
-    exit();
-}
+redirectIfLoggedIn();
 
 $error = '';
 
@@ -24,7 +16,7 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+
     // Input validation
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password';
@@ -35,188 +27,250 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
-        
-        $user = null;
 
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            if (!password_verify($password, $user['password'])) {
-                $error = 'Invalid password!';
-                $user = null;
+
+            // Verify password
+            if (password_verify($password, $user['password'])) {
+                // Login successful
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['shop_name'] = $user['shop_name'];
+
+                // Update last login
+                $update_sql = "UPDATE users SET last_login = NOW() WHERE id = ?";
+                $update_stmt = $conn->prepare($update_sql);
+                $update_stmt->bind_param("i", $user['id']);
+                $update_stmt->execute();
+                $update_stmt->close();
+
+                // Redirect to dashboard
+                header('Location: dashboard.php');
+                exit();
+            } else {
+                $error = 'Invalid username or password!';
             }
         } else {
-            $error = 'Invalid username or user not found!';
+            $error = 'Invalid username or password!';
         }
-        
-        if ($user) {
-            // Login successful
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['shop_name'] = $user['shop_name'];
-            
-            // Update last login
-            $update_sql = "UPDATE users SET last_login_at = NOW() WHERE id = ?";
-            $update_stmt = $conn->prepare($update_sql);
-            $update_stmt->bind_param("i", $user['id']);
-            $update_stmt->execute();
-            $update_stmt->close();
 
-            // Log user activity
-            $log_sql = "INSERT INTO user_logs (user_id, activity, ip_address) VALUES (?, 'login', ?)";
-            $log_stmt = $conn->prepare($log_sql);
-            $ip_address = $_SERVER['REMOTE_ADDR'];
-            $log_stmt->bind_param("is", $user['id'], $ip_address);
-            $log_stmt->execute();
-            $log_stmt->close();
-
-            // Redirect to dashboard
-            header('Location: dashboard.php');
-            exit();
-        }
-        
         $stmt->close();
     }
+    $conn->close();
 }
-
-$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Smart Udhar System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-color-darker: #0069d9;
+            --secondary-color: #6c757d;
+            --background-color: #f4f7fc;
+            --text-color: #495057;
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             display: flex;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
         }
-        .login-container {
-            max-width: 400px;
+
+        .main-container {
+            display: flex;
             width: 100%;
-            margin: 0 auto;
-        }
-        .login-card {
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 1200px;
+            min-height: 700px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             overflow: hidden;
         }
-        .login-header {
-            background: #2c3e50;
-            color: white;
-            padding: 25px;
+
+        .branding-section {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: #fff;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+            width: 50%;
         }
-        .login-body {
-            padding: 30px;
-            background: white;
+
+        .branding-section .logo-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
         }
-        .prefilled-info {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-size: 14px;
+
+        .branding-section h1 {
+            font-weight: 600;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .branding-section p {
+            font-size: 1.1rem;
+            max-width: 350px;
+            line-height: 1.6;
+        }
+
+        .form-section {
+            padding: 60px 50px;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-section h2 {
+            font-weight: 600;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #343a40;
+        }
+
+        .form-section .lead {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgb(0 123 255 / 25%);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 500;
+            transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-color-darker);
+            border-color: var(--primary-color-darker);
+        }
+
+        .form-check-label {
+            user-select: none;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .branding-section,
+            .form-section {
+                width: 100%;
+                padding: 40px;
+            }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="login-container">
-            <div class="login-card">
-                <div class="login-header">
-                    <h3><i class="bi bi-wallet2"></i> Smart Udhar System</h3>
-                    <p class="mb-0">Digital Credit Management</p>
+    <div class="main-container">
+        <div class="branding-section">
+            <i class="bi bi-wallet2 logo-icon"></i>
+            <h1>Smart Udhar System</h1>
+            <p>Your trusted partner for seamless digital credit management. Track dues, manage payments, and grow your business with confidence.</p>
+        </div>
+        <div class="form-section">
+            <h2>Welcome Back!</h2>
+            <p class="lead">Login to access your dashboard.</p>
+
+            <?php if ($error): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo htmlspecialchars($error); ?>
                 </div>
-                <div class="login-body">
-                    <h4 class="text-center mb-4">Login to Your Account</h4>
-                    
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <?php echo htmlspecialchars($error); ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <form method="POST" action="">
-                        <input type="hidden" name="login" value="1">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">
-                                <i class="bi bi-person-fill"></i> Username
-                            </label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="username" 
-                                   name="username" 
-                                   placeholder="Enter username" 
-                                   value="admin"
-                                   required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">
-                                <i class="bi bi-lock-fill"></i> Password
-                            </label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="Enter password" 
-                                   value="admin123"
-                                   required>
-                        </div>
-                        
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="showPassword">
-                            <label class="form-check-label" for="showPassword">
-                                Show Password
-                            </label>
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <div class="text-center mt-3">
-                        <a href="register.php">Don't have an account? Create one</a>
-                    </div>
-                    
-                    <div class="prefilled-info">
-                        <div class="text-center">
-                            <strong>Test Credentials:</strong><br>
-                            Username: <code>admin</code><br>
-                            Password: <code>admin123</code>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center mt-4">
-                        <small class="text-muted">
-                            &copy; <?php echo date('Y'); ?> Smart Udhar System
-                        </small>
-                    </div>
+            <?php endif; ?>
+
+            <form method="POST" action="index.php">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="e.g., john.doe" required>
                 </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="showPassword">
+                    <label class="form-check-label" for="showPassword">Show Password</label>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </button>
+                </div>
+            </form>
+
+            <div class="footer-text">
+                <p>
+                    Don't have an account? <a href="register.php">Sign up now</a>
+                </p>
+                <small class="text-muted">&copy; <?php echo date('Y'); ?> Smart Udhar System</small>
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Show/Hide Password
         document.getElementById('showPassword').addEventListener('change', function() {
-            const passwordInput = document.getElementById('password');
-            passwordInput.type = this.checked ? 'text' : 'password';
+            document.getElementById('password').type = this.checked ? 'text' : 'password';
         });
-        
-        // Auto focus on username field
         document.getElementById('username').focus();
     </script>
 </body>
+
 </html>

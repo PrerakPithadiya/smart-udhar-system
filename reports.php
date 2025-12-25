@@ -194,9 +194,9 @@ if ($report_type == 'trend') {
 if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="report_' . $report_type . '_' . date('Y-m-d') . '.csv"');
-    
+
     $output = fopen('php://output', 'w');
-    
+
     if ($report_type == 'summary') {
         fputcsv($output, ['Customer Name', 'Mobile', 'Total Sales', 'Total Payments', 'Balance', 'Current Balance']);
         foreach ($customer_summary as $row) {
@@ -249,7 +249,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
             ]);
         }
     }
-    
+
     fclose($output);
     exit();
 }
@@ -264,113 +264,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
-    <style>
-        .report-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+    <link rel="stylesheet" href="assets/css/reports.css">
 
-        .report-card:hover {
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-            transform: translateY(-5px);
-        }
-
-        .report-type-btn {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: #333;
-            display: block;
-        }
-
-        .report-type-btn:hover {
-            border-color: #007bff;
-            background-color: #f8f9fa;
-            color: #007bff;
-        }
-
-        .report-type-btn.active {
-            border-color: #007bff;
-            background-color: #007bff;
-            color: white;
-        }
-
-        .report-type-btn i {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box.primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .stat-box.success {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .stat-box.info {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .stat-box.warning {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .stat-box h3 {
-            margin: 0;
-            font-size: 2rem;
-        }
-
-        .stat-box p {
-            margin: 0;
-            opacity: 0.9;
-        }
-
-        .report-table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .report-table thead {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .report-table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .filter-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-    </style>
 </head>
 
 <body>
@@ -517,17 +412,17 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                 <div class="filter-card">
                     <form method="GET" action="reports.php" class="row g-3">
                         <input type="hidden" name="type" value="<?php echo $report_type; ?>">
-                        
+
                         <div class="col-md-3">
                             <label class="form-label">From Date</label>
                             <input type="date" class="form-control" name="date_from" value="<?php echo $date_from; ?>">
                         </div>
-                        
+
                         <div class="col-md-3">
                             <label class="form-label">To Date</label>
                             <input type="date" class="form-control" name="date_to" value="<?php echo $date_to; ?>">
                         </div>
-                        
+
                         <?php if ($report_type != 'outstanding'): ?>
                             <div class="col-md-4">
                                 <label class="form-label">Customer</label>
@@ -541,7 +436,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                 </select>
                             </div>
                         <?php endif; ?>
-                        
+
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-funnel"></i> Filter
@@ -880,7 +775,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                         $months[$pt['month']]['payments'] = $pt['total_payments'];
                                         $months[$pt['month']]['payment_count'] = $pt['total_transactions'];
                                     }
-                                    
+
                                     foreach ($months as $month => $data):
                                         $sales = $data['sales'] ?? 0;
                                         $payments = $data['payments'] ?? 0;
@@ -907,100 +802,32 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script>
-        // Sidebar toggle
-        // Sidebar toggle function
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-
-            if (sidebar && mainContent) {
-                sidebar.classList.toggle('closed');
-                mainContent.classList.toggle('expanded');
-            }
-        }
-
-        // Sidebar toggle button inside sidebar
-        const sidebarToggleBtn = document.getElementById('sidebarToggle');
-        if (sidebarToggleBtn) {
-            sidebarToggleBtn.addEventListener('click', toggleSidebar);
-        }
-
-        // Floating toggle button (visible when sidebar is closed)
-        const floatingToggleBtn = document.getElementById('floatingToggle');
-        if (floatingToggleBtn) {
-            floatingToggleBtn.addEventListener('click', toggleSidebar);
-        }
-
-        // Trend Chart
+        // Global variables for JavaScript
+        window.reportType = '<?php echo $report_type; ?>';
         <?php if ($report_type == 'trend'): ?>
-            const ctx = document.getElementById('trendChart');
-            if (ctx) {
-                const labels = <?php 
-                    $all_months = array_keys($months);
-                    echo json_encode(array_map(function($m) {
-                        return date('M Y', strtotime($m . '-01'));
-                    }, $all_months));
-                ?>;
-                
-                const salesData = <?php 
-                    echo json_encode(array_map(function($m) use ($months) {
-                        return $months[$m]['sales'] ?? 0;
-                    }, $all_months));
-                ?>;
-                
-                const paymentData = <?php 
-                    echo json_encode(array_map(function($m) use ($months) {
-                        return $months[$m]['payments'] ?? 0;
-                    }, $all_months));
-                ?>;
-
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Sales',
-                            data: salesData,
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                            tension: 0.4
-                        }, {
-                            label: 'Payments',
-                            data: paymentData,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            },
-                            title: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return '₹' + value.toLocaleString();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
+            window.trendLabels = <?php
+                                    $all_months = array_keys($months);
+                                    echo json_encode(array_map(function ($m) {
+                                        return date('M Y', strtotime($m . '-01'));
+                                    }, $all_months));
+                                    ?>;
+            window.salesData = <?php
+                                echo json_encode(array_map(function ($m) use ($months) {
+                                    return $months[$m]['sales'] ?? 0;
+                                }, $all_months));
+                                ?>;
+            window.paymentData = <?php
+                                    echo json_encode(array_map(function ($m) use ($months) {
+                                        return $months[$m]['payments'] ?? 0;
+                                    }, $all_months));
+                                    ?>;
         <?php endif; ?>
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="assets/js/reports.js"></script>
+
 </body>
 
 </html>
