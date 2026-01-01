@@ -2,7 +2,7 @@
 // File: smart-udhar-system/index.php
 
 // Include database configuration and functions
-require_once 'core/database.php';
+require_once 'config/database.php';
 
 // Get database connection
 $conn = getDBConnection();
@@ -220,7 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="branding-section">
             <i class="bi bi-wallet2 logo-icon"></i>
             <h1>Smart Udhar System</h1>
-            <p>Your trusted partner for seamless digital credit management. Track dues, manage payments, and grow your business with confidence.</p>
+            <p>Your trusted partner for seamless digital credit management. Track dues, manage payments, and grow your
+                business with confidence.</p>
         </div>
         <div class="form-section">
             <h2>Welcome Back!</h2>
@@ -235,12 +236,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <form method="POST" action="index.php">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="e.g., john.doe" required>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="e.g., john.doe"
+                        required>
                 </div>
 
                 <div class="mb-4">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••"
+                        required>
                 </div>
 
                 <div class="mb-4 form-check">
@@ -266,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('showPassword').addEventListener('change', function() {
+        document.getElementById('showPassword').addEventListener('change', function () {
             document.getElementById('password').type = this.checked ? 'text' : 'password';
         });
         document.getElementById('username').focus();

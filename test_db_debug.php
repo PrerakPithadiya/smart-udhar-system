@@ -3,7 +3,7 @@
 // We need to be careful about paths. Assuming we run this from project root or core.
 // Let's put this file in the root directory for easy execution.
 
-require_once 'core/database.php';
+require_once 'config/database.php';
 
 echo "Testing Database Connection...\n";
 echo "Host: " . DB_HOST . "\n";

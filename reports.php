@@ -265,87 +265,12 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" href="assets/css/reports.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
 </head>
 
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-header-content">
-                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-                <div class="shop-name">
-                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
-                </div>
-            </div>
-            <button class="sidebar-toggle-btn" id="sidebarToggle">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="customers.php">
-                    <i class="bi bi-people-fill"></i> Customers
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="items.php">
-                    <i class="bi bi-box-seam"></i> Items
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="udhar.php">
-                    <i class="bi bi-credit-card"></i> Udhar Entry
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="payments.php">
-                    <i class="bi bi-cash-stack"></i> Payments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="reports.php">
-                    <i class="bi bi-bar-chart-fill"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reminders.php">
-                    <i class="bi bi-bell-fill"></i> Reminders
-                </a>
-            </li>
-            <li class="nav-item">
-                <div class="dropdown-divider"></div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="profile.php">
-                    <i class="bi bi-person-circle"></i> Profile
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="settings.php">
-                    <i class="bi bi-gear-fill"></i> Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer text-center mt-4">
-            <small class="text-muted">
-                Version 1.0<br>
-                &copy; <?php echo date('Y'); ?>
-            </small>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -510,11 +435,14 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
                                                 <td class="text-end">₹<?php echo number_format($row['total_sales'], 2); ?></td>
-                                                <td class="text-end text-success">₹<?php echo number_format($row['total_payments'], 2); ?></td>
-                                                <td class="text-end <?php echo $row['balance'] > 0 ? 'text-danger' : 'text-success'; ?>">
+                                                <td class="text-end text-success">
+                                                    ₹<?php echo number_format($row['total_payments'], 2); ?></td>
+                                                <td
+                                                    class="text-end <?php echo $row['balance'] > 0 ? 'text-danger' : 'text-success'; ?>">
                                                     ₹<?php echo number_format($row['balance'], 2); ?>
                                                 </td>
-                                                <td class="text-end <?php echo $row['current_balance'] > 0 ? 'text-danger' : 'text-success'; ?>">
+                                                <td
+                                                    class="text-end <?php echo $row['current_balance'] > 0 ? 'text-danger' : 'text-success'; ?>">
                                                     <strong>₹<?php echo number_format($row['current_balance'], 2); ?></strong>
                                                 </td>
                                             </tr>
@@ -569,13 +497,17 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><?php echo date('d M Y', strtotime($row['transaction_date'])); ?></td>
                                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
-                                                <td class="text-end"><strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
+                                                <td class="text-end">
+                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
                                                 <td>
                                                     <?php
                                                     $badge_class = 'secondary';
-                                                    if ($row['status'] == 'paid') $badge_class = 'success';
-                                                    elseif ($row['status'] == 'pending') $badge_class = 'warning';
-                                                    elseif ($row['status'] == 'partially_paid') $badge_class = 'info';
+                                                    if ($row['status'] == 'paid')
+                                                        $badge_class = 'success';
+                                                    elseif ($row['status'] == 'pending')
+                                                        $badge_class = 'warning';
+                                                    elseif ($row['status'] == 'partially_paid')
+                                                        $badge_class = 'info';
                                                     ?>
                                                     <span class="badge bg-<?php echo $badge_class; ?>">
                                                         <?php echo ucfirst(str_replace('_', ' ', $row['status'])); ?>
@@ -588,7 +520,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                     <tfoot>
                                         <tr class="table-primary">
                                             <td colspan="4"><strong>Total</strong></td>
-                                            <td class="text-end"><strong>₹<?php echo number_format($sales_total, 2); ?></strong></td>
+                                            <td class="text-end"><strong>₹<?php echo number_format($sales_total, 2); ?></strong>
+                                            </td>
                                             <td colspan="2"></td>
                                         </tr>
                                     </tfoot>
@@ -640,7 +573,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><?php echo date('d M Y', strtotime($row['payment_date'])); ?></td>
                                                 <td><strong><?php echo htmlspecialchars($row['customer_name']); ?></strong></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
-                                                <td class="text-end text-success"><strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
+                                                <td class="text-end text-success">
+                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
                                                 <td>
                                                     <span class="badge bg-info">
                                                         <?php echo ucfirst(str_replace('_', ' ', $row['payment_mode'])); ?>
@@ -654,7 +588,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                     <tfoot>
                                         <tr class="table-success">
                                             <td colspan="3"><strong>Total</strong></td>
-                                            <td class="text-end"><strong>₹<?php echo number_format($payment_total, 2); ?></strong></td>
+                                            <td class="text-end">
+                                                <strong>₹<?php echo number_format($payment_total, 2); ?></strong></td>
                                             <td colspan="3"></td>
                                         </tr>
                                     </tfoot>
@@ -708,7 +643,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                             <tr>
                                                 <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
-                                                <td class="text-end text-danger"><strong>₹<?php echo number_format($row['balance'], 2); ?></strong></td>
+                                                <td class="text-end text-danger">
+                                                    <strong>₹<?php echo number_format($row['balance'], 2); ?></strong></td>
                                                 <td class="text-center"><?php echo $row['total_bills']; ?></td>
                                                 <td class="text-center"><?php echo $row['total_payments']; ?></td>
                                                 <td>
@@ -723,7 +659,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                     <tfoot>
                                         <tr class="table-warning">
                                             <td colspan="2"><strong>Total Outstanding</strong></td>
-                                            <td class="text-end"><strong>₹<?php echo number_format($total_outstanding, 2); ?></strong></td>
+                                            <td class="text-end">
+                                                <strong>₹<?php echo number_format($total_outstanding, 2); ?></strong></td>
                                             <td colspan="4"></td>
                                         </tr>
                                     </tfoot>
@@ -739,7 +676,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                 <div class="row">
                     <div class="col-md-12">
                         <div class="chart-container">
-                            <h5 class="mb-4"><i class="bi bi-graph-up-arrow"></i> Sales & Payment Trend (Last 12 Months)</h5>
+                            <h5 class="mb-4"><i class="bi bi-graph-up-arrow"></i> Sales & Payment Trend (Last 12 Months)
+                            </h5>
                             <canvas id="trendChart" height="80"></canvas>
                         </div>
                     </div>
@@ -780,7 +718,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                         $sales = $data['sales'] ?? 0;
                                         $payments = $data['payments'] ?? 0;
                                         $diff = $sales - $payments;
-                                    ?>
+                                        ?>
                                         <tr>
                                             <td><strong><?php echo date('M Y', strtotime($month . '-01')); ?></strong></td>
                                             <td class="text-end">₹<?php echo number_format($sales, 2); ?></td>
@@ -807,21 +745,21 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
         window.reportType = '<?php echo $report_type; ?>';
         <?php if ($report_type == 'trend'): ?>
             window.trendLabels = <?php
-                                    $all_months = array_keys($months);
-                                    echo json_encode(array_map(function ($m) {
-                                        return date('M Y', strtotime($m . '-01'));
-                                    }, $all_months));
-                                    ?>;
+            $all_months = array_keys($months);
+            echo json_encode(array_map(function ($m) {
+                return date('M Y', strtotime($m . '-01'));
+            }, $all_months));
+            ?>;
             window.salesData = <?php
-                                echo json_encode(array_map(function ($m) use ($months) {
-                                    return $months[$m]['sales'] ?? 0;
-                                }, $all_months));
-                                ?>;
+            echo json_encode(array_map(function ($m) use ($months) {
+                return $months[$m]['sales'] ?? 0;
+            }, $all_months));
+            ?>;
             window.paymentData = <?php
-                                    echo json_encode(array_map(function ($m) use ($months) {
-                                        return $months[$m]['payments'] ?? 0;
-                                    }, $all_months));
-                                    ?>;
+            echo json_encode(array_map(function ($m) use ($months) {
+                return $months[$m]['payments'] ?? 0;
+            }, $all_months));
+            ?>;
         <?php endif; ?>
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

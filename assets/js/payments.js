@@ -42,18 +42,94 @@ document.addEventListener("click", function (event) {
 
 // Update customer balance when customer is selected
 function updateCustomerBalance(customerId) {
-  const customerSelect = document.getElementById("customer_id");
-  const selectedOption = customerSelect.options[customerSelect.selectedIndex];
-  const balance = selectedOption.dataset.balance || 0;
+  let balance = 0;
+  
+  if (customerId && window.allCustomers) {
+    const customer = window.allCustomers.find(c => c.id == customerId);
+    if (customer) {
+      balance = customer.balance;
+    }
+  }
 
   if (customerId) {
     document.getElementById("customerBalanceInfo").style.display = "block";
-    document.getElementById("customerBalance").textContent =
-      parseFloat(balance).toFixed(2);
+    document.getElementById("customerBalance").textContent = parseFloat(balance).toFixed(2);
   } else {
     document.getElementById("customerBalanceInfo").style.display = "none";
   }
 }
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('customer_search');
+    const resultsDiv = document.getElementById('customer_results');
+    const hiddenInput = document.getElementById('customer_id');
+
+    if (searchInput && resultsDiv && window.allCustomers) {
+        // Search input handler
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length === 0) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const matches = window.allCustomers.filter(c => 
+                c.name.toLowerCase().includes(query) || 
+                c.mobile.includes(query)
+            );
+
+            if (matches.length > 0) {
+                let html = '';
+                matches.forEach(c => {
+                    html += `
+                        <a href="javascript:void(0)" class="list-group-item list-group-item-action" 
+                           onclick="selectCustomer(${c.id}, '${c.name.replace(/'/g, "\\'")}')">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${c.name}</strong><br>
+                                    <small class="text-muted"><i class="bi bi-phone"></i> ${c.mobile}</small>
+                                </div>
+                                <span class="badge ${c.balance > 0 ? 'bg-danger' : 'bg-success'}">
+                                    ₹${parseFloat(c.balance).toFixed(2)}
+                                </span>
+                            </div>
+                        </a>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.innerHTML = '<div class="list-group-item text-muted">No customers found</div>';
+                resultsDiv.style.display = 'block';
+            }
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+        
+        // Clear selection if input is cleared
+        searchInput.addEventListener('change', function() {
+             if (this.value === '') {
+                 hiddenInput.value = '';
+                 updateCustomerBalance('');
+             }
+        });
+    }
+});
+
+// Global function to select customer (called from onclick in generated HTML)
+window.selectCustomer = function(id, name) {
+    document.getElementById('customer_search').value = name;
+    document.getElementById('customer_id').value = id;
+    document.getElementById('customer_results').style.display = 'none';
+    updateCustomerBalance(id);
+};
 
 // Form validation for add payment
 document

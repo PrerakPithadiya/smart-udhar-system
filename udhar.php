@@ -383,901 +383,36 @@ $page_title = "Udhar Entry Management";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="assets/css/udhar.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .sidebar {
-            background-color: var(--secondary-color);
-            color: white;
-            min-height: 100vh;
-            position: fixed;
-            width: 250px;
-            transition: all 0.3s;
-            z-index: 1000;
+        .search-suggestions-container {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
             left: 0;
-        }
-
-        .sidebar.closed {
-            margin-left: -250px;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-header-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .sidebar-header h4 {
-            margin: 0;
-            color: white;
-            font-weight: 700;
-            font-size: 20px;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-header .shop-name {
-            font-size: 0.85rem;
-            opacity: 0.95;
-            margin-top: 5px;
-            font-weight: 400;
-        }
-
-        .sidebar-toggle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
-        .sidebar-toggle-btn:active {
-            transform: scale(0.95);
-        }
-
-        .sidebar-toggle-btn i {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sidebar.closed .sidebar-toggle-btn i {
-            transform: rotate(180deg);
-        }
-
-        .sidebar .nav-link {
-            color: #9ca3af;
-            padding: 14px 20px;
-            border-left: 3px solid transparent;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .sidebar .nav-link:hover {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.08);
-            border-left-color: var(--primary-color);
-            transform: translateX(2px);
-        }
-
-        .sidebar .nav-link.active {
-            color: white;
-            background: linear-gradient(90deg, rgba(52, 152, 219, 0.15) 0%, transparent 100%);
-            border-left-color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .sidebar .nav-link i {
-            width: 20px;
-            font-size: 16px;
-            text-align: center;
-        }
-
-
-
-
-
-
-        /* Import common dashboard styles */
-
-
-        /* Udhar specific styles */
-        .udhar-container {
-            padding: 20px;
-        }
-
-        .udhar-header {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            border-radius: 10px 10px 0 0;
-            padding: 20px;
-            margin-bottom: 0;
-        }
-
-        .udhar-card {
-            border-radius: 0 0 10px 10px;
-            border: none;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .udhar-table-container {
-            overflow-x: auto;
-            border-radius: 0 0 10px 10px;
-        }
-
-        .udhar-table {
-            margin-bottom: 0;
-        }
-
-        .udhar-table thead th {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-            color: #2c3e50;
-            font-weight: 600;
-            padding: 15px;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-
-        .udhar-table tbody tr {
-            transition: all 0.3s ease;
-            border-bottom: 1px solid #f1f1f1;
-        }
-
-        .udhar-table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: translateX(5px);
-        }
-
-        .udhar-table tbody td {
-            padding: 15px;
-            vertical-align: middle;
-            border-top: 1px solid #f1f1f1;
-        }
-
-        .udhar-bill-number {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: #2c3e50;
-            background: #f8f9fa;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .udhar-customer-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .udhar-customer-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-
-        .udhar-customer-name {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 3px;
-        }
-
-        .udhar-customer-mobile {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-
-        .udhar-amount {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #2c3e50;
-        }
-
-        .udhar-date {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        .udhar-status-badge {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .udhar-status-pending {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .udhar-status-partially_paid {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .udhar-status-paid {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .udhar-overdue-badge {
-            background-color: #dc3545;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            margin-left: 5px;
-        }
-
-        .udhar-row-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .udhar-row-actions .btn {
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .udhar-search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .udhar-search-box .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            z-index: 10;
-        }
-
-        .udhar-search-box input {
-            padding-left: 45px;
-            border-radius: 25px;
-            border: 2px solid #e0e0e0;
-            height: 45px;
-        }
-
-        .udhar-search-box input:focus {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25);
-        }
-
-        .udhar-filter-box {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .udhar-stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .udhar-stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            border-left: 4px solid #e74c3c;
-            position: relative;
-        }
-
-        .udhar-stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .udhar-stat-card.stat-success {
-            border-left-color: #27ae60;
-        }
-
-        .udhar-stat-card.stat-warning {
-            border-left-color: #f39c12;
-        }
-
-        .udhar-stat-card.stat-danger {
-            border-left-color: #c0392b;
-        }
-
-        .udhar-stat-card .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2c3e50;
-            margin: 10px 0;
-        }
-
-        .udhar-stat-card .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .udhar-stat-card .stat-icon {
-            font-size: 2.5rem;
-            opacity: 0.2;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        /* Bill Creation Form Styles */
-        .bill-form-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .bill-form-header {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .bill-form-header h3 {
-            margin: 0;
-            font-weight: 600;
-        }
-
-        .bill-form-body {
-            padding: 30px;
-        }
-
-        .bill-form-section {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f1f1f1;
-        }
-
-        .bill-form-section h5 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-            font-weight: 600;
-        }
-
-        .bill-form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .bill-form-group {
-            margin-bottom: 20px;
-        }
-
-        .bill-form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #34495e;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .bill-form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .bill-form-control:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-            outline: none;
-        }
-
-        /* Items Table in Bill Form */
-        .bill-items-container {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .bill-items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .bill-items-table thead th {
-            background-color: #e9ecef;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #495057;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .bill-items-table tbody td {
-            padding: 12px;
-            border-bottom: 1px solid #dee2e6;
-            background: white;
-        }
-
-        .bill-items-table tbody tr:hover td {
-            background-color: #f8f9fa;
-        }
-
-        .bill-item-quantity,
-        .bill-item-price {
-            width: 100px;
-        }
-
-        .bill-item-gst {
-            width: 150px;
-        }
-
-        .bill-item-total {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .bill-item-actions {
-            width: 80px;
-        }
-
-        /* Bill Summary Section */
-        .bill-summary-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .bill-summary-table {
-            width: 100%;
-        }
-
-        .bill-summary-table tr:last-child {
-            border-top: 2px solid #dee2e6;
-        }
-
-        .bill-summary-table td {
-            padding: 8px 0;
-        }
-
-        .bill-summary-table .summary-label {
-            color: #7f8c8d;
-            font-weight: 500;
-        }
-
-        .bill-summary-table .summary-value {
-            text-align: right;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .bill-summary-table .grand-total {
-            font-size: 1.2rem;
-            color: #e74c3c;
-        }
-
-        /* Bill View/Edit Page */
-        .bill-view-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .bill-view-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .bill-view-header {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            padding: 25px;
-        }
-
-        .bill-view-header h3 {
-            margin: 0;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .bill-number-badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
-
-        .bill-view-body {
-            padding: 30px;
-        }
-
-        .bill-info-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .bill-info-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .bill-info-card h5 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-            font-weight: 600;
-        }
-
-        .bill-info-table {
-            width: 100%;
-        }
-
-        .bill-info-table tr td {
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .bill-info-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .bill-info-label {
-            color: #7f8c8d;
-            font-weight: 500;
-            width: 40%;
-        }
-
-        .bill-info-value {
-            color: #2c3e50;
-            font-weight: 500;
-        }
-
-        /* Items List in Bill View */
-        .bill-items-section {
-            margin-top: 30px;
-        }
-
-        .bill-items-list {
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            overflow: hidden;
-        }
-
-        .bill-item-row {
-            display: grid;
-            grid-template-columns: 50px 2fr 80px 80px 100px 150px 100px;
-            gap: 15px;
-            padding: 15px;
-            border-bottom: 1px solid #f1f1f1;
-            align-items: center;
-        }
-
-        .bill-item-row:last-child {
-            border-bottom: none;
-        }
-
-        .bill-item-row.header {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #495057;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .bill-item-sno {
-            text-align: center;
-            font-weight: 600;
-            color: #7f8c8d;
-        }
-
-        .bill-item-name {
-            font-weight: 500;
-            color: #2c3e50;
-        }
-
-        .bill-item-qty,
-        .bill-item-price,
-        .bill-item-total-view {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-        }
-
-        .bill-item-gst-view {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .udhar-table-container {
-                font-size: 0.9rem;
-            }
-
-            .udhar-table thead th,
-            .udhar-table tbody td {
-                padding: 10px 5px;
-            }
-
-            .udhar-row-actions {
-                flex-direction: column;
-                gap: 3px;
-            }
-
-            .bill-form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .bill-items-table {
-                display: block;
-                overflow-x: auto;
-            }
-
-            .bill-item-row {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                text-align: center;
-            }
-
-            .bill-item-row.header {
-                display: none;
-            }
-
-            .bill-info-section {
-                grid-template-columns: 1fr;
-            }
-
-            .udhar-stats-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .udhar-customer-info {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .udhar-customer-avatar {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-        }
-
-        /* Animation for Bill Operations */
-        @keyframes billFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .bill-card {
-            animation: billFadeIn 0.5s ease-out;
-        }
-
-        /* Custom Buttons for Udhar */
-        .btn-add-item {
-            background: linear-gradient(135deg, #27ae60, #219653);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-add-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
-        }
-
-        .btn-remove-item {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-remove-item:hover {
-            background: #c0392b;
-            transform: scale(1.1);
-        }
-
-        /* Empty State */
-        .udhar-empty-state {
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .udhar-empty-state .empty-icon {
-            font-size: 4rem;
-            color: #bdc3c7;
-            margin-bottom: 20px;
-        }
-
-        .udhar-empty-state h4 {
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-
-        .udhar-empty-state p {
-            color: #95a5a6;
-            margin-bottom: 30px;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 20px;
-            transition: all 0.3s;
+            right: 0;
+            max-height: 200px;
             overflow-y: auto;
-            max-height: 100vh;
-        }
-
-        .main-content.expanded {
-            margin-left: 0;
-        }
-
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .mobile-menu-btn {
-            display: block;
-            background: none;
-            border: none;
-            color: var(--secondary-color);
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 200;
-            position: relative;
-        }
-
-        .mobile-menu-btn:hover {
-            color: var(--primary-color);
-        }
-
-        /* Arrow tab toggle - visible when sidebar is closed */
-        .floating-toggle-btn {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, var(--primary-color) 0%, #2980b9 100%);
-            border: none;
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
-            color: white;
-            width: 28px;
-            height: 70px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: none;
-            align-items: center;
-            justify-content: center;
+        }
+
+        .search-suggestion-item {
+            padding: 10px;
             cursor: pointer;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 16px;
-            z-index: 1001;
-            padding-left: 4px;
-        }
-
-        .floating-toggle-btn:hover {
-            width: 32px;
-            box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
-            background: linear-gradient(135deg, #2980b9 0%, var(--primary-color) 100%);
-        }
-
-        .floating-toggle-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        .sidebar.closed+.main-content .floating-toggle-btn {
+            border-bottom: 1px solid #eee;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: -260px;
-            }
-
-            .sidebar.active {
-                margin-left: 0;
-            }
-
-            .main-content {
-                margin-left: 0 !important;
-            }
-
-            .main-content.active {
-                margin-left: 260px;
-            }
+        .search-suggestion-item:hover,
+        .search-suggestion-item.active {
+            background-color: #e9ecef;
         }
     </style>
 </head>
@@ -1286,83 +421,7 @@ $page_title = "Udhar Entry Management";
     <?php include 'includes/header.php'; ?>
 
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-header-content">
-                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-                <div class="shop-name">
-                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
-                </div>
-            </div>
-            <button class="sidebar-toggle-btn" id="sidebarToggle">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link " href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="customers.php">
-                    <i class="bi bi-people-fill"></i> Customers
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="items.php">
-                    <i class="bi bi-people-fill"></i> Items
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="udhar.php">
-                    <i class="bi bi-credit-card"></i> Udhar Entry
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="payments.php">
-                    <i class="bi bi-cash-stack"></i> Payments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reports.php">
-                    <i class="bi bi-bar-chart-fill"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reminders.php">
-                    <i class="bi bi-bell-fill"></i> Reminders
-                </a>
-            </li>
-            <li class="nav-item">
-                <div class="dropdown-divider"></div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="profile.php">
-                    <i class="bi bi-person-circle"></i> Profile
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="settings.php">
-                    <i class="bi bi-gear-fill"></i> Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer text-center mt-4">
-            <small class="text-muted">
-                Version 1.0<br>
-                &copy; <?php echo date('Y'); ?>
-            </small>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -1653,6 +712,52 @@ $page_title = "Udhar Entry Management";
                                     <form method="POST" action="" id="udharForm">
                                         <div class="bill-form-section">
                                             <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
+                                            <div class="bill-form-row">
+                                                <div class="bill-form-group" style="grid-column: span 2;">
+                                                    <label for="customer_search"><i class="bi bi-person"></i> Customer
+                                                        *</label>
+                                                    <div class="position-relative">
+                                                        <div class="input-group">
+                                                            <input type="text" class="bill-form-control"
+                                                                id="customer_search" name="customer_search"
+                                                                placeholder="Type customer name or mobile number..."
+                                                                required>
+                                                            <button type="button" class="btn btn-outline-secondary"
+                                                                id="customer_search_btn" title="Search Customer">
+                                                                <i class="bi bi-search"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="form-text">Start typing to search existing customers or
+                                                            click search button</div>
+                                                    </div>
+
+                                                    <!-- Hidden field to store selected customer ID -->
+                                                    <input type="hidden" id="customer_id" name="customer_id" value="">
+
+                                                    <!-- Customer info display (optional) -->
+                                                    <div id="customer_info" class="mt-2" style="display: none;">
+                                                        <div class="card">
+                                                            <div class="card-body py-2">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center">
+                                                                    <div>
+                                                                        <strong id="selected_customer_name"></strong>
+                                                                        <span id="selected_customer_mobile"
+                                                                            class="text-muted ms-2"></span>
+                                                                    </div>
+                                                                    <div>
+                                                                        Balance: <span id="selected_customer_balance"
+                                                                            class="badge bg-warning"></span>
+                                                                    </div>
+                                                                </div>
+                                                                <small id="selected_customer_address"
+                                                                    class="text-muted"></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="bill-form-row">
                                                 <div class="bill-form-group">
                                                     <label for="category"><i class="bi bi-tags"></i> Category *</label>
@@ -2237,7 +1342,7 @@ $page_title = "Udhar Entry Management";
         }
 
         // Auto-hide sidebar on mobile when clicking outside
-        document.addEventListener("click", function (event) {
+        document.addEventListener("click", function(event) {
             const sidebar = document.querySelector(".sidebar");
             const toggleBtn = document.getElementById("sidebarToggle");
             const floatingBtn = document.getElementById("floatingToggle");
@@ -2251,17 +1356,67 @@ $page_title = "Udhar Entry Management";
                 !sidebar.classList.contains("closed")
             ) {
                 sidebar.classList.add("closed");
-                mainContent.classList.add("expanded");
+      mainContent.classList.add("expanded");
             }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/search_suggestions.js"></script>
     <script>
         // Global variables
         let itemCounter = 0;
         const items = <?php echo json_encode($items); ?>;
         const preSelectedItemId = <?php echo $item_id; ?>;
+
+        // Initialize customer search suggestions
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('customer_search')) {
+                const customerSearch = new SearchSuggestions('#customer_search', {
+                    apiUrl: 'api/search_customers.php',
+                    minChars: 2,
+                    delay: 300,
+                    maxSuggestions: 10,
+                    onSelect: function(customer) {
+                        const infoDiv = document.getElementById('customer_info');
+                        document.getElementById('customer_id').value = customer.id;
+                        document.getElementById('selected_customer_name').textContent = customer.name;
+                        document.getElementById('selected_customer_mobile').textContent = customer.mobile || '';
+                        document.getElementById('selected_customer_address').textContent = customer.address || 'No address provided';
+
+                        // Display balance
+                        const balance = parseFloat(customer.balance) || 0;
+                        const balanceBadge = document.getElementById('selected_customer_balance');
+                        balanceBadge.textContent = '₹' + Math.abs(balance).toFixed(2);
+
+                        if (balance > 0) {
+                            balanceBadge.className = 'badge bg-danger';
+                            balanceBadge.textContent += ' (Due)';
+                        } else if (balance < 0) {
+                            balanceBadge.className = 'badge bg-success';
+                            balanceBadge.textContent += ' (Advance)';
+                        } else {
+                            balanceBadge.className = 'badge bg-secondary';
+                            balanceBadge.textContent += ' (Clear)';
+                        }
+
+                        infoDiv.style.display = 'block';
+                    }
+                });
+
+            // Optional: Add "Add New Customer" button functionality
+            const customerSearchInput = document.getElementById('customer_search');
+            customerSearchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && customerSearchInput.value.trim() !== '' && !document.getElementById('customer_id').value) {
+                    e.preventDefault();
+                    if (confirm(`Customer "${customerSearchInput.value}" not found. Would you like to add as a new customer?`)) {
+                        // You can redirect to customer add page or show a modal
+                        window.location.href = `customers.php?action=add&name=${encodeURIComponent(customerSearchInput.value)}`;
+                    }
+                }
+            });
+        }
+        });
 
         // Add item row dynamically
         function addItemRow(itemData = null) {
@@ -2507,13 +1662,13 @@ $page_title = "Udhar Entry Management";
         }
 
         // Form validation
-        document.getElementById('udharForm')?.addEventListener('submit', function (e) {
+        document.getElementById('udharForm')?.addEventListener('submit', function(e) {
             // Check if customer is selected
             const customerId = document.getElementById('customer_id').value;
             if (!customerId) {
                 e.preventDefault();
                 alert('Please select a customer');
-                document.getElementById('customer_id').focus();
+                document.getElementById('customer_search').focus();
                 return false;
             }
 
@@ -2554,31 +1709,42 @@ $page_title = "Udhar Entry Management";
 
         // Initialize with one empty row if adding new udhar
         <?php if ($action == 'add'): ?>
-            window.addEventListener('DOMContentLoaded', function () {
-                <?php if ($item_id > 0): ?>
-                    // Add pre-selected item
-                    <?php
-                    $pre_selected_item = null;
-                    foreach ($items as $itm) {
-                        if ($itm['id'] == $item_id) {
-                            $pre_selected_item = $itm;
-                            break;
-                        }
-                    }
-                    if ($pre_selected_item): ?>
-                        addItemRow(<?php echo json_encode($pre_selected_item); ?>);
-                    <?php else: ?>
-                        addItemRow();
-                    <?php endif; ?>
-                <?php else: ?>
-                    addItemRow();
-                <?php endif; ?>
+                    window.addEventListener('DOMContentLoaded', function() {
+                        <?php if ($item_id > 0): ?>
+                                    // Add pre-selected item
+                                    <?php
+                                    $pre_selected_item = null;
+                                    foreach ($items as $itm) {
+                                        if ($itm['id'] == $item_id) {
+                                            $pre_selected_item = $itm;
+                                            break;
+                                        }
+                                    }
+                                    if ($pre_selected_item): ?>
+                                                addItemRow(<?php echo json_encode($pre_selected_item); ?>);
+                                    <?php else: ?>
+                                                addItemRow();
+                                    <?php endif; ?>
+                        <?php else: ?>
+                                    addItemRow();
+                        <?php endif; ?>
 
-                // Auto-focus first customer field if coming from customer page
-                <?php if ($customer_id > 0): ?>
-                    document.getElementById('customer_id').value = <?php echo $customer_id; ?>;
-                <?php endif; ?>
-            });
+                        // Auto-focus first customer field if coming from customer page
+                        <?php if ($customer_id > 0): ?>
+                                    document.getElementById('customer_id').value = <?php echo $customer_id; ?>;
+                                    // Get customer name to populate the search field
+                                    <?php
+                                    $stmt = $conn->prepare("SELECT name FROM customers WHERE id = ? AND user_id = ?");
+                                    $stmt->bind_param("ii", $customer_id, $_SESSION['user_id']);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $customer = $result->fetch_assoc();
+                                    $stmt->close();
+                                    if ($customer): ?>
+                                                document.getElementById('customer_search').value = "<?php echo addslashes(htmlspecialchars($customer['name'])); ?>";
+                                    <?php endif; ?>
+                        <?php endif; ?>
+                    });
         <?php endif; ?>
 
         // Delete confirmation

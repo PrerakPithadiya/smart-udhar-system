@@ -187,87 +187,12 @@ $stmt->close();
 
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="assets/css/customers.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-header-content">
-                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-                <div class="shop-name">
-                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
-                </div>
-            </div>
-            <button class="sidebar-toggle-btn" id="sidebarToggle">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link " href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="customers.php">
-                    <i class="bi bi-people-fill"></i> Customers
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="items.php">
-                    <i class="bi bi-people-fill"></i> Items
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="udhar.php">
-                    <i class="bi bi-credit-card"></i> Udhar Entry
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="payments.php">
-                    <i class="bi bi-cash-stack"></i> Payments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reports.php">
-                    <i class="bi bi-bar-chart-fill"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reminders.php">
-                    <i class="bi bi-bell-fill"></i> Reminders
-                </a>
-            </li>
-            <li class="nav-item">
-                <div class="dropdown-divider"></div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="profile.php">
-                    <i class="bi bi-person-circle"></i> Profile
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="settings.php">
-                    <i class="bi bi-gear-fill"></i> Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer text-center mt-4">
-            <small class="text-muted">
-                Version 1.0<br>
-                &copy; <?php echo date('Y'); ?>
-            </small>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
 
     <div class="main-content">
@@ -1039,13 +964,13 @@ $stmt->close();
     <!-- Search Suggestions Feature -->
     <script src="assets/js/search_suggestions.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function  () {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize search suggestions for customer search
             const customerSearch = new SearchSuggestions('#customer-search', {
                 apiUrl: 'api/search_customers.php',
                 minChars: 1,
                 delay: 300,
-                onSelect: function  (suggestion) {
+                onSelect: function (suggestion) {
                     // When a suggestion is selected, redirect to the customer details page
                     window.location.href = `customers.php?action=view&id=${suggestion.id}`;
                 }

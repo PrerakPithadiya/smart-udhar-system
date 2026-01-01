@@ -329,6 +329,7 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
     <title><?php echo $page_title; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
         :root {
             --primary-color: #3498db;
@@ -416,224 +417,238 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
 </head>
 
 <body>
-    <?php include 'includes/header.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
-    <div class="edit-container">
-        <div class="bill-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h3><i class="bi bi-pencil-square"></i> Edit Bill</h3>
-                    <p class="mb-0">Bill No: <?php echo htmlspecialchars($udhar['bill_no']); ?></p>
-                    <?php if (isset($udhar['revision_number']) && $udhar['revision_number'] > 1): ?>
-                        <span class="revision-badge">Revision #<?php echo $udhar['revision_number']; ?></span>
-                    <?php endif; ?>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+        <div class="edit-container">
+            <div class="bill-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3><i class="bi bi-pencil-square"></i> Edit Bill</h3>
+                        <p class="mb-0">Bill No: <?php echo htmlspecialchars($udhar['bill_no']); ?></p>
+                        <?php if (isset($udhar['revision_number']) && $udhar['revision_number'] > 1): ?>
+                            <span class="revision-badge">Revision #<?php echo $udhar['revision_number']; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <a href="udhar.php" class="btn btn-light">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
                 </div>
-                <a href="udhar.php" class="btn btn-light">
-                    <i class="bi bi-x-circle"></i> Cancel
-                </a>
-            </div>
-        </div>
-
-        <div class="bill-card">
-            <?php displayMessage(); ?>
-
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-                <strong>Important:</strong> Editing this bill will create a revision for audit purposes.
-                The original bill data will be preserved in the revision history. Please provide a clear reason for the
-                changes.
             </div>
 
-            <form method="POST" action="" id="editBillForm">
-                <!-- Change Reason -->
-                <div class="mb-4">
-                    <label for="change_reason" class="form-label">
-                        <i class="bi bi-chat-left-text"></i> Reason for Editing *
-                    </label>
-                    <textarea class="form-control" id="change_reason" name="change_reason" rows="2"
-                        placeholder="E.g., Correcting item quantity, Updating price, Customer requested changes..."
-                        required></textarea>
-                    <small class="text-muted">This will be logged in the revision history</small>
+            <div class="bill-card">
+                <?php displayMessage(); ?>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Important:</strong> Editing this bill will create a revision for audit purposes.
+                    The original bill data will be preserved in the revision history. Please provide a clear reason for
+                    the
+                    changes.
                 </div>
 
-                <div class="row">
-                    <!-- Customer Info (Read-only) -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label"><i class="bi bi-person"></i> Customer</label>
-                        <input type="text" class="form-control"
-                            value="<?php echo htmlspecialchars($udhar['customer_name']); ?>" readonly>
-                        <small class="text-muted">Customer cannot be changed after bill creation</small>
+                <form method="POST" action="" id="editBillForm">
+                    <!-- Change Reason -->
+                    <div class="mb-4">
+                        <label for="change_reason" class="form-label">
+                            <i class="bi bi-chat-left-text"></i> Reason for Editing *
+                        </label>
+                        <textarea class="form-control" id="change_reason" name="change_reason" rows="2"
+                            placeholder="E.g., Correcting item quantity, Updating price, Customer requested changes..."
+                            required></textarea>
+                        <small class="text-muted">This will be logged in the revision history</small>
                     </div>
 
-                    <!-- Bill Number (Read-only) -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label"><i class="bi bi-receipt"></i> Bill Number</label>
-                        <input type="text" class="form-control"
-                            value="<?php echo htmlspecialchars($udhar['bill_no']); ?>" readonly>
-                    </div>
-                </div>
+                    <div class="row">
+                        <!-- Customer Info (Read-only) -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-person"></i> Customer</label>
+                            <input type="text" class="form-control"
+                                value="<?php echo htmlspecialchars($udhar['customer_name']); ?>" readonly>
+                            <small class="text-muted">Customer cannot be changed after bill creation</small>
+                        </div>
 
-                <div class="row">
-                    <!-- Transaction Date -->
-                    <div class="col-md-4 mb-3">
-                        <label for="transaction_date" class="form-label"><i class="bi bi-calendar"></i> Bill Date
-                            *</label>
-                        <input type="date" class="form-control" id="transaction_date" name="transaction_date"
-                            value="<?php echo $udhar['transaction_date']; ?>" required>
-                    </div>
-
-                    <!-- Due Date -->
-                    <div class="col-md-4 mb-3">
-                        <label for="due_date" class="form-label"><i class="bi bi-calendar-check"></i> Due Date</label>
-                        <input type="date" class="form-control" id="due_date" name="due_date"
-                            value="<?php echo $udhar['due_date']; ?>">
+                        <!-- Bill Number (Read-only) -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="bi bi-receipt"></i> Bill Number</label>
+                            <input type="text" class="form-control"
+                                value="<?php echo htmlspecialchars($udhar['bill_no']); ?>" readonly>
+                        </div>
                     </div>
 
-                    <!-- Status -->
-                    <div class="col-md-4 mb-3">
-                        <label for="status" class="form-label"><i class="bi bi-flag"></i> Status *</label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>Pending
-                            </option>
-                            <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>Partially Paid</option>
-                            <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid</option>
-                        </select>
-                    </div>
-                </div>
+                    <div class="row">
+                        <!-- Transaction Date -->
+                        <div class="col-md-4 mb-3">
+                            <label for="transaction_date" class="form-label"><i class="bi bi-calendar"></i> Bill Date
+                                *</label>
+                            <input type="date" class="form-control" id="transaction_date" name="transaction_date"
+                                value="<?php echo $udhar['transaction_date']; ?>" required>
+                        </div>
 
-                <!-- Category -->
-                <div class="mb-3">
-                    <label for="category" class="form-label"><i class="bi bi-tags"></i> Category</label>
-                    <select class="form-select" id="category" name="category">
-                        <option value="">Select Category</option>
-                        <option value="Fertilizers" <?php echo ($udhar['category'] ?? '') == 'Fertilizers' ? 'selected' : ''; ?>>
-                            Fertilizers</option>
-                        <option value="Seeds" <?php echo ($udhar['category'] ?? '') == 'Seeds' ? 'selected' : ''; ?>>Seeds
-                        </option>
-                        <option value="Insecticides" <?php echo ($udhar['category'] ?? '') == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
-                        <option value="Others" <?php echo ($udhar['category'] ?? '') == 'Others' ? 'selected' : ''; ?>>
-                            Others
-                        </option>
-                    </select>
-                </div>
+                        <!-- Due Date -->
+                        <div class="col-md-4 mb-3">
+                            <label for="due_date" class="form-label"><i class="bi bi-calendar-check"></i> Due
+                                Date</label>
+                            <input type="date" class="form-control" id="due_date" name="due_date"
+                                value="<?php echo $udhar['due_date']; ?>">
+                        </div>
 
-                <!-- Description -->
-                <div class="mb-3">
-                    <label for="description" class="form-label"><i class="bi bi-file-text"></i> Description</label>
-                    <input type="text" class="form-control" id="description" name="description"
-                        value="<?php echo htmlspecialchars($udhar['description']); ?>">
-                </div>
-
-                <!-- Items Section -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5><i class="bi bi-box-seam"></i> Bill Items</h5>
-                        <button type="button" class="btn btn-add-item" onclick="addItemRow()">
-                            <i class="bi bi-plus-circle"></i> Add Item
-                        </button>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered items-table">
-                            <thead>
-                                <tr>
-                                    <th width="25%">Item</th>
-                                    <th width="12%">HSN</th>
-                                    <th width="10%">Qty</th>
-                                    <th width="8%">Unit</th>
-                                    <th width="12%">Price</th>
-                                    <th width="18%">GST Rates</th>
-                                    <th width="12%">Total</th>
-                                    <th width="3%"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsBody">
-                                <!-- Items will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Discount and Round Off -->
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="discount" class="form-label"><i class="bi bi-percent"></i> Discount</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="discount" name="discount"
-                                value="<?php echo $udhar['discount']; ?>" step="0.01" min="0"
-                                onchange="calculateTotals()">
-                            <select class="form-select" name="discount_type" style="max-width: 120px;"
-                                onchange="calculateTotals()">
-                                <option value="fixed" <?php echo $udhar['discount_type'] == 'fixed' ? 'selected' : ''; ?>>
-                                    Fixed (₹)</option>
-                                <option value="percentage" <?php echo $udhar['discount_type'] == 'percentage' ? 'selected' : ''; ?>>Percentage (%)</option>
+                        <!-- Status -->
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label"><i class="bi bi-flag"></i> Status *</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
+                                    Pending
+                                </option>
+                                <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>Partially Paid</option>
+                                <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid
+                                </option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label for="round_off" class="form-label"><i class="bi bi-calculator"></i> Round Off</label>
-                        <input type="number" class="form-control" id="round_off" name="round_off"
-                            value="<?php echo $udhar['round_off']; ?>" step="0.01" onchange="calculateTotals()">
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="category" class="form-label"><i class="bi bi-tags"></i> Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">Select Category</option>
+                            <option value="Fertilizers" <?php echo ($udhar['category'] ?? '') == 'Fertilizers' ? 'selected' : ''; ?>>
+                                Fertilizers</option>
+                            <option value="Seeds" <?php echo ($udhar['category'] ?? '') == 'Seeds' ? 'selected' : ''; ?>>
+                                Seeds
+                            </option>
+                            <option value="Insecticides" <?php echo ($udhar['category'] ?? '') == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
+                            <option value="Others" <?php echo ($udhar['category'] ?? '') == 'Others' ? 'selected' : ''; ?>>
+                                Others
+                            </option>
+                        </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label"><i class="bi bi-cash-stack"></i> Grand Total</label>
-                        <div class="form-control bg-light" style="font-size: 1.2rem; font-weight: bold;">
-                            ₹<span id="grandTotal">0.00</span>
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label"><i class="bi bi-file-text"></i> Description</label>
+                        <input type="text" class="form-control" id="description" name="description"
+                            value="<?php echo htmlspecialchars($udhar['description']); ?>">
+                    </div>
+
+                    <!-- Items Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="bi bi-box-seam"></i> Bill Items</h5>
+                            <button type="button" class="btn btn-add-item" onclick="addItemRow()">
+                                <i class="bi bi-plus-circle"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered items-table">
+                                <thead>
+                                    <tr>
+                                        <th width="25%">Item</th>
+                                        <th width="12%">HSN</th>
+                                        <th width="10%">Qty</th>
+                                        <th width="8%">Unit</th>
+                                        <th width="12%">Price</th>
+                                        <th width="18%">GST Rates</th>
+                                        <th width="12%">Total</th>
+                                        <th width="3%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsBody">
+                                    <!-- Items will be loaded here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
 
-                <!-- Notes -->
-                <div class="mb-3">
-                    <label for="notes" class="form-label"><i class="bi bi-sticky"></i> Notes</label>
-                    <textarea class="form-control" id="notes" name="notes"
-                        rows="2"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
-                </div>
+                    <!-- Discount and Round Off -->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="discount" class="form-label"><i class="bi bi-percent"></i> Discount</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="discount" name="discount"
+                                    value="<?php echo $udhar['discount']; ?>" step="0.01" min="0"
+                                    onchange="calculateTotals()">
+                                <select class="form-select" name="discount_type" style="max-width: 120px;"
+                                    onchange="calculateTotals()">
+                                    <option value="fixed" <?php echo $udhar['discount_type'] == 'fixed' ? 'selected' : ''; ?>>
+                                        Fixed (₹)</option>
+                                    <option value="percentage" <?php echo $udhar['discount_type'] == 'percentage' ? 'selected' : ''; ?>>Percentage (%)</option>
+                                </select>
+                            </div>
+                        </div>
 
-                <!-- Submit Buttons -->
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="udhar.php" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle"></i> Cancel
-                    </a>
-                    <button type="submit" name="update_bill" class="btn btn-warning btn-lg">
-                        <i class="bi bi-check-circle"></i> Update Bill & Create Revision
-                    </button>
-                </div>
-            </form>
+                        <div class="col-md-4 mb-3">
+                            <label for="round_off" class="form-label"><i class="bi bi-calculator"></i> Round Off</label>
+                            <input type="number" class="form-control" id="round_off" name="round_off"
+                                value="<?php echo $udhar['round_off']; ?>" step="0.01" onchange="calculateTotals()">
+                        </div>
 
-            <!-- Revision History -->
-            <?php if (!empty($revisions)): ?>
-                <div class="revision-history">
-                    <h5><i class="bi bi-clock-history"></i> Revision History</h5>
-                    <p class="text-muted">This bill has been edited <?php echo count($revisions); ?> time(s)</p>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label"><i class="bi bi-cash-stack"></i> Grand Total</label>
+                            <div class="form-control bg-light" style="font-size: 1.2rem; font-weight: bold;">
+                                ₹<span id="grandTotal">0.00</span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <?php foreach ($revisions as $rev): ?>
-                        <div class="revision-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>Revision #<?php echo $rev['revision_number']; ?></strong>
-                                    <span class="text-muted"> -
-                                        <?php echo date('d M Y, h:i A', strtotime($rev['changed_at'])); ?></span>
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label"><i class="bi bi-sticky"></i> Notes</label>
+                        <textarea class="form-control" id="notes" name="notes"
+                            rows="2"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="udhar.php" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" name="update_bill" class="btn btn-warning btn-lg">
+                            <i class="bi bi-check-circle"></i> Update Bill & Create Revision
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Revision History -->
+                <?php if (!empty($revisions)): ?>
+                    <div class="revision-history">
+                        <h5><i class="bi bi-clock-history"></i> Revision History</h5>
+                        <p class="text-muted">This bill has been edited <?php echo count($revisions); ?> time(s)</p>
+
+                        <?php foreach ($revisions as $rev): ?>
+                            <div class="revision-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>Revision #<?php echo $rev['revision_number']; ?></strong>
+                                        <span class="text-muted"> -
+                                            <?php echo date('d M Y, h:i A', strtotime($rev['changed_at'])); ?></span>
+                                    </div>
+                                    <span class="badge bg-info">₹<?php echo number_format($rev['grand_total'], 2); ?></span>
                                 </div>
-                                <span class="badge bg-info">₹<?php echo number_format($rev['grand_total'], 2); ?></span>
-                            </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-person"></i> By:
-                                    <?php echo htmlspecialchars($rev['changed_by_name'] ?? 'Unknown'); ?>
-                                </small>
-                            </div>
-                            <?php if (!empty($rev['change_reason'])): ?>
                                 <div class="mt-2">
-                                    <small><strong>Reason:</strong> <?php echo htmlspecialchars($rev['change_reason']); ?></small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> By:
+                                        <?php echo htmlspecialchars($rev['changed_by_name'] ?? 'Unknown'); ?>
+                                    </small>
                                 </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                                <?php if (!empty($rev['change_reason'])): ?>
+                                    <div class="mt-2">
+                                        <small><strong>Reason:</strong>
+                                            <?php echo htmlspecialchars($rev['change_reason']); ?></small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 

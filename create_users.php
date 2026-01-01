@@ -1,5 +1,5 @@
 <?php
-require_once 'core/database.php';
+require_once 'config/database.php';
 
 $conn = getDBConnection();
 
@@ -27,14 +27,14 @@ INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `email`, `shop_n
 (2, 'staff1', 'staff123', 'Staff Member', 'staff@myshop.com', 'My Shop', '9876543211', 'Shop Address', 'staff', 'active', '2025-12-20 10:00:00', '2025-12-19 23:30:00');";
 
 if ($conn->multi_query($sql)) {
-    echo "Users table created successfully.";
-    do {
-        if ($result = $conn->store_result()) {
-            $result->free();
-        }
-    } while ($conn->more_results() && $conn->next_result());
+  echo "Users table created successfully.";
+  do {
+    if ($result = $conn->store_result()) {
+      $result->free();
+    }
+  } while ($conn->more_results() && $conn->next_result());
 } else {
-    echo "Error: " . $conn->error;
+  echo "Error: " . $conn->error;
 }
 
 $conn->close();

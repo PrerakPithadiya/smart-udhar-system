@@ -106,86 +106,11 @@ $stmt->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-header-content">
-                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-                <div class="shop-name">
-                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
-                </div>
-            </div>
-            <button class="sidebar-toggle-btn" id="sidebarToggle">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link active" href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="customers.php">
-                    <i class="bi bi-people-fill"></i> Customers
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="items.php">
-                    <i class="bi bi-people-fill"></i> Items
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="udhar.php">
-                    <i class="bi bi-credit-card"></i> Udhar Entry
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="payments.php">
-                    <i class="bi bi-cash-stack"></i> Payments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reports.php">
-                    <i class="bi bi-bar-chart-fill"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reminders.php">
-                    <i class="bi bi-bell-fill"></i> Reminders
-                </a>
-            </li>
-            <li class="nav-item">
-                <div class="dropdown-divider"></div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="profile.php">
-                    <i class="bi bi-person-circle"></i> Profile
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="settings.php">
-                    <i class="bi bi-gear-fill"></i> Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer text-center mt-4">
-            <small class="text-muted">
-                Version 1.0<br>
-                &copy; <?php echo date('Y'); ?>
-            </small>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">

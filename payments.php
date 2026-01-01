@@ -252,7 +252,8 @@ function allocatePaymentToUdhar($conn, $payment_id, $customer_id, $amount)
     $remaining_payment = $amount;
 
     foreach ($udhar_entries as $entry) {
-        if ($remaining_payment <= 0) break;
+        if ($remaining_payment <= 0)
+            break;
 
         $alloc_amount = min($entry['remaining_amount'], $remaining_payment);
 
@@ -391,7 +392,8 @@ $order_by = in_array($order_by, $allowed_columns) ? $order_by : 'p.payment_date'
 $order_dir = in_array(strtoupper($order_dir), ['ASC', 'DESC']) ? strtoupper($order_dir) : 'DESC';
 
 // Ensure we're not selecting non-existent columns
-$query = "SELECT p.* FROM payments p JOIN customers c ON p.customer_id = c.id $where_clause ORDER BY $order_by $order_dir LIMIT ? OFFSET ?";
+// Ensure we're selecting name from customers table as customer_name
+$query = "SELECT p.*, c.name as customer_name FROM payments p JOIN customers c ON p.customer_id = c.id $where_clause ORDER BY $order_by $order_dir LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($query);
 
 if (!empty($params)) {
@@ -419,10 +421,12 @@ $page_title = "Payment Management";
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/payments.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <script>
         window.paymentRemainingAmount = <?php echo json_encode($payment['remaining_amount'] ?? 0); ?>;
         window.currentAction = <?php echo json_encode($action); ?>;
         window.currentCustomerId = <?php echo json_encode($customer_id); ?>;
+        window.allCustomers = <?php echo json_encode($customers); ?>;
     </script>
 </head>
 
@@ -430,83 +434,7 @@ $page_title = "Payment Management";
 
 
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-header-content">
-                <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>
-                <div class="shop-name">
-                    <?php echo htmlspecialchars($_SESSION['shop_name']); ?>
-                </div>
-            </div>
-            <button class="sidebar-toggle-btn" id="sidebarToggle">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link " href="dashboard.php">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="customers.php">
-                    <i class="bi bi-people-fill"></i> Customers
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="items.php">
-                    <i class="bi bi-people-fill"></i> Items
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link " href="udhar.php">
-                    <i class="bi bi-credit-card"></i> Udhar Entry
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="payments.php">
-                    <i class="bi bi-cash-stack"></i> Payments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reports.php">
-                    <i class="bi bi-bar-chart-fill"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="reminders.php">
-                    <i class="bi bi-bell-fill"></i> Reminders
-                </a>
-            </li>
-            <li class="nav-item">
-                <div class="dropdown-divider"></div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="profile.php">
-                    <i class="bi bi-person-circle"></i> Profile
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="settings.php">
-                    <i class="bi bi-gear-fill"></i> Settings
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="logout.php">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer text-center mt-4">
-            <small class="text-muted">
-                Version 1.0<br>
-                &copy; <?php echo date('Y'); ?>
-            </small>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -518,7 +446,8 @@ $page_title = "Payment Management";
 
 
         <div class="container-fluid">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">
                     <i class="bi bi-cash-stack"></i> Payment Management
                 </h1>
@@ -546,52 +475,52 @@ $page_title = "Payment Management";
                     <div class="col-md-3 col-sm-6">
                         <div class="stats-card" style="background: linear-gradient(135deg, var(--primary-color), #2980b9);">
                             <div class="stat-value">₹<?php
-                                                        $total_stmt = $conn->prepare("SELECT SUM(amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ?");
-                                                        $total_stmt->bind_param("i", $_SESSION['user_id']);
-                                                        $total_stmt->execute();
-                                                        $total_result = $total_stmt->get_result()->fetch_assoc();
-                                                        $total_stmt->close();
-                                                        echo number_format($total_result['total'] ?? 0, 2);
-                                                        ?></div>
+                            $total_stmt = $conn->prepare("SELECT SUM(amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ?");
+                            $total_stmt->bind_param("i", $_SESSION['user_id']);
+                            $total_stmt->execute();
+                            $total_result = $total_stmt->get_result()->fetch_assoc();
+                            $total_stmt->close();
+                            echo number_format($total_result['total'] ?? 0, 2);
+                            ?></div>
                             <div class="stat-label">Total Payments</div>
                         </div>
                     </div>
                     <div class="col-md-3 col-sm-6">
                         <div class="stats-card" style="background: linear-gradient(135deg, var(--success-color), #229954);">
                             <div class="stat-value">₹<?php
-                                                        $allocated_stmt = $conn->prepare("SELECT SUM(allocated_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.is_allocated = 1");
-                                                        $allocated_stmt->bind_param("i", $_SESSION['user_id']);
-                                                        $allocated_stmt->execute();
-                                                        $allocated_result = $allocated_stmt->get_result()->fetch_assoc();
-                                                        $allocated_stmt->close();
-                                                        echo number_format($allocated_result['total'] ?? 0, 2);
-                                                        ?></div>
+                            $allocated_stmt = $conn->prepare("SELECT SUM(allocated_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.is_allocated = 1");
+                            $allocated_stmt->bind_param("i", $_SESSION['user_id']);
+                            $allocated_stmt->execute();
+                            $allocated_result = $allocated_stmt->get_result()->fetch_assoc();
+                            $allocated_stmt->close();
+                            echo number_format($allocated_result['total'] ?? 0, 2);
+                            ?></div>
                             <div class="stat-label">Allocated</div>
                         </div>
                     </div>
                     <div class="col-md-3 col-sm-6">
                         <div class="stats-card" style="background: linear-gradient(135deg, var(--warning-color), #e67e22);">
                             <div class="stat-value">₹<?php
-                                                        $unallocated_stmt = $conn->prepare("SELECT SUM(remaining_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.remaining_amount > 0");
-                                                        $unallocated_stmt->bind_param("i", $_SESSION['user_id']);
-                                                        $unallocated_stmt->execute();
-                                                        $unallocated_result = $unallocated_stmt->get_result()->fetch_assoc();
-                                                        $unallocated_stmt->close();
-                                                        echo number_format($unallocated_result['total'] ?? 0, 2);
-                                                        ?></div>
+                            $unallocated_stmt = $conn->prepare("SELECT SUM(remaining_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.remaining_amount > 0");
+                            $unallocated_stmt->bind_param("i", $_SESSION['user_id']);
+                            $unallocated_stmt->execute();
+                            $unallocated_result = $unallocated_stmt->get_result()->fetch_assoc();
+                            $unallocated_stmt->close();
+                            echo number_format($unallocated_result['total'] ?? 0, 2);
+                            ?></div>
                             <div class="stat-label">Unallocated</div>
                         </div>
                     </div>
                     <div class="col-md-3 col-sm-6">
                         <div class="stats-card" style="background: linear-gradient(135deg, var(--danger-color), #c0392b);">
                             <div class="stat-value"><?php
-                                                    $today_stmt = $conn->prepare("SELECT COUNT(*) as count FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.payment_date = CURDATE()");
-                                                    $today_stmt->bind_param("i", $_SESSION['user_id']);
-                                                    $today_stmt->execute();
-                                                    $today_result = $today_stmt->get_result()->fetch_assoc();
-                                                    $today_stmt->close();
-                                                    echo number_format($today_result['count'] ?? 0);
-                                                    ?></div>
+                            $today_stmt = $conn->prepare("SELECT COUNT(*) as count FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.payment_date = CURDATE()");
+                            $today_stmt->bind_param("i", $_SESSION['user_id']);
+                            $today_stmt->execute();
+                            $today_result = $today_stmt->get_result()->fetch_assoc();
+                            $today_stmt->close();
+                            echo number_format($today_result['count'] ?? 0);
+                            ?></div>
                             <div class="stat-label">Today's Payments</div>
                         </div>
                     </div>
@@ -599,34 +528,28 @@ $page_title = "Payment Management";
 
                 <!-- Search and Filter Box -->
                 <div class="search-filter-box mb-4">
-                    <form method="GET" class="row g-3">
+                    <form method="GET" class="row g-3 align-items-end">
                         <input type="hidden" name="action" value="list">
 
-                        <div class="col-md-3">
-                            <label class="form-label">Customer</label>
-                            <select name="customer" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Customers</option>
-                                <?php foreach ($customers as $cust): ?>
-                                    <option value="<?php echo $cust['id']; ?>" <?php echo $customer_filter == $cust['id'] ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($cust['name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
 
-                        <div class="col-md-3">
+
+                        <div class="col-md-4">
                             <label class="form-label">Payment Mode</label>
                             <select name="payment_mode" class="form-select" onchange="this.form.submit()">
                                 <option value="">All Modes</option>
-                                <option value="cash" <?php echo $payment_mode_filter == 'cash' ? 'selected' : ''; ?>>Cash</option>
+                                <option value="cash" <?php echo $payment_mode_filter == 'cash' ? 'selected' : ''; ?>>Cash
+                                </option>
                                 <option value="bank_transfer" <?php echo $payment_mode_filter == 'bank_transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
-                                <option value="upi" <?php echo $payment_mode_filter == 'upi' ? 'selected' : ''; ?>>UPI</option>
-                                <option value="cheque" <?php echo $payment_mode_filter == 'cheque' ? 'selected' : ''; ?>>Cheque</option>
-                                <option value="other" <?php echo $payment_mode_filter == 'other' ? 'selected' : ''; ?>>Other</option>
+                                <option value="upi" <?php echo $payment_mode_filter == 'upi' ? 'selected' : ''; ?>>UPI
+                                </option>
+                                <option value="cheque" <?php echo $payment_mode_filter == 'cheque' ? 'selected' : ''; ?>>
+                                    Cheque</option>
+                                <option value="other" <?php echo $payment_mode_filter == 'other' ? 'selected' : ''; ?>>Other
+                                </option>
                             </select>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <label class="form-label">Date Range</label>
                             <div class="input-group">
                                 <input type="date" class="form-control" name="date_from"
@@ -640,18 +563,30 @@ $page_title = "Payment Management";
                             </div>
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-10">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-search"></i> Search Customers / Payments
+                            </label>
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control"
-                                    placeholder="Search by customer name, reference or notes..."
-                                    value="<?php echo htmlspecialchars($search); ?>">
-                                <button type="submit" class="btn btn-outline-primary">
-                                    <i class="bi bi-search"></i> Search
-                                </button>
-                                <a href="payments.php" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle"></i> Clear
-                                </a>
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" name="search" id="customer-search-payments" class="form-control"
+                                    placeholder="Search by customer name, mobile, reference or notes..."
+                                    value="<?php echo htmlspecialchars($search); ?>"
+                                    data-api-url="api/search_customers.php">
+                                <?php if (!empty($search) || $customer_filter > 0): ?>
+                                    <a href="payments.php" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg"></i> Clear
+                                    </a>
+                                <?php endif; ?>
                             </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -705,11 +640,12 @@ $page_title = "Payment Management";
                                                 </td>
                                                 <td>
                                                     <?php
-                                                    $mode_class = 'mode-' . $payment_item['payment_mode'];
-                                                    $mode_text = ucfirst(str_replace('_', ' ', $payment_item['payment_mode']));
+                                                    $mode = $payment_item['payment_mode'];
+                                                    $mode_display = !empty($mode) ? ucfirst(str_replace('_', ' ', $mode)) : 'Unknown';
+                                                    $mode_class = 'mode-' . (empty($mode) ? 'unknown' : $mode);
                                                     ?>
                                                     <span class="payment-mode-badge <?php echo $mode_class; ?>">
-                                                        <?php echo $mode_text; ?>
+                                                        <?php echo $mode_display; ?>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -739,9 +675,11 @@ $page_title = "Payment Management";
                                                     <?php if ($payment_item['is_allocated']): ?>
                                                         <br>
                                                         <small class="text-muted">
-                                                            Allocated: ₹<?php echo number_format($payment_item['allocated_amount'], 2); ?>
+                                                            Allocated:
+                                                            ₹<?php echo number_format($payment_item['allocated_amount'], 2); ?>
                                                             <?php if ($payment_item['remaining_amount'] > 0): ?>
-                                                                | Remaining: ₹<?php echo number_format($payment_item['remaining_amount'], 2); ?>
+                                                                | Remaining:
+                                                                ₹<?php echo number_format($payment_item['remaining_amount'], 2); ?>
                                                             <?php endif; ?>
                                                         </small>
                                                     <?php endif; ?>
@@ -782,7 +720,8 @@ $page_title = "Payment Management";
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
-                                                    <h6 class="mb-1"><?php echo htmlspecialchars($payment_item['customer_name']); ?></h6>
+                                                    <h6 class="mb-1"><?php echo htmlspecialchars($payment_item['customer_name']); ?>
+                                                    </h6>
                                                     <small class="text-muted">
                                                         <?php echo date('d M Y', strtotime($payment_item['payment_date'])); ?>
                                                         <?php if ($payment_item['payment_date'] == date('Y-m-d')): ?>
@@ -791,13 +730,15 @@ $page_title = "Payment Management";
                                                     </small>
                                                 </div>
                                                 <div class="text-end">
-                                                    <h5 class="payment-amount mb-1">₹<?php echo number_format($payment_item['amount'], 2); ?></h5>
+                                                    <h5 class="payment-amount mb-1">
+                                                        ₹<?php echo number_format($payment_item['amount'], 2); ?></h5>
                                                     <?php
-                                                    $mode_class = 'mode-' . $payment_item['payment_mode'];
-                                                    $mode_text = ucfirst(str_replace('_', ' ', $payment_item['payment_mode']));
+                                                    $mode = $payment_item['payment_mode'];
+                                                    $mode_display = !empty($mode) ? ucfirst(str_replace('_', ' ', $mode)) : 'Unknown';
+                                                    $mode_class = 'mode-' . (empty($mode) ? 'unknown' : $mode);
                                                     ?>
                                                     <span class="payment-mode-badge <?php echo $mode_class; ?>">
-                                                        <?php echo $mode_text; ?>
+                                                        <?php echo $mode_display; ?>
                                                     </span>
                                                 </div>
                                             </div>
@@ -850,21 +791,24 @@ $page_title = "Payment Management";
                                 <nav aria-label="Page navigation">
                                     <ul class="pagination justify-content-center">
                                         <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
-                                            <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page - 1; ?>">
+                                            <a class="page-link"
+                                                href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page - 1; ?>">
                                                 <i class="bi bi-chevron-left"></i>
                                             </a>
                                         </li>
 
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                                <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $i; ?>">
+                                                <a class="page-link"
+                                                    href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $i; ?>">
                                                     <?php echo $i; ?>
                                                 </a>
                                             </li>
                                         <?php endfor; ?>
 
                                         <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
-                                            <a class="page-link" href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page + 1; ?>">
+                                            <a class="page-link"
+                                                href="?action=list&search=<?php echo urlencode($search); ?>&payment_mode=<?php echo $payment_mode_filter; ?>&customer=<?php echo $customer_filter; ?>&date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&page=<?php echo $page + 1; ?>">
                                                 <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </li>
@@ -890,27 +834,41 @@ $page_title = "Payment Management";
                                     <div class="row g-3">
                                         <div class="col-md-12">
                                             <div class="form-floating">
-                                                <select class="form-select" id="customer_id" name="customer_id" required onchange="updateCustomerBalance(this.value)">
-                                                    <option value="">Select Customer</option>
-                                                    <?php foreach ($customers as $cust): ?>
-                                                        <option value="<?php echo $cust['id']; ?>" <?php echo $customer_id == $cust['id'] ? 'selected' : ''; ?> data-balance="<?php echo $cust['balance']; ?>">
-                                                            <?php echo htmlspecialchars($cust['name']); ?>
-                                                            (₹<?php echo number_format($cust['balance'], 2); ?>)
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <label for="customer_id"><i class="bi bi-person"></i> Customer *</label>
+                                                <?php
+                                                $selected_customer_name = '';
+                                                if ($customer_id) {
+                                                    foreach ($customers as $cust) {
+                                                        if ($cust['id'] == $customer_id) {
+                                                            $selected_customer_name = $cust['name'];
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+                                                <input type="text" class="form-control" id="customer_search"
+                                                    placeholder="Search Customer" autocomplete="off"
+                                                    value="<?php echo htmlspecialchars($selected_customer_name); ?>">
+                                                <label for="customer_search"><i class="bi bi-person"></i> Customer *</label>
+                                                <input type="hidden" id="customer_id" name="customer_id"
+                                                    value="<?php echo $customer_id ? $customer_id : ''; ?>" required>
+
+                                                <div id="customer_results"
+                                                    class="list-group position-absolute w-100 shadow mt-1"
+                                                    style="z-index: 1000; display: none; max-height: 300px; overflow-y: auto;">
+                                                </div>
                                             </div>
                                             <div class="mt-2" id="customerBalanceInfo" style="display: none;">
-                                                <span class="badge bg-info">Customer Balance: <span id="customerBalance">0.00</span></span>
+                                                <span class="badge bg-info">Customer Balance: <span
+                                                        id="customerBalance">0.00</span></span>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input type="date" class="form-control" id="payment_date" name="payment_date"
-                                                    value="<?php echo date('Y-m-d'); ?>" required>
-                                                <label for="payment_date"><i class="bi bi-calendar"></i> Payment Date *</label>
+                                                <input type="date" class="form-control" id="payment_date"
+                                                    name="payment_date" value="<?php echo date('Y-m-d'); ?>" required>
+                                                <label for="payment_date"><i class="bi bi-calendar"></i> Payment Date
+                                                    *</label>
                                             </div>
                                         </div>
 
@@ -931,34 +889,39 @@ $page_title = "Payment Management";
                                                     <option value="cheque">Cheque</option>
                                                     <option value="other">Other</option>
                                                 </select>
-                                                <label for="payment_mode"><i class="bi bi-credit-card"></i> Payment Mode *</label>
+                                                <label for="payment_mode"><i class="bi bi-credit-card"></i> Payment Mode
+                                                    *</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control" id="reference_no" name="reference_no"
-                                                    placeholder="Reference No">
-                                                <label for="reference_no"><i class="bi bi-receipt"></i> Reference No (Optional)</label>
+                                                <input type="text" class="form-control" id="reference_no"
+                                                    name="reference_no" placeholder="Reference No">
+                                                <label for="reference_no"><i class="bi bi-receipt"></i> Reference No
+                                                    (Optional)</label>
                                             </div>
                                         </div>
 
                                         <div class="col-12">
                                             <div class="form-floating">
-                                                <textarea class="form-control" id="notes" name="notes"
-                                                    placeholder="Notes" style="height: 100px"></textarea>
+                                                <textarea class="form-control" id="notes" name="notes" placeholder="Notes"
+                                                    style="height: 100px"></textarea>
                                                 <label for="notes"><i class="bi bi-sticky"></i> Notes</label>
                                             </div>
                                         </div>
 
                                         <div class="col-12">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="auto_allocate" name="auto_allocate" value="1" checked>
+                                                <input class="form-check-input" type="checkbox" id="auto_allocate"
+                                                    name="auto_allocate" value="1" checked>
                                                 <label class="form-check-label" for="auto_allocate">
-                                                    <i class="bi bi-lightning-charge"></i> Auto-allocate payment to pending udhar entries (oldest first)
+                                                    <i class="bi bi-lightning-charge"></i> Auto-allocate payment to pending
+                                                    udhar entries (oldest first)
                                                 </label>
                                                 <small class="text-muted d-block">
-                                                    If checked, the system will automatically allocate this payment to the customer's pending udhar entries starting from the oldest.
+                                                    If checked, the system will automatically allocate this payment to the
+                                                    customer's pending udhar entries starting from the oldest.
                                                 </small>
                                             </div>
                                         </div>
@@ -987,11 +950,12 @@ $page_title = "Payment Management";
                                 <h5 class="mb-0">Payment Details</h5>
                                 <div class="mt-2">
                                     <?php
-                                    $mode_class = 'mode-' . $payment['payment_mode'];
-                                    $mode_text = ucfirst(str_replace('_', ' ', $payment['payment_mode']));
+                                    $mode = $payment['payment_mode'];
+                                    $mode_display = !empty($mode) ? ucfirst(str_replace('_', ' ', $mode)) : 'Unknown';
+                                    $mode_class = 'mode-' . (empty($mode) ? 'unknown' : $mode);
                                     ?>
                                     <span class="payment-mode-badge <?php echo $mode_class; ?>">
-                                        <?php echo $mode_text; ?>
+                                        <?php echo $mode_display; ?>
                                     </span>
                                     <?php
                                     $alloc_class = '';
@@ -1033,7 +997,8 @@ $page_title = "Payment Management";
                                             </tr>
                                             <tr>
                                                 <th>Payment Mode:</th>
-                                                <td><?php echo ucfirst(str_replace('_', ' ', $payment['payment_mode'])); ?></td>
+                                                <td><?php echo !empty($payment['payment_mode']) ? ucfirst(str_replace('_', ' ', $payment['payment_mode'])) : 'Unknown'; ?>
+                                                </td>
                                             </tr>
                                         </table>
                                     </div>
@@ -1041,7 +1006,8 @@ $page_title = "Payment Management";
                                         <table class="table table-sm">
                                             <tr>
                                                 <th width="40%">Amount:</th>
-                                                <td class="payment-amount">₹<?php echo number_format($payment['amount'], 2); ?></td>
+                                                <td class="payment-amount">
+                                                    ₹<?php echo number_format($payment['amount'], 2); ?></td>
                                             </tr>
                                             <tr>
                                                 <th>Allocated:</th>
@@ -1105,7 +1071,8 @@ $page_title = "Payment Management";
                                                                 </a>
                                                             </td>
                                                             <td><?php echo htmlspecialchars($alloc['description']); ?></td>
-                                                            <td class="text-success fw-bold">₹<?php echo number_format($alloc['allocated_amount'], 2); ?></td>
+                                                            <td class="text-success fw-bold">
+                                                                ₹<?php echo number_format($alloc['allocated_amount'], 2); ?></td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 </tbody>
@@ -1116,19 +1083,20 @@ $page_title = "Payment Management";
 
                                 <div class="mt-4">
                                     <?php if ($payment['remaining_amount'] > 0): ?>
-                                        <a href="payments.php?action=allocate&id=<?php echo $payment['id']; ?>" class="btn btn-warning">
+                                        <a href="payments.php?action=allocate&id=<?php echo $payment['id']; ?>"
+                                            class="btn btn-warning">
                                             <i class="bi bi-cash-coin"></i> Allocate Payment
                                         </a>
                                     <?php endif; ?>
-                                    <a href="payments.php?action=edit&id=<?php echo $payment['id']; ?>" class="btn btn-primary">
+                                    <a href="payments.php?action=edit&id=<?php echo $payment['id']; ?>"
+                                        class="btn btn-primary">
                                         <i class="bi bi-pencil"></i> Edit Payment
                                     </a>
-                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal">
                                         <i class="bi bi-trash"></i> Delete Payment
                                     </button>
-                                    <a href="payments.php" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-left"></i> Back to List
-                                    </a>
+
                                 </div>
                             </div>
                         </div>
@@ -1136,7 +1104,8 @@ $page_title = "Payment Management";
                 </div>
 
                 <!-- Delete Confirmation Modal -->
-                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -1149,13 +1118,15 @@ $page_title = "Payment Management";
                                     <strong>Warning:</strong> Are you sure you want to delete this payment?
                                 </div>
                                 <p class="mb-0">
-                                    Customer: <strong><?php echo htmlspecialchars($payment['customer_name']); ?></strong><br>
+                                    Customer:
+                                    <strong><?php echo htmlspecialchars($payment['customer_name']); ?></strong><br>
                                     Amount: <strong>₹<?php echo number_format($payment['amount'], 2); ?></strong><br>
                                     Date: <strong><?php echo date('d M Y', strtotime($payment['payment_date'])); ?></strong>
                                 </p>
                                 <p class="mt-2 text-danger">
                                     <?php if (!empty($allocations)): ?>
-                                        <strong>Note:</strong> This payment has <?php echo count($allocations); ?> allocation(s). Deleting it will also remove these allocations.
+                                        <strong>Note:</strong> This payment has <?php echo count($allocations); ?>
+                                        allocation(s). Deleting it will also remove these allocations.
                                     <?php endif; ?>
                                 </p>
                             </div>
@@ -1191,17 +1162,22 @@ $page_title = "Payment Management";
                                     <div class="row g-3">
                                         <div class="col-md-12">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($payment['customer_name']); ?>" disabled>
+                                                <input type="text" class="form-control"
+                                                    value="<?php echo htmlspecialchars($payment['customer_name']); ?>"
+                                                    disabled>
                                                 <label><i class="bi bi-person"></i> Customer</label>
-                                                <small class="text-muted">Customer cannot be changed for existing payments</small>
+                                                <small class="text-muted">Customer cannot be changed for existing
+                                                    payments</small>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input type="date" class="form-control" id="payment_date" name="payment_date"
-                                                    value="<?php echo $payment['payment_date']; ?>" required>
-                                                <label for="payment_date"><i class="bi bi-calendar"></i> Payment Date *</label>
+                                                <input type="date" class="form-control" id="payment_date"
+                                                    name="payment_date" value="<?php echo $payment['payment_date']; ?>"
+                                                    required>
+                                                <label for="payment_date"><i class="bi bi-calendar"></i> Payment Date
+                                                    *</label>
                                             </div>
                                         </div>
 
@@ -1218,28 +1194,31 @@ $page_title = "Payment Management";
                                             <div class="form-floating">
                                                 <select class="form-select" id="payment_mode" name="payment_mode" required>
                                                     <option value="cash" <?php echo $payment['payment_mode'] == 'cash' ? 'selected' : ''; ?>>Cash</option>
-                                                    <option value="bank_transfer" <?php echo $payment['payment_mode'] == 'bank_transfer' ? 'selected' : ''; ?>>Bank Transfer</option>
+                                                    <option value="bank_transfer" <?php echo $payment['payment_mode'] == 'bank_transfer' ? 'selected' : ''; ?>>Bank
+                                                        Transfer</option>
                                                     <option value="upi" <?php echo $payment['payment_mode'] == 'upi' ? 'selected' : ''; ?>>UPI</option>
                                                     <option value="cheque" <?php echo $payment['payment_mode'] == 'cheque' ? 'selected' : ''; ?>>Cheque</option>
                                                     <option value="other" <?php echo $payment['payment_mode'] == 'other' ? 'selected' : ''; ?>>Other</option>
                                                 </select>
-                                                <label for="payment_mode"><i class="bi bi-credit-card"></i> Payment Mode *</label>
+                                                <label for="payment_mode"><i class="bi bi-credit-card"></i> Payment Mode
+                                                    *</label>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-floating">
-                                                <input type="text" class="form-control" id="reference_no" name="reference_no"
-                                                    placeholder="Reference No"
+                                                <input type="text" class="form-control" id="reference_no"
+                                                    name="reference_no" placeholder="Reference No"
                                                     value="<?php echo htmlspecialchars($payment['reference_no']); ?>">
-                                                <label for="reference_no"><i class="bi bi-receipt"></i> Reference No (Optional)</label>
+                                                <label for="reference_no"><i class="bi bi-receipt"></i> Reference No
+                                                    (Optional)</label>
                                             </div>
                                         </div>
 
                                         <div class="col-12">
                                             <div class="form-floating">
-                                                <textarea class="form-control" id="notes" name="notes"
-                                                    placeholder="Notes" style="height: 100px"><?php echo htmlspecialchars($payment['notes']); ?></textarea>
+                                                <textarea class="form-control" id="notes" name="notes" placeholder="Notes"
+                                                    style="height: 100px"><?php echo htmlspecialchars($payment['notes']); ?></textarea>
                                                 <label for="notes"><i class="bi bi-sticky"></i> Notes</label>
                                             </div>
                                         </div>
@@ -1249,7 +1228,8 @@ $page_title = "Payment Management";
                                         <button type="submit" name="update_payment" class="btn btn-primary">
                                             <i class="bi bi-check-circle"></i> Update Payment
                                         </button>
-                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="btn btn-outline-secondary">
+                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>"
+                                            class="btn btn-outline-secondary">
                                             <i class="bi bi-x-circle"></i> Cancel
                                         </a>
                                     </div>
@@ -1269,9 +1249,12 @@ $page_title = "Payment Management";
                                     <i class="bi bi-cash-coin"></i> Allocate Payment
                                 </h5>
                                 <div class="mt-2">
-                                    <span class="text-white">Customer: <?php echo htmlspecialchars($payment['customer_name']); ?></span>
-                                    <span class="badge bg-light text-dark ms-2">Payment: ₹<?php echo number_format($payment['amount'], 2); ?></span>
-                                    <span class="badge bg-warning ms-2">Remaining: ₹<?php echo number_format($payment['remaining_amount'], 2); ?></span>
+                                    <span class="text-white">Customer:
+                                        <?php echo htmlspecialchars($payment['customer_name']); ?></span>
+                                    <span class="badge bg-light text-dark ms-2">Payment:
+                                        ₹<?php echo number_format($payment['amount'], 2); ?></span>
+                                    <span class="badge bg-warning ms-2">Remaining:
+                                        ₹<?php echo number_format($payment['remaining_amount'], 2); ?></span>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -1280,7 +1263,8 @@ $page_title = "Payment Management";
                                         <i class="bi bi-check-circle display-1 text-success"></i>
                                         <h4 class="mt-3">No Pending Udhar Entries</h4>
                                         <p class="text-muted">This customer has no pending udhar entries to allocate.</p>
-                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="btn btn-primary">
+                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>"
+                                            class="btn btn-primary">
                                             <i class="bi bi-arrow-left"></i> Back to Payment
                                         </a>
                                     </div>
@@ -1290,8 +1274,10 @@ $page_title = "Payment Management";
 
                                         <div class="alert alert-info">
                                             <i class="bi bi-info-circle"></i>
-                                            <strong>Instructions:</strong> Enter allocation amounts for each pending udhar entry.
-                                            The total allocation cannot exceed the remaining payment amount (₹<?php echo number_format($payment['remaining_amount'], 2); ?>).
+                                            <strong>Instructions:</strong> Enter allocation amounts for each pending udhar
+                                            entry.
+                                            The total allocation cannot exceed the remaining payment amount
+                                            (₹<?php echo number_format($payment['remaining_amount'], 2); ?>).
                                         </div>
 
                                         <div class="table-responsive">
@@ -1318,19 +1304,23 @@ $page_title = "Payment Management";
                                                                 </a>
                                                             </td>
                                                             <td><?php echo htmlspecialchars($entry['description']); ?></td>
-                                                            <td><?php echo date('d M Y', strtotime($entry['transaction_date'])); ?></td>
+                                                            <td><?php echo date('d M Y', strtotime($entry['transaction_date'])); ?>
+                                                            </td>
                                                             <td>₹<?php echo number_format($entry['amount'], 2); ?></td>
                                                             <td>
-                                                                <span class="badge <?php echo $entry['remaining_amount'] == $entry['amount'] ? 'bg-danger' : 'bg-warning'; ?>">
+                                                                <span
+                                                                    class="badge <?php echo $entry['remaining_amount'] == $entry['amount'] ? 'bg-danger' : 'bg-warning'; ?>">
                                                                     ₹<?php echo number_format($entry['remaining_amount'], 2); ?>
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <input type="number" class="form-control amount-input allocate-amount"
-                                                                    name="allocations[<?php echo $entry['id']; ?>]"
-                                                                    step="0.01" min="0" max="<?php echo $entry['remaining_amount']; ?>"
+                                                                <input type="number"
+                                                                    class="form-control amount-input allocate-amount"
+                                                                    name="allocations[<?php echo $entry['id']; ?>]" step="0.01"
+                                                                    min="0" max="<?php echo $entry['remaining_amount']; ?>"
                                                                     placeholder="0.00" onchange="updateTotalAllocation()">
-                                                                <small class="text-muted">Max: ₹<?php echo number_format($entry['remaining_amount'], 2); ?></small>
+                                                                <small class="text-muted">Max:
+                                                                    ₹<?php echo number_format($entry['remaining_amount'], 2); ?></small>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
@@ -1340,14 +1330,16 @@ $page_title = "Payment Management";
                                                         <td colspan="5" class="text-end"><strong>Total Allocation:</strong></td>
                                                         <td><strong id="totalAllocated">0.00</strong></td>
                                                         <td>
-                                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="autoAllocate()">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                                onclick="autoAllocate()">
                                                                 <i class="bi bi-lightning-charge"></i> Auto Allocate
                                                             </button>
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="7" class="text-center">
-                                                            <div class="alert alert-warning" id="allocationWarning" style="display: none;">
+                                                            <div class="alert alert-warning" id="allocationWarning"
+                                                                style="display: none;">
                                                                 <i class="bi bi-exclamation-triangle"></i>
                                                                 <span id="warningMessage"></span>
                                                             </div>
@@ -1361,7 +1353,8 @@ $page_title = "Payment Management";
                                             <button type="submit" name="allocate_payment" class="btn btn-primary btn-lg">
                                                 <i class="bi bi-check-circle"></i> Save Allocations
                                             </button>
-                                            <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="btn btn-outline-secondary">
+                                            <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>"
+                                                class="btn btn-outline-secondary">
                                                 <i class="bi bi-x-circle"></i> Cancel
                                             </a>
                                         </div>
@@ -1378,6 +1371,22 @@ $page_title = "Payment Management";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="assets/js/payments.js"></script>
+    <!-- Search Suggestions Feature -->
+    <script src="assets/js/search_suggestions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize search suggestions for customer search in payments
+            const customerSearch = new SearchSuggestions('#customer-search-payments', {
+                apiUrl: 'api/search_customers.php',
+                minChars: 1,
+                delay: 300,
+                onSelect: function (suggestion) {
+                    // When a suggestion is selected, filter the payments by that customer
+                    window.location.href = `payments.php?action=list&customer=${suggestion.id}`;
+                }
+            });
+        });
+    </script>
 
 
 

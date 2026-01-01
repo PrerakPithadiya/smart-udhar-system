@@ -1,17 +1,8 @@
 <?php
-require_once 'core/database.php';
-
+require_once 'config/database.php';
 $conn = getDBConnection();
-
 $result = $conn->query("DESCRIBE customers");
-
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        echo $row['Field'] . " - " . $row['Type'] . " - " . $row['Key'] . "\n";
-    }
-} else {
-    echo "Error: " . $conn->error;
+while ($row = $result->fetch_assoc()) {
+    print_r($row);
 }
-
-$conn->close();
 ?>
