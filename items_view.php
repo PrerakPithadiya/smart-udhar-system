@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title ?? 'Items Management'; ?> - Smart Udhar System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="assets/css/items.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/items_custom.css">
+</head>
+
+<body>
+    <?php include 'includes/header.php'; ?>
+
+
+    <?php include 'includes/sidebar.php'; ?>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Floating Toggle Button (visible when sidebar is closed) -->
+        <button class="floating-toggle-btn" id="floatingToggle">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+
+
+        <div class="container-fluid items-container">
+            <div class="row">
+                <div class="col-12">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="bi bi-box-seam"></i> Items Management
+                        </h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <?php if ($action == 'list'): ?>
+                                <a href="import_items.php" class="btn btn-secondary me-2">
+                                    <i class="bi bi-cloud-upload"></i> Import Items
+                                </a>
+                                <a href="items.php?action=add" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Add New Item
+                                </a>
+                            <?php else: ?>
+                                <a href="items.php" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to List
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <?php displayMessage(); ?>
+
+                    <?php if ($action == 'list'): ?>
+                        <!-- Items List View -->
+                        <div class="items-stat-card mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <h5 class="mb-0">All Items (<?php echo $total_items; ?>)</h5>
+                                </div>
+                                <div class="col-md-8">
+                                    <form method="GET" class="row g-2">
+                                        <input type="hidden" name="action" value="list">
+                                        <div class="col-md-4">
+                                            <select name="category" class="form-select" onchange="this.form.submit()">
+                                                <option value="">All Categories</option>
+                                                <option value="Fertilizers" <?php echo $category_filter == 'Fertilizers' ? 'selected' : ''; ?>>Fertilizers</option>
+                                                <option value="Seeds" <?php echo $category_filter == 'Seeds' ? 'selected' : ''; ?>>Seeds</option>
+                                                <option value="Insecticides" <?php echo $category_filter == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
+                                                <option value="Others" <?php echo $category_filter == 'Others' ? 'selected' : ''; ?>>Others</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="items-search-box">
+                                                <i class="bi bi-search search-icon"></i>
+                                                <input type="text" name="search" class="form-control"
+                                                    placeholder="Search by item name, code or HSN..."
+                                                    value="<?php echo htmlspecialchars($search); ?>"
+                                                    onchange="this.form.submit()">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Statistics -->
+                        <div class="items-stats-cards">
+                            <div class="items-stat-card">
+                                <div class="stat-value"><?php echo number_format($total_items); ?></div>
+                                <div class="stat-label">Total Items</div>
+                                <i class="bi bi-box stat-icon"></i>
+                            </div>
+
+                            <div class="items-stat-card">
+                                <div class="stat-value">₹<?php echo number_format($avg_price ?? 0, 2); ?></div>
+                                <div class="stat-label">Average Price</div>
+                                <i class="bi bi-currency-rupee stat-icon"></i>
+                            </div>
+
+                            <div class="items-stat-card stat-warning">
+                                <div class="stat-value"><?php echo number_format($gst_count); ?></div>
+                                <div class="stat-label">Items with GST</div>
+                                <i class="bi bi-percent stat-icon"></i>
+                            </div>
+
+                            <div class="items-stat-card stat-success">
+                                <div class="stat-value"><?php echo number_format($total_items - $gst_count); ?></div>
+                                <div class="stat-label">Items without GST</div>
+                                <i class="bi bi-tag stat-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="card items-card">
+                            <div class="card-body">
+                                <?php if (empty($items)): ?>
+                                    <div class="items-empty-state">
+                                        <i class="bi bi-people display-1 empty-icon"></i>
+                                        <h4 class="mt-3">No items found</h4>
+                                        <p class="text-muted">Get started by adding your first item</p>
+                                        <a href="items.php?action=add" class="btn btn-primary">
+                                            <i class="bi bi-person-plus"></i> Add First Item
+                                        </a>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="items-table-container">
+                                        <table class="table items-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        <a
+                                                            href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&order_by=item_name&order_dir=<?php echo $order_by == 'item_name' && $order_dir == 'ASC' ? 'DESC' : 'ASC'; ?>">
+                                                            Item Name
+                                                            <?php if ($order_by == 'item_name'): ?>
+                                                                <i
+                                                                    class="bi bi-chevron-<?php echo $order_dir == 'ASC' ? 'up' : 'down'; ?>"></i>
+                                                            <?php endif; ?>
+                                                        </a>
+                                                    </th>
+                                                    <th>Item Code</th>
+                                                    <th>HSN Code</th>
+                                                    <th>Price</th>
+                                                    <th>GST</th>
+                                                    <th>Unit</th>
+                                                    <th>Category</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($items as $itm): ?>
+                                                    <tr class="item-card">
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="item-avatar">
+                                                                    <?php echo strtoupper(substr($itm['item_name'], 0, 1)); ?>
+                                                                </div>
+                                                                <div>
+                                                                    <h6 class="mb-0">
+                                                                        <?php echo htmlspecialchars($itm['item_name']); ?>
+                                                                    </h6>
+                                                                    <?php if (!empty($itm['description'])): ?>
+                                                                        <small
+                                                                            class="text-muted"><?php echo htmlspecialchars(substr($itm['description'], 0, 30)); ?>...</small>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($itm['item_code'] ?: 'N/A'); ?></td>
+                                                        <td><?php echo htmlspecialchars($itm['hsn_code'] ?: 'N/A'); ?></td>
+                                                        <td>
+                                                            <span class="item-price-badge">
+                                                                ₹<?php echo number_format($itm['price'], 2); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <?php if ($itm['igst_rate'] > 0): ?>
+                                                                <span class="item-gst-badge">IGST:
+                                                                    <?php echo $itm['igst_rate']; ?>%</span>
+                                                            <?php else: ?>
+                                                                <span class="item-gst-badge">CGST:
+                                                                    <?php echo $itm['cgst_rate']; ?>%</span>
+                                                                <span class="item-gst-badge">SGST:
+                                                                    <?php echo $itm['sgst_rate']; ?>%</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="item-unit-badge"><?php echo htmlspecialchars($itm['unit']); ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="item-unit-badge"><?php echo htmlspecialchars($itm['category'] ?: 'N/A'); ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="item-row-actions">
+                                                                <a href="items.php?action=view&id=<?php echo $itm['id']; ?>"
+                                                                    class="btn btn-sm btn-outline-info" title="View">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </a>
+                                                                <a href="items.php?action=edit&id=<?php echo $itm['id']; ?>"
+                                                                    class="btn btn-sm btn-outline-primary" title="Edit">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                    onclick="confirmDelete(<?php echo $itm['id']; ?>, '<?php echo htmlspecialchars(addslashes($itm['item_name'])); ?>')"
+                                                                    title="Delete">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Pagination -->
+                                    <?php if ($total_pages > 1): ?>
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination justify-content-center">
+                                                <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
+                                                    <a class="page-link"
+                                                        href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page - 1; ?>">
+                                                        <i class="bi bi-chevron-left"></i>
+                                                    </a>
+                                                </li>
+
+                                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                                    <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                                        <a class="page-link"
+                                                            href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $i; ?>">
+                                                            <?php echo $i; ?>
+                                                        </a>
+                                                    </li>
+                                                <?php endfor; ?>
+
+                                                <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
+                                                    <a class="page-link"
+                                                        href="?action=list&search=<?php echo urlencode($search); ?>&category=<?php echo $category_filter; ?>&page=<?php echo $page + 1; ?>">
+                                                        <i class="bi bi-chevron-right"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                    <?php elseif ($action == 'add' || $action == 'edit'): ?>
+                        <!-- Add/Edit Item Form -->
+                        <div class="item-form-container">
+                            <div class="item-form-header">
+                                <h3>
+                                    <i class="bi bi-<?php echo $action == 'add' ? 'plus-circle' : 'pencil'; ?>"></i>
+                                    <?php echo $action == 'add' ? 'Add New Item' : 'Edit Item'; ?>
+                                </h3>
+                            </div>
+                            <form method="POST" action="" id="itemForm">
+                                <div class="item-form-group">
+                                    <label for="item_name"><i class="bi bi-tag"></i> Item Name *</label>
+                                    <input type="text" class="item-form-control" id="item_name" name="item_name"
+                                        placeholder="Enter item name" required
+                                        value="<?php echo $action == 'edit' && $item ? htmlspecialchars($item['item_name']) : ''; ?>">
+                                </div>
+
+                                <div class="item-form-row">
+                                    <div class="item-form-group">
+                                        <label for="item_code"><i class="bi bi-upc"></i> Item Code</label>
+                                        <input type="text" class="item-form-control" id="item_code" name="item_code"
+                                            placeholder="Enter item code"
+                                            value="<?php echo $action == 'edit' && $item ? htmlspecialchars($item['item_code']) : ''; ?>">
+                                    </div>
+
+                                    <div class="item-form-group">
+                                        <label for="hsn_code"><i class="bi bi-file-text"></i> HSN Code</label>
+                                        <input type="text" class="item-form-control" id="hsn_code" name="hsn_code"
+                                            placeholder="Enter HSN code"
+                                            value="<?php echo $action == 'edit' && $item ? htmlspecialchars($item['hsn_code']) : ''; ?>">
+                                    </div>
+                                </div>
+
+                                <div class="item-form-row">
+                                    <div class="item-form-group">
+                                        <label for="price"><i class="bi bi-currency-rupee"></i> Price *</label>
+                                        <input type="number" class="item-form-control" id="price" name="price" step="0.01"
+                                            min="0.01" placeholder="0.00" required
+                                            value="<?php echo $action == 'edit' && $item ? number_format($item['price'], 2, '.', '') : '0.00'; ?>">
+                                    </div>
+
+                                    <div class="item-form-group">
+                                        <label for="unit"><i class="bi bi-rulers"></i> Unit *</label>
+                                        <select class="item-form-control" id="unit" name="unit" required>
+                                            <option value="PCS" <?php echo ($action == 'edit' && $item && $item['unit'] == 'PCS') ? 'selected' : ''; ?>>Pieces (PCS)</option>
+                                            <option value="KG" <?php echo ($action == 'edit' && $item && $item['unit'] == 'KG') ? 'selected' : ''; ?>>Kilogram (KG)</option>
+                                            <option value="L" <?php echo ($action == 'edit' && $item && $item['unit'] == 'L') ? 'selected' : ''; ?>>Liter (L)</option>
+                                            <option value="M" <?php echo ($action == 'edit' && $item && $item['unit'] == 'M') ? 'selected' : ''; ?>>Meter (M)</option>
+                                            <option value="PACK" <?php echo ($action == 'edit' && $item && $item['unit'] == 'PACK') ? 'selected' : ''; ?>>Pack</option>
+                                            <option value="BOTTLE" <?php echo ($action == 'edit' && $item && $item['unit'] == 'BOTTLE') ? 'selected' : ''; ?>>Bottle</option>
+                                            <option value="BOX" <?php echo ($action == 'edit' && $item && $item['unit'] == 'BOX') ? 'selected' : ''; ?>>Box</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="item-form-group">
+                                    <label><i class="bi bi-percent"></i> GST Rates</label>
+                                    <div class="gst-input-group">
+                                        <div class="gst-input-item">
+                                            <label for="cgst_rate">CGST Rate (%)</label>
+                                            <input type="number" class="item-form-control" id="cgst_rate" name="cgst_rate"
+                                                step="0.01" min="0" max="100" placeholder="2.5"
+                                                value="<?php echo $action == 'edit' && $item ? number_format($item['cgst_rate'], 2, '.', '') : '2.5'; ?>">
+                                        </div>
+
+                                        <div class="gst-input-item">
+                                            <label for="sgst_rate">SGST Rate (%)</label>
+                                            <input type="number" class="item-form-control" id="sgst_rate" name="sgst_rate"
+                                                step="0.01" min="0" max="100" placeholder="2.5"
+                                                value="<?php echo $action == 'edit' && $item ? number_format($item['sgst_rate'], 2, '.', '') : '2.5'; ?>">
+                                        </div>
+
+                                        <div class="gst-input-item">
+                                            <label for="igst_rate">IGST Rate (%)</label>
+                                            <input type="number" class="item-form-control" id="igst_rate" name="igst_rate"
+                                                step="0.01" min="0" max="100" placeholder="0.00"
+                                                value="<?php echo $action == 'edit' && $item ? number_format($item['igst_rate'], 2, '.', '') : '0.00'; ?>">
+                                            <small class="text-muted">Use for inter-state</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="item-form-group">
+                                    <label for="description"><i class="bi bi-card-text"></i> Description</label>
+                                    <textarea class="item-form-control" id="description" name="description"
+                                        placeholder="Enter item description"
+                                        rows="3"><?php echo $action == 'edit' && $item ? htmlspecialchars($item['description']) : ''; ?></textarea>
+                                </div>
+
+                                <div class="item-form-group">
+                                    <label for="category"><i class="bi bi-tags"></i> Category *</label>
+                                    <select class="item-form-control" id="category" name="category" required>
+                                        <option value="" <?php echo ($action == 'edit' && $item && empty($item['category'])) ? 'selected' : ''; ?>>Select Category</option>
+                                        <option value="Fertilizers" <?php echo ($action == 'edit' && $item && $item['category'] == 'Fertilizers') ? 'selected' : ''; ?>>Fertilizers</option>
+                                        <option value="Seeds" <?php echo ($action == 'edit' && $item && $item['category'] == 'Seeds') ? 'selected' : ''; ?>>Seeds</option>
+                                        <option value="Insecticides" <?php echo ($action == 'edit' && $item && $item['category'] == 'Insecticides') ? 'selected' : ''; ?>>Insecticides</option>
+                                        <option value="Others" <?php echo ($action == 'edit' && $item && $item['category'] == 'Others') ? 'selected' : ''; ?>>Others</option>
+                                    </select>
+                                </div>
+
+                                <?php if ($action == 'edit' && $item): ?>
+
+                                    <!-- Item Preview -->
+                                    <div class="item-preview-card">
+                                        <h5>Item Preview</h5>
+                                        <div class="item-preview-row">
+                                            <div class="item-preview-label">Current Price:</div>
+                                            <div class="item-preview-value">₹<?php echo number_format($item['price'], 2); ?>
+                                            </div>
+                                        </div>
+                                        <div class="item-preview-row">
+                                            <div class="item-preview-label">Tax Calculation:</div>
+                                            <div class="item-preview-value">
+                                                <?php
+                                                $cgst_amount = ($item['price'] * $item['cgst_rate']) / 100;
+                                                $sgst_amount = ($item['price'] * $item['sgst_rate']) / 100;
+                                                $igst_amount = ($item['price'] * $item['igst_rate']) / 100;
+                                                $total_with_tax = $item['price'] + $cgst_amount + $sgst_amount + $igst_amount;
+                                                ?>
+                                                ₹<?php echo number_format($total_with_tax, 2); ?> (incl. GST)
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="item-form-actions">
+                                    <?php if ($action == 'edit' && $item): ?>
+                                        <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" name="update_item" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Update Item
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="submit" name="add_item" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle"></i> Add Item
+                                        </button>
+                                    <?php endif; ?>
+                                    <a href="items.php" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
+                    <?php elseif ($action == 'view' && $item): ?>
+                        <!-- Item Detail View -->
+                        <div class="item-form-container">
+                            <div class="item-form-header">
+                                <h3>
+                                    <i class="bi bi-box"></i> Item Details
+                                </h3>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4><?php echo htmlspecialchars($item['item_name']); ?></h4>
+
+                                    <?php if (!empty($item['description'])): ?>
+                                        <p class="mt-3"><?php echo htmlspecialchars($item['description']); ?></p>
+                                    <?php endif; ?>
+
+                                    <div class="row mt-4">
+                                        <div class="col-md-6">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th>Item Code:</th>
+                                                    <td><?php echo htmlspecialchars($item['item_code'] ?: 'N/A'); ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>HSN Code:</th>
+                                                    <td><?php echo htmlspecialchars($item['hsn_code'] ?: 'N/A'); ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Unit:</th>
+                                                    <td>
+                                                        <span
+                                                            class="item-unit-badge"><?php echo htmlspecialchars($item['unit']); ?></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Category:</th>
+                                                    <td>
+                                                        <span
+                                                            class="item-unit-badge"><?php echo htmlspecialchars($item['category'] ?: 'N/A'); ?></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th>Price:</th>
+                                                    <td class="fw-bold">
+                                                        <span
+                                                            class="item-price-badge">₹<?php echo number_format($item['price'], 2); ?></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>CGST:</th>
+                                                    <td><?php echo number_format($item['cgst_rate'], 2); ?>%</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>SGST:</th>
+                                                    <td><?php echo number_format($item['sgst_rate'], 2); ?>%</td>
+                                                </tr>
+                                                <?php if ($item['igst_rate'] > 0): ?>
+                                                    <tr>
+                                                        <th>IGST:</th>
+                                                        <td><?php echo number_format($item['igst_rate'], 2); ?>%</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="item-preview-card">
+                                        <h6>Tax Calculation</h6>
+                                        <?php
+                                        $cgst_amount = ($item['price'] * $item['cgst_rate']) / 100;
+                                        $sgst_amount = ($item['price'] * $item['sgst_rate']) / 100;
+                                        $igst_amount = ($item['price'] * $item['igst_rate']) / 100;
+                                        $total_with_tax = $item['price'] + $cgst_amount + $sgst_amount + $igst_amount;
+                                        ?>
+                                        <p class="mb-1">Base Price: ₹<?php echo number_format($item['price'], 2); ?></p>
+                                        <?php if ($item['igst_rate'] > 0): ?>
+                                            <p class="mb-1">IGST: ₹<?php echo number_format($igst_amount, 2); ?></p>
+                                        <?php else: ?>
+                                            <p class="mb-1">CGST: ₹<?php echo number_format($cgst_amount, 2); ?></p>
+                                            <p class="mb-1">SGST: ₹<?php echo number_format($sgst_amount, 2); ?></p>
+                                        <?php endif; ?>
+                                        <hr>
+                                        <h5 class="text-primary">Total: ₹<?php echo number_format($total_with_tax, 2); ?>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="item-form-actions">
+                                <a href="items.php?action=edit&id=<?php echo $item['id']; ?>" class="btn btn-primary">
+                                    <i class="bi bi-pencil"></i> Edit Item
+                                </a>
+                                <a href="udhar.php?action=add&item_id=<?php echo $item['id']; ?>" class="btn btn-success">
+                                    <i class="bi bi-cart-plus"></i> Use in Bill
+                                </a>
+                                <a href="items.php" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <small class="text-muted">
+                                    <i class="bi bi-clock"></i> Created:
+                                    <?php echo date('d M Y, h:i A', strtotime($item['created_at'])); ?>
+                                    <?php if ($item['created_at'] != $item['updated_at']): ?>
+                                        | Updated: <?php echo date('d M Y, h:i A', strtotime($item['updated_at'])); ?>
+                                    <?php endif; ?>
+                                </small>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/items.js"></script>
+    <script src="assets/js/items_custom.js"></script>
+</body>
+
+</html>

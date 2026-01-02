@@ -20,11 +20,14 @@ if (strlen($query) < 2 && strlen($query) > 0) {
     exit;
 }
 
+// Get filters
+$has_payments = isset($_GET['has_payments']) && $_GET['has_payments'] == '1';
+
 // Search in customers table for current user
 $searchTerm = strlen($query) > 0 ? "%{$query}%" : "%";
 $limit = strlen($query) > 0 ? 15 : 10; // Show fewer results when showing all
 
-$stmt = $conn->prepare("
+$query_sql = "
     SELECT 
         c.id,
         c.name,
@@ -39,12 +42,16 @@ $stmt = $conn->prepare("
         ) as balance
     FROM customers c
     WHERE c.user_id = ? 
-      AND (c.name LIKE ? OR c.mobile LIKE ?)
-    ORDER BY c.name
-    LIMIT ?
-");
+      AND (c.name LIKE ? OR c.mobile LIKE ? OR c.address LIKE ?)";
 
-$stmt->bind_param("issi", $_SESSION['user_id'], $searchTerm, $searchTerm, $limit);
+if ($has_payments) {
+    $query_sql .= " AND EXISTS (SELECT 1 FROM payments p WHERE p.customer_id = c.id)";
+}
+
+$query_sql .= " ORDER BY c.name LIMIT ?";
+
+$stmt = $conn->prepare($query_sql);
+$stmt->bind_param("isssi", $_SESSION['user_id'], $searchTerm, $searchTerm, $searchTerm, $limit);
 $stmt->execute();
 $result = $stmt->get_result();
 

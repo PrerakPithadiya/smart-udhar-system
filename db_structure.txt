@@ -1,0 +1,25 @@
+Field	Type	Null	Key	Default	Extra
+id	int(11)	NO	PRI	NULL	auto_increment
+customer_id	int(11)	NO	MUL	NULL	
+transaction_date	date	NO	MUL	NULL	
+description	text	YES		NULL	
+amount	decimal(10,2)	NO		NULL	
+due_date	date	YES		NULL	
+notes	text	YES		NULL	
+status	enum('pending','partially_paid','paid')	YES	MUL	pending	
+remaining_amount	decimal(10,2)	YES		0.00	
+created_at	timestamp	NO		current_timestamp()	
+bill_no	int(11)	YES		NULL	
+total_amount	decimal(10,2)	YES		0.00	
+cgst_amount	decimal(10,2)	YES		0.00	
+sgst_amount	decimal(10,2)	YES		0.00	
+igst_amount	decimal(10,2)	YES		0.00	
+grand_total	decimal(10,2)	YES		0.00	
+discount	decimal(10,2)	YES		0.00	
+discount_type	enum('percentage','fixed')	YES		fixed	
+round_off	decimal(10,2)	YES		0.00	
+bill_notes	text	YES		NULL	
+print_count	int(11)	YES		0	
+revision_number	int(11)	YES		1	
+last_edited_by	int(11)	YES		NULL	
+last_edited_at	timestamp	YES		NULL	

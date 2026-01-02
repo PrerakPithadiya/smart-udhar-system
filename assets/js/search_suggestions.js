@@ -62,20 +62,7 @@ class SearchSuggestions {
       this.input.id + "-suggestions"
     );
     this.suggestionsContainer.classList.add("search-suggestions-container");
-    this.suggestionsContainer.style.cssText = `
-            position: absolute;
-            border: 1px solid #ddd;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: none;
-        `;
+    this.suggestionsContainer.style.display = "none";
     this.input.parentNode.style.position = "relative";
     this.input.parentNode.appendChild(this.suggestionsContainer);
   }
@@ -108,9 +95,9 @@ class SearchSuggestions {
     const query = this.input.value.trim();
     if (query.length >= this.options.minChars) {
       this.fetchSuggestions(query);
-    } else if (query.length === 0) {
-      // If empty, show all customers (or first few)
-      this.fetchSuggestions("");
+    } else {
+      // If empty or too short, hide suggestions
+      this.closeAllLists();
     }
   }
 
@@ -146,8 +133,9 @@ class SearchSuggestions {
 
   async fetchSuggestions(query) {
     try {
+      const separator = this.options.apiUrl.includes("?") ? "&" : "?";
       const response = await fetch(
-        `${this.options.apiUrl}?q=${encodeURIComponent(query)}`
+        `${this.options.apiUrl}${separator}q=${encodeURIComponent(query)}`
       );
       const data = await response.json();
 
@@ -183,14 +171,6 @@ class SearchSuggestions {
     limitedSuggestions.forEach((suggestion, index) => {
       const item = document.createElement("div");
       item.classList.add("search-suggestion-item");
-      item.style.cssText = `
-                padding: 10px;
-                cursor: pointer;
-                border-bottom: 1px solid #eee;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            `;
 
       // Use custom template or default
       item.innerHTML = this.options.suggestionTemplate(suggestion);
@@ -215,39 +195,37 @@ class SearchSuggestions {
     let balanceText = "";
     if (suggestion.balance !== undefined) {
       const balance = parseFloat(suggestion.balance);
-      let balanceClass = "balance-zero";
+      let balanceClass = "text-slate-400";
+      let balanceBg = "bg-slate-50";
+
       if (balance > 0) {
-        balanceClass = "balance-negative"; // Due
+        balanceClass = "text-rose-500";
+        balanceBg = "bg-rose-50/50";
       } else if (balance < 0) {
-        balanceClass = "balance-positive"; // Advance
+        balanceClass = "text-emerald-500";
+        balanceBg = "bg-emerald-50/50";
       }
 
-      let formattedBalance = `₹${Math.abs(balance).toFixed(2)}`;
-      if (balance > 0) {
-        formattedBalance += " (Due)";
-      } else if (balance < 0) {
-        formattedBalance += " (Advance)";
-      }
+      let formattedBalance = `₹${Math.abs(balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      let label = balance > 0 ? "Due" : (balance < 0 ? "Adv" : "Clear");
 
-      balanceText = `<span class="suggestion-balance ${balanceClass}">${formattedBalance}</span>`;
+      balanceText = `<div class="flex flex-col items-end gap-1">
+                      <span class="text-xs font-black ${balanceClass} ${balanceBg} px-2 py-1 rounded-lg border border-current/10">${formattedBalance}</span>
+                      <span class="text-[8px] font-black uppercase tracking-widest text-slate-300">${label}</span>
+                    </div>`;
     }
 
-    let contactInfo = "";
-    if (suggestion.mobile) {
-      contactInfo += `<small class="text-muted">📱 ${suggestion.mobile}</small>`;
-    }
-    if (suggestion.email) {
-      if (contactInfo) contactInfo += "<br>";
-      contactInfo += `<small class="text-muted">📧 ${suggestion.email}</small>`;
-    }
+    const initials = suggestion.name.substring(0, 1).toUpperCase();
 
     return `
-            <div>
-                <strong>${this.highlightMatch(
-                  suggestion.name,
-                  this.input.value
-                )}</strong>
-                ${contactInfo ? `<br>${contactInfo}` : ""}
+            <div class="flex items-center gap-4 flex-grow">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-sm shadow-sm group-hover:scale-110 transition-transform">
+                    ${initials}
+                </div>
+                <div class="flex flex-col">
+                    <strong class="text-sm text-slate-700 tracking-tight">${this.highlightMatch(suggestion.name, this.input.value)}</strong>
+                    ${suggestion.mobile ? `<span class="text-[10px] font-bold text-slate-400 flex items-center gap-1 mt-0.5"><iconify-icon icon="solar:phone-bold-duotone" class="text-xs"></iconify-icon> ${suggestion.mobile}</span>` : ""}
+                </div>
             </div>
             ${balanceText}
         `;
@@ -255,9 +233,8 @@ class SearchSuggestions {
 
   highlightMatch(text, query) {
     if (!query) return text;
-
     const regex = new RegExp(`(${query})`, "gi");
-    return text.replace(regex, "<mark>$1</mark>");
+    return text.replace(regex, `<span class="text-indigo-600 border-b-2 border-indigo-200">$1</span>`);
   }
 
   selectSuggestion(suggestion) {
@@ -271,10 +248,16 @@ class SearchSuggestions {
       this.options.onSelect(suggestion);
     }
 
-    // Optionally redirect to customer details page
-    if (suggestion.id) {
-      // You can customize this behavior based on your needs
-      // window.location.href = `customers.php?action=view&id=${suggestion.id}`;
+    // AUTO-SUBMIT FORM: Filter table to only this customer
+    const form = this.input.closest('form');
+    if (form) {
+      form.submit();
+    } else if (suggestion.id) {
+      // Fallback for cases without a form
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('search', suggestion.name);
+      currentUrl.searchParams.set('action', 'list');
+      window.location.href = currentUrl.toString();
     }
   }
 

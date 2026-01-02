@@ -1,0 +1,191 @@
+        .search-suggestions-container {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 2000;
+            /* Super high to clear all modals and tables */
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 450px;
+            /* Increased further to show 5+ items clearly */
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 12px 12px;
+            display: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .search-suggestion-item {
+            padding: 10px 15px;
+            /* Slightly more compact */
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .search-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-suggestion-item:hover,
+        .search-suggestion-item.active {
+            background-color: #f0f7ff;
+            color: #0056b3;
+        }
+
+        /* Improved Search Button Style */
+        .btn-search-dynamic {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #dee2e6;
+            background: #ffffff;
+            color: #6c757d;
+        }
+
+        .btn-search-dynamic:not(:disabled):hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-search-dynamic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f8f9fa;
+        }
+
+        .btn-search-dynamic i {
+            font-size: 1.1rem;
+        }
+
+        /* Customer Info Card Premium Look */
+        #customer_info .card {
+            border: 1px solid #e3f2fd;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: #fff;
+            overflow: hidden;
+            border-left: 4px solid #3498db;
+        }
+
+        #selected_customer_balance {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        /* Colorful Rows Styles */
+        #itemsBody tr {
+            transition: background-color 0.4s ease;
+        }
+
+        #itemsBody tr.colored-row .bill-form-control,
+        #itemsBody tr.colored-row .form-control,
+        #itemsBody tr.colored-row .input-group-text {
+            background-color: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(2px);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Resizable Columns Styles */
+        .resizable-table {
+            table-layout: fixed;
+            width: 100% !important;
+        }
+
+        .resizable-table th {
+            position: relative;
+            vertical-align: middle;
+            background-color: #f8f9fa;
+        }
+
+        .resizable-table th,
+        .resizable-table td {
+            white-space: normal !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-width: 50px;
+        }
+
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            cursor: col-resize;
+            user-select: none;
+            height: 100%;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        /* Summary Input Styles */
+        .summary-input {
+            border: none;
+            background: transparent;
+            text-align: right;
+            width: 100%;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+
+        .summary-input:focus {
+            outline: none;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px #3498db;
+        }
+
+        .summary-input::-webkit-inner-spin-button,
+        .summary-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .summary-value {
+            position: relative;
+            min-width: 120px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Fix for select and inputs inside resizable columns */
+        .resizable-table .form-control,
+        .resizable-table .form-select {
+            width: 100%;
+        }
+
+        .resizable-table .input-group {
+            width: 100% !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .resizable-table .input-group-text {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Ensure inputs don't hide borders in resizable columns */
+        .resizable-table td {
+            padding: 8px !important;
+        }
