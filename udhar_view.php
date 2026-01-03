@@ -3,58 +3,163 @@
 // This file contains the HTML template for the Udhar page
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Udhar Entry - Smart Udhar System</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="assets/css/udhar.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/udhar_custom.css">
+
+    <style>
+        :root {
+            --bg-airy: #f8fafc;
+            --glass-white: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent-indigo: #6366f1;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-airy);
+            color: #1e293b;
+            overflow-x: hidden;
+
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
+        }
+
+        .udhar-container .udhar-stat-card,
+        .udhar-container .card.udhar-card,
+        .udhar-container .bill-form-container,
+        .udhar-container .bill-view-card,
+        .udhar-container .bill-summary-card,
+        .udhar-container .modal-content {
+            background: var(--glass-white) !important;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 24px !important;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .udhar-container .bill-form-header,
+        .udhar-container .bill-view-header {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+            border-top-left-radius: 24px !important;
+            border-top-right-radius: 24px !important;
+        }
+
+        .udhar-container .btn,
+        .udhar-container .btn-primary,
+        .udhar-container .btn-outline-secondary {
+            border-radius: 16px !important;
+            font-weight: 800 !important;
+        }
+
+        .udhar-container .btn-primary {
+            background: var(--accent-indigo) !important;
+            border-color: var(--accent-indigo) !important;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3) !important;
+        }
+
+        .udhar-container .btn-primary:hover {
+            background: #4f46e5 !important;
+            border-color: #4f46e5 !important;
+        }
+
+        .udhar-container .btn-outline-secondary {
+            background: #fff !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+
+        .udhar-container .btn-outline-secondary:hover {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        .udhar-container .form-control,
+        .udhar-container .form-select,
+        .udhar-container .bill-form-control {
+            border-radius: 16px !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        .udhar-container .table {
+            margin-bottom: 0;
+        }
+
+        .udhar-container .udhar-table-container {
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .udhar-container .udhar-table thead {
+            background: rgba(248, 250, 252, 0.6) !important;
+        }
+    </style>
 </head>
 
-<body>
-    <?php include 'includes/header.php'; ?>
-
+<body class="bg-[var(--bg-airy)]">
+    <!-- Sidebar Toggle Commander (Visible when closed) -->
+    <button id="sidebarOpenBtn" class="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-16 bg-white border border-slate-200 text-indigo-600 rounded-r-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:w-14 active:scale-95 transition-all z-[100] hidden">
+        <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
+    </button>
 
     <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="main-content">
-        <!-- Floating Toggle Button (visible when sidebar is closed) -->
-        <button class="floating-toggle-btn" id="floatingToggle">
-            <i class="bi bi-chevron-right"></i>
-        </button>
-
-
-
-
+    <div id="mainContent" class="main-content min-h-screen relative z-10 px-4 py-8 md:px-10">
 
         <div class="container-fluid">
             <div class="container-fluid udhar-container">
                 <div class="row">
                     <div class="col-12">
-                        <div
-                            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                            <h1 class="h2">
-                                <i class="bi bi-credit-card"></i> Udhar Entry
-                            </h1>
-                            <div class="btn-toolbar mb-2 mb-md-0">
+                        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex flex-col">
+                                    <nav class="flex text-[10px] items-center gap-1.5 font-bold uppercase tracking-widest text-slate-400 mb-2">
+                                        <iconify-icon icon="solar:home-2-bold" class="text-xs"></iconify-icon>
+                                        <span>Smart Udhar</span>
+                                        <iconify-icon icon="solar:alt-arrow-right-bold" class="text-[8px]"></iconify-icon>
+                                        <span class="text-indigo-500">Udhar</span>
+                                    </nav>
+                                    <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
+                                        <iconify-icon icon="solar:card-transfer-bold-duotone" class="text-indigo-500"></iconify-icon>
+                                        Udhar Ledger
+                                    </h1>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
                                 <?php if ($action == 'list'): ?>
-                                    <a href="udhar.php?action=add" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle"></i> New Udhar Entry
+                                    <a href="udhar.php?action=add" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
+                                        <iconify-icon icon="solar:add-circle-bold" class="text-xl"></iconify-icon>
+                                        New Udhar Entry
                                     </a>
                                 <?php else: ?>
-                                    <a href="udhar.php" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-left"></i> Back to List
+                                    <a href="udhar.php" class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all">
+                                        <iconify-icon icon="solar:arrow-left-bold" class="text-xl"></iconify-icon>
+                                        Back to List
                                     </a>
                                 <?php endif; ?>
                             </div>
-                        </div>
+                        </header>
 
                         <?php displayMessage(); ?>
 
@@ -173,7 +278,7 @@
                                             </a>
                                         </div>
                                     <?php else: ?>
-                                        <div class="udhar-table-container table-responsive">
+                                        <div class="udhar-table-container">
                                             <table class="table udhar-table">
                                                 <thead>
                                                     <tr>
@@ -934,6 +1039,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="assets/js/search_suggestions.js"></script>
+    <script src="assets/js/common.js"></script>
     <script src="assets/js/udhar_custom.js"></script>
 
     <script>

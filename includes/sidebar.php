@@ -2,8 +2,11 @@
 // File: smart-udhar-system/includes/sidebar.php
 // Get current page to set active class
 $current_page = basename($_SERVER['PHP_SELF']);
+
+$sidebar_state = $_COOKIE['sidebarState'] ?? '';
+$sidebar_class = ($sidebar_state === 'closed') ? ' closed' : '';
 ?>
-<div class="sidebar">
+<div class="sidebar<?php echo $sidebar_class; ?>">
     <div class="sidebar-header">
         <div class="sidebar-header-content">
             <h4><i class="bi bi-wallet2"></i> Smart Udhar</h4>

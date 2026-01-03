@@ -1,28 +1,5 @@
 // File: smart-udhar-system/assets/js/reports.js
 
-// Sidebar toggle
-function toggleSidebar() {
-  const sidebar = document.querySelector(".sidebar");
-  const mainContent = document.querySelector(".main-content");
-
-  if (sidebar && mainContent) {
-    sidebar.classList.toggle("closed");
-    mainContent.classList.toggle("expanded");
-  }
-}
-
-// Sidebar toggle button inside sidebar
-const sidebarToggleBtn = document.getElementById("sidebarToggle");
-if (sidebarToggleBtn) {
-  sidebarToggleBtn.addEventListener("click", toggleSidebar);
-}
-
-// Floating toggle button (visible when sidebar is closed)
-const floatingToggleBtn = document.getElementById("floatingToggle");
-if (floatingToggleBtn) {
-  floatingToggleBtn.addEventListener("click", toggleSidebar);
-}
-
 // Trend Chart
 if (window.reportType === "trend") {
   const ctx = document.getElementById("trendChart");

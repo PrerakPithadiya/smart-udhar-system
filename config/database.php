@@ -37,16 +37,22 @@ function getDBConnection()
     return $conn;
 }
 
-// Sanitize input function
+// Sanitize input function - Updated to avoid double-encoding
 function sanitizeInput($data)
 {
     if (is_array($data)) {
         return array_map('sanitizeInput', $data);
     }
 
+    if ($data === null)
+        return '';
+
     $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    // Only strip slashes if magic quotes was a thing or if specifically needed
+    // In modern PHP, we usually don't need this if using prepared statements
+    // But we'll keep it for legacy compatibility if needed
+    // $data = stripslashes($data); 
+
     return $data;
 }
 
@@ -143,20 +149,48 @@ function verifyCSRFToken($token)
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// Display error/success messages
+// Display themed Antigravity messages
 function displayMessage()
 {
     if (isset($_SESSION['message'])) {
         $message = $_SESSION['message'];
         unset($_SESSION['message']);
 
-        $type = isset($message['type']) ? $message['type'] : 'info';
-        $text = isset($message['text']) ? $message['text'] : '';
+        $type = $message['type'] ?? 'info';
+        $text = $message['text'] ?? '';
+
+        $bg = 'bg-white/80';
+        $border = 'border-slate-200';
+        $text_color = 'text-slate-700';
+        $icon = 'solar:info-circle-bold-duotone';
+        $icon_color = 'text-indigo-500';
+
+        if ($type === 'success') {
+            $border = 'border-emerald-200';
+            $icon = 'solar:check-circle-bold-duotone';
+            $icon_color = 'text-emerald-500';
+        } elseif ($type === 'danger' || $type === 'error') {
+            $border = 'border-rose-200';
+            $icon = 'solar:danger-bold-duotone';
+            $icon_color = 'text-rose-500';
+        } elseif ($type === 'warning') {
+            $border = 'border-amber-200';
+            $icon = 'solar:bell-bing-bold-duotone';
+            $icon_color = 'text-amber-500';
+        }
 
         if (!empty($text)) {
-            echo '<div class="alert alert-' . htmlspecialchars($type) . ' alert-dismissible fade show" role="alert">';
-            echo htmlspecialchars($text);
-            echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+            echo '<div class="message-pulse flex items-center gap-4 p-5 mb-8 rounded-3xl border-2 ' . $bg . ' ' . $border . ' backdrop-blur-xl shadow-xl shadow-slate-200/50 animate-in fade-in slide-in-from-top-4 duration-500">';
+            echo '  <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-3xl shadow-sm ' . $icon_color . '">';
+            echo '    <iconify-icon icon="' . $icon . '"></iconify-icon>';
+            echo '  </div>';
+            echo '  <div class="flex-grow">';
+            echo '    <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-0.5">' . strtoupper($type) . ' PROTOCOL</p>';
+            echo '    <p class="text-sm font-bold ' . $text_color . '">' . $text . '</p>';
+            echo '  </div>';
+            echo '  <button onclick="this.parentElement.remove()" class="w-10 h-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">';
+            echo '    <iconify-icon icon="solar:close-circle-bold" width="20"></iconify-icon>';
+            echo '  </button>';
             echo '</div>';
         }
     }

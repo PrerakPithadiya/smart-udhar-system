@@ -170,12 +170,19 @@ class SearchSuggestions {
 
     limitedSuggestions.forEach((suggestion, index) => {
       const item = document.createElement("div");
-      item.classList.add("search-suggestion-item");
+      item.classList.add("search-suggestion-item", "group");
 
       // Use custom template or default
       item.innerHTML = this.options.suggestionTemplate(suggestion);
 
-      item.addEventListener("click", () => {
+      // Prevention of focus loss on mousedown
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+      });
+
+      // Actual selection on click (works for mouse and Enter key)
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
         this.selectSuggestion(suggestion);
       });
 
@@ -197,44 +204,99 @@ class SearchSuggestions {
       const balance = parseFloat(suggestion.balance);
       let balanceClass = "text-slate-400";
       let balanceBg = "bg-slate-50";
+      let statusIcon = "solar:check-circle-bold-duotone";
 
       if (balance > 0) {
         balanceClass = "text-rose-500";
-        balanceBg = "bg-rose-50/50";
+        balanceBg = "bg-rose-50/80";
+        statusIcon = "solar:danger-bold-duotone";
       } else if (balance < 0) {
         balanceClass = "text-emerald-500";
-        balanceBg = "bg-emerald-50/50";
+        balanceBg = "bg-emerald-50/80";
+        statusIcon = "solar:verified-check-bold-duotone";
       }
 
-      let formattedBalance = `₹${Math.abs(balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-      let label = balance > 0 ? "Due" : (balance < 0 ? "Adv" : "Clear");
+      let formattedBalance = `₹${Math.abs(balance).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+      })}`;
+      let label =
+        balance > 0
+          ? "Debt Presence"
+          : balance < 0
+          ? "Credit Reserve"
+          : "Balanced";
 
-      balanceText = `<div class="flex flex-col items-end gap-1">
-                      <span class="text-xs font-black ${balanceClass} ${balanceBg} px-2 py-1 rounded-lg border border-current/10">${formattedBalance}</span>
-                      <span class="text-[8px] font-black uppercase tracking-widest text-slate-300">${label}</span>
+      balanceText = `<div class="flex flex-col items-end shrink-0">
+                      <div class="flex items-center gap-1.5 ${balanceBg} ${balanceClass} px-3 py-1.5 rounded-xl border border-current/10 shadow-sm shadow-current/5">
+                        <iconify-icon icon="${statusIcon}" class="text-lg"></iconify-icon>
+                        <span class="text-[13px] font-black tracking-tighter">${formattedBalance}</span>
+                      </div>
+                      <span class="text-[8px] font-black uppercase tracking-[0.2em] text-slate-300 mt-1.5">${label}</span>
                     </div>`;
     }
 
     const initials = suggestion.name.substring(0, 1).toUpperCase();
+    const colors = [
+      "from-indigo-500 to-violet-600",
+      "from-emerald-500 to-teal-600",
+      "from-amber-500 to-orange-600",
+      "from-rose-500 to-pink-600",
+      "from-sky-500 to-blue-600",
+    ];
+    const gradient = colors[suggestion.id % colors.length];
 
     return `
-            <div class="flex items-center gap-4 flex-grow">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-sm shadow-sm group-hover:scale-110 transition-transform">
-                    ${initials}
+            <div class="flex items-center gap-4 flex-grow overflow-hidden">
+                <div class="relative shrink-0">
+                  <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-black text-lg shadow-lg shadow-current/20 group-hover:scale-105 transition-transform duration-500">
+                      ${initials}
+                  </div>
+                  <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></div>
+                  </div>
                 </div>
-                <div class="flex flex-col">
-                    <strong class="text-sm text-slate-700 tracking-tight">${this.highlightMatch(suggestion.name, this.input.value)}</strong>
-                    ${suggestion.mobile ? `<span class="text-[10px] font-bold text-slate-400 flex items-center gap-1 mt-0.5"><iconify-icon icon="solar:phone-bold-duotone" class="text-xs"></iconify-icon> ${suggestion.mobile}</span>` : ""}
+                <div class="flex flex-col min-w-0">
+                    <h4 class="text-[15px] font-black text-slate-800 tracking-tight leading-none mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                      ${this.highlightMatch(suggestion.name, this.input.value)}
+                    </h4>
+                    <div class="flex items-center gap-3">
+                      ${
+                        suggestion.mobile
+                          ? `
+                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                          <iconify-icon icon="solar:phone-bold-duotone" class="text-indigo-400 text-sm"></iconify-icon>
+                          ${suggestion.mobile}
+                        </span>`
+                          : ""
+                      }
+                      ${
+                        suggestion.email
+                          ? `
+                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                          <iconify-icon icon="solar:letter-bold-duotone" class="text-indigo-400 text-sm"></iconify-icon>
+                          <span class="truncate max-w-[120px]">${suggestion.email}</span>
+                        </span>`
+                          : ""
+                      }
+                    </div>
                 </div>
             </div>
             ${balanceText}
+            <div class="absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none">
+              <iconify-icon icon="solar:alt-arrow-right-bold-duotone" class="text-indigo-600 text-2xl"></iconify-icon>
+            </div>
         `;
   }
 
   highlightMatch(text, query) {
     if (!query) return text;
-    const regex = new RegExp(`(${query})`, "gi");
-    return text.replace(regex, `<span class="text-indigo-600 border-b-2 border-indigo-200">$1</span>`);
+    // Escaping query for regex
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escapedQuery})`, "gi");
+    return text.replace(
+      regex,
+      `<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 bg-no-repeat bg-[length:100%_2px] bg-bottom font-black">$1</span>`
+    );
   }
 
   selectSuggestion(suggestion) {
@@ -244,19 +306,21 @@ class SearchSuggestions {
     this.closeAllLists();
 
     // Trigger custom onSelect callback if provided
+    // If onSelect handles navigation, we should avoid form submission
     if (this.options.onSelect) {
       this.options.onSelect(suggestion);
+      return; // Exit early if we have a custom handler
     }
 
     // AUTO-SUBMIT FORM: Filter table to only this customer
-    const form = this.input.closest('form');
+    const form = this.input.closest("form");
     if (form) {
       form.submit();
     } else if (suggestion.id) {
       // Fallback for cases without a form
       const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('search', suggestion.name);
-      currentUrl.searchParams.set('action', 'list');
+      currentUrl.searchParams.set("search", suggestion.name);
+      currentUrl.searchParams.set("action", "list");
       window.location.href = currentUrl.toString();
     }
   }
@@ -278,7 +342,6 @@ class SearchSuggestions {
 
     if (items[this.currentFocus]) {
       items[this.currentFocus].classList.add("active");
-      items[this.currentFocus].style.backgroundColor = "#e9ecef";
     }
   }
 
@@ -288,7 +351,6 @@ class SearchSuggestions {
     );
     items.forEach((item) => {
       item.classList.remove("active");
-      item.style.backgroundColor = "";
     });
   }
 

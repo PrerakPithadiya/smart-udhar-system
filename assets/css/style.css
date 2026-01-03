@@ -63,11 +63,9 @@ body {
 
 /* Sidebar Styles - Modern Enterprise Design */
 .sidebar {
-  background: linear-gradient(
-    180deg,
-    var(--secondary-color) 0%,
-    var(--dark-bg) 100%
-  );
+  background: linear-gradient(180deg,
+      var(--secondary-color) 0%,
+      var(--dark-bg) 100%);
   color: #e5e7eb;
   min-height: 100vh;
   position: fixed;
@@ -122,11 +120,9 @@ body {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--primary-dark) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%);
   border: none;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
@@ -147,28 +143,24 @@ body {
 .floating-toggle-btn:hover {
   width: 32px;
   box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
-  background: linear-gradient(
-    135deg,
-    var(--primary-dark) 0%,
-    var(--primary-color) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-dark) 0%,
+      var(--primary-color) 100%);
 }
 
 .floating-toggle-btn:active {
   transform: translateY(-50%) scale(0.95);
 }
 
-.sidebar.closed + .main-content .floating-toggle-btn {
+.sidebar.closed ~ .main-content .floating-toggle-btn {
   display: flex;
 }
 
 .sidebar-header {
   padding: 24px 20px;
-  background: linear-gradient(
-    135deg,
-    var(--primary-dark) 0%,
-    var(--primary-color) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-dark) 0%,
+      var(--primary-color) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -223,11 +215,9 @@ body {
   top: 0;
   height: 100%;
   width: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(59, 130, 246, 0.2) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(59, 130, 246, 0.2) 0%,
+      transparent 100%);
   transition: width 0.3s ease;
 }
 
@@ -245,11 +235,9 @@ body {
 
 .sidebar .nav-link.active {
   color: white;
-  background: linear-gradient(
-    90deg,
-    rgba(59, 130, 246, 0.25) 0%,
-    rgba(59, 130, 246, 0.1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(59, 130, 246, 0.25) 0%,
+      rgba(59, 130, 246, 0.1) 100%);
   border-left-color: var(--accent-color);
   font-weight: 600;
   box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
@@ -299,9 +287,11 @@ body {
   padding: 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
-  overflow-y: auto;
-  max-height: 100vh;
   background-color: var(--light-bg);
+}
+
+.sidebar.closed ~ .main-content {
+  margin-left: 0;
 }
 
 .main-content.expanded {
@@ -372,11 +362,9 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(90deg,
+      var(--primary-color),
+      var(--primary-light));
 }
 
 .stat-card:hover {
@@ -429,11 +417,9 @@ body {
 }
 
 .card-header {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--primary-dark) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%);
   color: white;
   border-bottom: none;
   font-weight: 600;
@@ -548,11 +534,9 @@ body {
 }
 
 .badge.bg-primary {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-light)
-  ) !important;
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light)) !important;
 }
 
 .badge.bg-success {
@@ -588,11 +572,9 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--primary-dark) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%);
   border: none;
   color: white;
 }
@@ -715,7 +697,7 @@ body {
   font-size: 14px;
 }
 
-.form-floating > label {
+.form-floating>label {
   padding-left: 1.5rem;
   color: var(--text-secondary);
 }
@@ -747,11 +729,9 @@ body {
 }
 
 .pagination .page-item.active .page-link {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-dark)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-dark));
   border-color: var(--primary-color);
   color: white;
   box-shadow: var(--shadow-md);
@@ -814,11 +794,9 @@ body {
 
 /* Welcome Card */
 .welcome-card {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--primary-dark) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%);
   color: white;
   border-radius: 16px;
   padding: 32px;
@@ -864,11 +842,9 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(90deg,
+      var(--primary-color),
+      var(--primary-light));
 }
 
 .quick-action-card:hover {
@@ -880,11 +856,9 @@ body {
 .quick-action-card i {
   font-size: 3.5rem;
   margin-bottom: 16px;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -975,6 +949,7 @@ body {
 
 /* Print Styles */
 @media print {
+
   .sidebar,
   .main-navbar,
   .no-print,
@@ -1011,11 +986,9 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    var(--primary-color),
-    var(--primary-dark)
-  );
+  background: linear-gradient(180deg,
+      var(--primary-color),
+      var(--primary-dark));
 }
 
 /* Loading Spinner */
@@ -1115,11 +1088,9 @@ body {
 
 /* Additional Utility Classes */
 .text-gradient {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1147,11 +1118,9 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--primary-light)
-  );
+  background: linear-gradient(135deg,
+      var(--primary-color),
+      var(--primary-light));
   color: white;
   display: flex;
   align-items: center;

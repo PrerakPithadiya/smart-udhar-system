@@ -1,46 +1,5 @@
 // File: smart-udhar-system/assets/js/udhar_custom.js
 
-// Sidebar toggle for both mobile and desktop
-// Sidebar toggle function
-function toggleSidebar() {
-    const sidebar = document.querySelector(".sidebar");
-    const mainContent = document.querySelector(".main-content");
-
-    sidebar.classList.toggle("closed");
-    mainContent.classList.toggle("expanded");
-}
-
-// Sidebar toggle button inside sidebar
-const sidebarToggleBtn = document.getElementById("sidebarToggle");
-if (sidebarToggleBtn) {
-    sidebarToggleBtn.addEventListener("click", toggleSidebar);
-}
-
-// Floating toggle button (visible when sidebar is closed)
-const floatingToggleBtn = document.getElementById("floatingToggle");
-if (floatingToggleBtn) {
-    floatingToggleBtn.addEventListener("click", toggleSidebar);
-}
-
-// Auto-hide sidebar on mobile when clicking outside
-document.addEventListener("click", function (event) {
-    const sidebar = document.querySelector(".sidebar");
-    const toggleBtn = document.getElementById("sidebarToggle");
-    const floatingBtn = document.getElementById("floatingToggle");
-    const mainContent = document.querySelector(".main-content");
-
-    if (
-        window.innerWidth <= 768 &&
-        !sidebar.contains(event.target) &&
-        !toggleBtn.contains(event.target) &&
-        !floatingBtn.contains(event.target) &&
-        !sidebar.classList.contains("closed")
-    ) {
-        sidebar.classList.add("closed");
-        mainContent.classList.add("expanded");
-    }
-});
-
 // Global variables initialized from PHP data
 let itemCounter = 0;
 // Note: ITEMS_LIST and PRE_SELECTED_ITEM_ID should be defined in the main PHP file

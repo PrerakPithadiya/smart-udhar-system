@@ -63,6 +63,11 @@
             overflow-y: auto !important;
             display: flex !important;
             flex-direction: column !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .sidebar.closed {
+            left: calc(-1 * var(--sidebar-width-ag)) !important;
         }
 
         .main-content {
@@ -70,15 +75,32 @@
             min-height: 100vh !important;
             padding: 40px !important;
             position: relative !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .main-content.expanded {
+            margin-left: 0 !important;
+        }
+
+        /* Sidebar Visibility Logic */
+        #sidebarOpenBtn {
+            display: none !important;
+        }
+
+        .sidebar.closed~#sidebarOpenBtn {
+            display: flex !important;
         }
 
         @media (max-width: 768px) {
             .sidebar {
                 margin-left: calc(-1 * var(--sidebar-width-ag)) !important;
+                left: -100% !important;
+                /* Force off-screen for mobile */
             }
 
             .sidebar.active {
                 margin-left: 0 !important;
+                left: 0 !important;
             }
 
             .main-content {
@@ -93,6 +115,11 @@
                 background: rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(8px);
                 z-index: 40;
+            }
+
+            /* Hide open btn on mobile to avoid clutter */
+            .sidebar.closed~#sidebarOpenBtn {
+                display: none !important;
             }
         }
 
@@ -145,32 +172,35 @@
         }
 
         .shop-name {
-            font-size: 10px !important;
-            font-weight: 800 !important;
+            font-size: 9px !important;
+            font-weight: 900 !important;
             text-transform: uppercase !important;
-            tracking: 0.1em !important;
+            letter-spacing: 0.15em !important;
             color: #94a3b8 !important;
-            margin-top: 4px !important;
+            margin-top: 2px !important;
+            opacity: 0.8 !important;
         }
 
         .sidebar-toggle-btn {
-            width: 32px !important;
-            height: 32px !important;
-            background: #f8fafc !important;
-            border: 1px solid #f1f5f9 !important;
-            border-radius: 10px !important;
+            width: 36px !important;
+            height: 36px !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            border-radius: 12px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            color: #64748b !important;
+            color: #6366f1 !important;
             cursor: pointer !important;
-            transition: all 0.2s ease !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
         }
 
         .sidebar-toggle-btn:hover {
             background: #6366f1 !important;
             color: white !important;
-            border-color: #6366f1 !important;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.2) !important;
+            transform: scale(1.05);
         }
 
         /* Glassmorphism */
@@ -335,40 +365,63 @@
             border-bottom-right-radius: 16px;
         }
 
-        /* Search Suggestions Container */
+        /* Quantum Search Suggestions */
         .search-suggestions-container {
             position: absolute;
             top: 110%;
             left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 24px;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.12);
-            z-index: 1000;
-            overflow: hidden;
-            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 32px;
+            box-shadow:
+                0 30px 100px -20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            z-index: 9999 !important;
+            overflow: visible !important;
+            padding: 12px;
+            transform-origin: top center;
+            animation: suggestAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto !important;
+        }
+
+        @keyframes suggestAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .search-suggestion-item {
-            padding: 12px 16px;
-            border-radius: 16px;
-            margin-bottom: 4px;
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            cursor: pointer !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid transparent;
+            position: relative;
+            z-index: 10000 !important;
+            pointer-events: auto !important;
         }
 
         .search-suggestion-item:hover,
         .search-suggestion-item.active {
             background: white;
             border-color: rgba(99, 102, 241, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            transform: scale(1.01);
+            box-shadow:
+                0 10px 25px -5px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(99, 102, 241, 0.05) inset;
+            transform: translateX(4px);
         }
 
         .search-suggestion-item:last-child {
@@ -378,11 +431,6 @@
 </head>
 
 <body>
-    <!-- Sidebar Toggle (Visible when closed) -->
-    <button id="sidebarOpenBtn" onclick="toggleSidebar()"
-        class="fixed top-8 left-8 w-12 h-12 bg-white border border-slate-200 text-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:scale-110 active:scale-95 transition-all z-[100] hidden">
-        <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
-    </button>
 
     <!-- Aesthetics Layers -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
@@ -396,6 +444,15 @@
     <div class="beam" style="left: 60%; animation-delay: 3s;"></div>
 
     <?php include 'includes/sidebar.php'; ?>
+
+    <!-- Sidebar Toggle (Visible when closed) -->
+    <button id="sidebarOpenBtn"
+        class="fixed left-0 top-1/2 -translate-y-1/2 w-10 h-28 bg-white backdrop-blur-xl border border-l-0 border-indigo-100 text-indigo-600 rounded-r-3xl flex flex-col items-center justify-center shadow-[10px_0_30px_rgba(99,102,241,0.15)] hover:w-14 hover:bg-white transition-all z-[9999] group">
+        <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone"
+            class="text-2xl group-hover:scale-125 transition-transform mb-1"></iconify-icon>
+        <span
+            class="[writing-mode:vertical-lr] text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Expand</span>
+    </button>
 
     <div id="mainContent" class="main-content min-h-screen relative z-10 px-6 py-8 md:px-12">
 
@@ -558,7 +615,7 @@
             </div>
 
             <!-- Client Grid -->
-            <div class="overflow-x-auto pb-4">
+            <div class="pb-4">
                 <table class="table-ag">
                     <thead>
                         <tr>
@@ -1188,12 +1245,8 @@
     <script src="assets/js/customers_custom.js"></script>
 
     <script>
-        // Initialize Intelligence Search
-        document.addEventListener('DOMContentLoaded', () => {
-            if (document.getElementById('customer-search')) {
-                initializeSearchSuggestions('#customer-search');
-            }
-        });
+        // Search suggestions are initialized in assets/js/customers_custom.js
+        // to handle specific redirection logic.
     </script>
 </body>
 

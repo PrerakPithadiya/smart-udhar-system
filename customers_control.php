@@ -35,19 +35,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         if (empty($errors)) {
-            $stmt = $conn->prepare("INSERT INTO customers (user_id, name, mobile, email, address) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO customers (user_id, name, mobile, email, address, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'active', NOW(), NOW())");
+            $status = 'active';
             $stmt->bind_param("issss", $_SESSION['user_id'], $name, $mobile, $email, $address);
 
             if ($stmt->execute()) {
-                setMessage("Customer added successfully!", "success");
-                header("Location: customers.php");
+                $new_id = $stmt->insert_id;
+                error_log("Customer added successfully. ID: " . $new_id . " Name: " . $name);
+                setMessage("Entity '" . $name . "' has been successfully initialized in the data core.", "success");
+                header("Location: customers.php?id=" . $new_id . "&action=view");
                 exit();
             } else {
-                setMessage("Error adding customer: " . $stmt->error, "danger");
+                error_log("Error adding customer: " . $stmt->error);
+                setMessage("Database rejection: " . $stmt->error, "danger");
             }
             $stmt->close();
         } else {
-            setMessage(implode("<br>", $errors), "danger");
+            setMessage("Protocol violation: " . implode(" | ", $errors), "danger");
         }
     }
 

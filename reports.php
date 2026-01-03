@@ -498,7 +498,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><?php echo htmlspecialchars($row['customer_name']); ?></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
                                                 <td class="text-end">
-                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
+                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong>
+                                                </td>
                                                 <td>
                                                     <?php
                                                     $badge_class = 'secondary';
@@ -574,7 +575,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><strong><?php echo htmlspecialchars($row['customer_name']); ?></strong></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
                                                 <td class="text-end text-success">
-                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong></td>
+                                                    <strong>₹<?php echo number_format($row['amount'], 2); ?></strong>
+                                                </td>
                                                 <td>
                                                     <span class="badge bg-info">
                                                         <?php echo ucfirst(str_replace('_', ' ', $row['payment_mode'])); ?>
@@ -589,7 +591,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                         <tr class="table-success">
                                             <td colspan="3"><strong>Total</strong></td>
                                             <td class="text-end">
-                                                <strong>₹<?php echo number_format($payment_total, 2); ?></strong></td>
+                                                <strong>₹<?php echo number_format($payment_total, 2); ?></strong>
+                                            </td>
                                             <td colspan="3"></td>
                                         </tr>
                                     </tfoot>
@@ -644,7 +647,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                                 <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
                                                 <td><?php echo htmlspecialchars($row['mobile']); ?></td>
                                                 <td class="text-end text-danger">
-                                                    <strong>₹<?php echo number_format($row['balance'], 2); ?></strong></td>
+                                                    <strong>₹<?php echo number_format($row['balance'], 2); ?></strong>
+                                                </td>
                                                 <td class="text-center"><?php echo $row['total_bills']; ?></td>
                                                 <td class="text-center"><?php echo $row['total_payments']; ?></td>
                                                 <td>
@@ -660,7 +664,8 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                                         <tr class="table-warning">
                                             <td colspan="2"><strong>Total Outstanding</strong></td>
                                             <td class="text-end">
-                                                <strong>₹<?php echo number_format($total_outstanding, 2); ?></strong></td>
+                                                <strong>₹<?php echo number_format($total_outstanding, 2); ?></strong>
+                                            </td>
                                             <td colspan="4"></td>
                                         </tr>
                                     </tfoot>
@@ -764,6 +769,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="assets/js/common.js"></script>
     <script src="assets/js/reports.js"></script>
 
 </body>

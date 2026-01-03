@@ -351,7 +351,7 @@ $stmt->close();
 
 <body class="bg-[var(--bg-deep)] text-[#f1f5f9]">
     <!-- Sidebar Toggle Commander (Visible when closed) -->
-    <button id="sidebarOpenBtn" onclick="toggleSidebar()"
+    <button id="sidebarOpenBtn"
         class="fixed top-8 left-8 w-12 h-12 bg-slate-900/80 border border-white/10 text-indigo-400 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-xl hover:scale-110 active:scale-95 transition-all z-[100] hidden">
         <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
     </button>

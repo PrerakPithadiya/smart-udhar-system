@@ -163,7 +163,7 @@ $count_stmt->close();
 
 // Pagination
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 15;
+$limit = 10;
 $offset = ($page - 1) * $limit;
 $total_pages = ceil($total_items / $limit);
 

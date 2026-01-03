@@ -7,12 +7,14 @@
     <title><?php echo $page_title ?? 'Payment Management'; ?> | Smart Udhar Pro</title>
 
     <!-- Core Engine -->
+    <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="assets/js/common.js" defer></script>
 
     <style>
         :root {
@@ -58,6 +60,14 @@
             background: transparent !important;
             border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
             padding: 32px 24px !important;
+            position: relative !important;
+        }
+
+        #sidebarToggle {
+            position: absolute !important;
+            right: 20px !important;
+            top: 20px !important;
+            z-index: 60 !important;
         }
 
         .sidebar-header h4 { color: #0f172a !important; font-weight: 800 !important; }
@@ -239,7 +249,7 @@
 
 <body class="bg-[var(--bg-airy)]">
     <!-- Sidebar Toggle Commander (Visible when closed) -->
-    <button id="sidebarOpenBtn" onclick="toggleSidebar()" class="fixed top-8 left-8 w-12 h-12 bg-white border border-slate-200 text-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:scale-110 active:scale-95 transition-all z-[100] hidden">
+    <button id="sidebarOpenBtn" class="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-16 bg-white border border-slate-200 text-indigo-600 rounded-r-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:w-14 active:scale-95 transition-all z-[100] hidden">
         <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
     </button>
 
@@ -432,7 +442,7 @@
                         <span class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-500 uppercase"><?php echo $total_payments; ?> Records Linked</span>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <div>
                         <?php if (empty($payments_list)): ?>
                                 <div class="py-24 text-center">
                                     <iconify-icon icon="solar:ghost-line-duotone" class="text-8xl text-slate-200 mb-6"></iconify-icon>
@@ -441,7 +451,7 @@
                                 </div>
                         <?php else: ?>
                                 <table class="w-full">
-                                    <thead class="bg-slate-50/50 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 border-b border-slate-100">
+                                    <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 border-b border-slate-100">
                                         <tr>
                                             <th class="px-8 py-5 text-left">
                                                 <a href="<?php echo getSortUrl('p.payment_date', $order_by, $order_dir); ?>" class="hover:text-indigo-600 transition-colors flex items-center gap-2">
@@ -746,7 +756,7 @@
                                                             </div>
                                                             <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest"><?php echo $alloc['bill_no']; ?></span>
                                                         </div>
-                                                        <p class="text-xs font-bold text-slate-500 line-clamp-1 mb-2 italic"><?php echo $alloc['description']; ?></p>
+                                                        <p class="text-xs font-bold text-slate-500 line-clamp-1 mb-2 italic"><?php echo htmlspecialchars($alloc['description']); ?></p>
                                                         <p class="text-sm font-black text-emerald-600 tracking-tight">₹<?php echo number_format($alloc['allocated_amount'], 2); ?></p>
                                                     </div>
                                             <?php endforeach; ?>
@@ -877,19 +887,6 @@
                     </div>
                 </div>
         <?php endif; ?>
-        
-        <!-- Footer Legend -->
-        <footer class="mt-20 py-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-500 text-xl font-black italic">AU</div>
-                <div>
-                    <p class="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">Antigravity Ledger</p>
-                    <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enterprise Cryptography v<?php echo PHP_VERSION; ?></p>
-                </div>
-            </div>
-            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">&copy; <?php echo date('Y'); ?> Smart Udhar Operating System. Design by Antigravity Engineering.</p>
-        </footer>
-    </div>
 
     <!-- Interface Controller -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -919,6 +916,102 @@
                 form.submit();
             }
         }
+    </script>
+
+    <script>
+        (function () {
+            if (window.__paymentsSidebarToggleInitialized) return;
+            window.__paymentsSidebarToggleInitialized = true;
+
+            function getNodes() {
+                return {
+                    sidebar: document.querySelector('.sidebar'),
+                    mainContent: document.getElementById('mainContent') || document.querySelector('.main-content'),
+                    openBtn: document.getElementById('sidebarOpenBtn'),
+                    toggleBtn: document.getElementById('sidebarToggle')
+                };
+            }
+
+            function isMobile() {
+                return window.innerWidth <= 768;
+            }
+
+            function syncOpenButtonVisibility() {
+                const { sidebar, openBtn } = getNodes();
+                if (!sidebar || !openBtn) return;
+
+                if (isMobile()) {
+                    openBtn.classList.add('hidden');
+                    openBtn.style.display = 'none';
+                    return;
+                }
+
+                const isClosed = sidebar.classList.contains('closed');
+                if (isClosed) {
+                    openBtn.classList.remove('hidden');
+                    openBtn.style.display = 'flex';
+                } else {
+                    openBtn.classList.add('hidden');
+                    openBtn.style.display = 'none';
+                }
+            }
+
+            function fallbackToggle() {
+                const { sidebar, mainContent } = getNodes();
+                if (!sidebar || !mainContent) return;
+
+                if (isMobile()) {
+                    sidebar.classList.toggle('active');
+                    mainContent.classList.toggle('active');
+                } else {
+                    const isClosed = sidebar.classList.toggle('closed');
+                    mainContent.classList.toggle('expanded');
+                    localStorage.setItem('sidebarState', isClosed ? 'closed' : 'open');
+                }
+
+                syncOpenButtonVisibility();
+            }
+
+            function toggleSidebarSafe() {
+                if (typeof window.toggleSidebar === 'function') {
+                    window.toggleSidebar();
+                    syncOpenButtonVisibility();
+                    return;
+                }
+                fallbackToggle();
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const { sidebar, mainContent, openBtn, toggleBtn } = getNodes();
+                if (!sidebar || !mainContent) return;
+
+                const savedState = localStorage.getItem('sidebarState');
+                if (savedState === 'closed' && !isMobile()) {
+                    sidebar.classList.add('closed');
+                    mainContent.classList.add('expanded');
+                }
+
+                syncOpenButtonVisibility();
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        toggleSidebarSafe();
+                    }, true);
+                }
+
+                if (openBtn) {
+                    openBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        toggleSidebarSafe();
+                    }, true);
+                }
+
+                window.addEventListener('resize', syncOpenButtonVisibility);
+            });
+        })();
     </script>
 </body>
 </html>
