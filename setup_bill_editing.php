@@ -146,7 +146,6 @@ try {
         <a href='udhar.php' class='btn btn-primary'>Go to Udhar Entry Page</a>
         <a href='dashboard.php' class='btn btn-secondary'>Go to Dashboard</a>
     </div>";
-
 } catch (Exception $e) {
     echo "<div class='alert alert-danger'>
         <h4>Error during setup:</h4>
@@ -157,4 +156,3 @@ try {
 echo "</div></div></div></body></html>";
 
 $conn->close();
-?>
