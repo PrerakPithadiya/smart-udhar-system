@@ -120,8 +120,8 @@ class SearchSuggestions {
         this.addActive(items);
         break;
       case "Enter":
-        e.preventDefault();
         if (this.currentFocus > -1 && items[this.currentFocus]) {
+          e.preventDefault();
           items[this.currentFocus].click();
         }
         break;
@@ -256,14 +256,14 @@ class SearchSuggestions {
                   </div>
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <h4 class="text-[15px] font-black text-slate-800 tracking-tight leading-none mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                    <h4 class="text-[15px] font-black text-black tracking-tight leading-none mb-2 truncate group-hover:text-indigo-600 transition-colors">
                       ${this.highlightMatch(suggestion.name, this.input.value)}
                     </h4>
                     <div class="flex items-center gap-3">
                       ${
                         suggestion.mobile
                           ? `
-                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
                           <iconify-icon icon="solar:phone-bold-duotone" class="text-indigo-400 text-sm"></iconify-icon>
                           ${suggestion.mobile}
                         </span>`
@@ -272,7 +272,7 @@ class SearchSuggestions {
                       ${
                         suggestion.email
                           ? `
-                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                        <span class="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
                           <iconify-icon icon="solar:letter-bold-duotone" class="text-indigo-400 text-sm"></iconify-icon>
                           <span class="truncate max-w-[120px]">${suggestion.email}</span>
                         </span>`
@@ -282,9 +282,6 @@ class SearchSuggestions {
                 </div>
             </div>
             ${balanceText}
-            <div class="absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none">
-              <iconify-icon icon="solar:alt-arrow-right-bold-duotone" class="text-indigo-600 text-2xl"></iconify-icon>
-            </div>
         `;
   }
 
@@ -295,7 +292,7 @@ class SearchSuggestions {
     const regex = new RegExp(`(${escapedQuery})`, "gi");
     return text.replace(
       regex,
-      `<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 bg-no-repeat bg-[length:100%_2px] bg-bottom font-black">$1</span>`
+      `<span class="bg-indigo-100 text-indigo-800 px-1 rounded font-black">$1</span>`
     );
   }
 

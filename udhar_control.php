@@ -6,6 +6,61 @@ requireLogin();
 
 $conn = getDBConnection();
 
+function tableColumnExists($conn, $table, $column)
+{
+    static $cache = [];
+    $key = $table . ':' . $column;
+    if (array_key_exists($key, $cache)) {
+        return $cache[$key];
+    }
+
+    $stmt = $conn->prepare("SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1");
+    if (!$stmt) {
+        $cache[$key] = false;
+        return $cache[$key];
+    }
+    $stmt->bind_param("ss", $table, $column);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cache[$key] = ($result && $result->num_rows > 0);
+    $stmt->close();
+
+    return $cache[$key];
+}
+
+function tableColumnType($conn, $table, $column)
+{
+    static $cache = [];
+    $key = $table . ':' . $column . ':type';
+    if (array_key_exists($key, $cache)) {
+        return $cache[$key];
+    }
+
+    $stmt = $conn->prepare("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1");
+    if (!$stmt) {
+        $cache[$key] = null;
+        return $cache[$key];
+    }
+    $stmt->bind_param("ss", $table, $column);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $cache[$key] = $row['DATA_TYPE'] ?? null;
+    $stmt->close();
+
+    return $cache[$key];
+}
+
+function mysqliBindParamsDynamic($stmt, $types, $params)
+{
+    $bind_names = [];
+    $bind_names[] = $types;
+    foreach ($params as $k => $value) {
+        $bind_names[] = &$params[$k];
+    }
+    return call_user_func_array([$stmt, 'bind_param'], $bind_names);
+}
+
 // Handle actions
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 $udhar_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -46,6 +101,29 @@ function generateBillNumber($conn, $user_id)
     return $prefix . '-' . $year . $month . '-' . $new_num;
 }
 
+function generateBillNumberFlexible($conn, $user_id)
+{
+    $type = tableColumnType($conn, 'udhar_transactions', 'bill_no');
+
+    // Older schemas store bill_no as int; newer schemas use string like BILL-YYYYMM-XXXX.
+    if ($type && in_array(strtolower($type), ['int', 'bigint', 'mediumint', 'smallint', 'tinyint', 'decimal', 'float', 'double'], true)) {
+        $stmt = $conn->prepare("
+            SELECT COALESCE(MAX(ut.bill_no), 0) AS max_bill
+            FROM udhar_transactions ut
+            JOIN customers c ON ut.customer_id = c.id
+            WHERE c.user_id = ?
+        ");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+        return (int)($row['max_bill'] ?? 0) + 1;
+    }
+
+    return generateBillNumber($conn, $user_id);
+}
+
 // Process form submissions
 if (isset($_POST['add_udhar'])) {
     $category = isset($_POST['category']) ? sanitizeInput($_POST['category']) : '';
@@ -65,11 +143,11 @@ if (isset($_POST['add_udhar'])) {
     $errors = [];
 
     if ($customer_id <= 0) {
-        $errors[] = "Please select a customer";
+        $errors[] = "Please choose a customer";
     }
 
     if (empty($transaction_date)) {
-        $errors[] = "Transaction date is required";
+        $errors[] = "Bill date is required";
     }
 
     // Check if items are added
@@ -82,7 +160,7 @@ if (isset($_POST['add_udhar'])) {
 
         try {
             // Generate bill number
-            $bill_no = generateBillNumber($conn, $_SESSION['user_id']);
+            $bill_no = generateBillNumberFlexible($conn, $_SESSION['user_id']);
 
             // Calculate totals from items
             $total_amount = 0;
@@ -94,9 +172,9 @@ if (isset($_POST['add_udhar'])) {
                 foreach ($_POST['items'] as $index => $item) {
                     $qty = floatval($item['quantity']);
                     $price = floatval($item['price']);
-                    $cgst = floatval($item['cgst_rate']);
-                    $sgst = floatval($item['sgst_rate']);
-                    $igst = floatval($item['igst_rate']);
+                    $cgst = floatval($item['cgst_rate'] ?? 0);
+                    $sgst = floatval($item['sgst_rate'] ?? 0);
+                    $igst = floatval($item['igst_rate'] ?? 0);
 
                     $item_total = $qty * $price;
                     $total_amount += $item_total;
@@ -111,18 +189,85 @@ if (isset($_POST['add_udhar'])) {
             }
 
             // Take manually edited values from POST, or use calculated ones as fallback
-            $cgst_amount = floatval($_POST['cgst_amount'] ?? $cgst_calc);
-            $sgst_amount = floatval($_POST['sgst_amount'] ?? $sgst_calc);
-            $igst_amount = floatval($_POST['igst_amount'] ?? $igst_calc);
+            $cgst_amount = floatval($_POST['cgst_amount'] ?? 0);
+            $sgst_amount = floatval($_POST['sgst_amount'] ?? 0);
+            $igst_amount = floatval($_POST['igst_amount'] ?? 0);
             $discount_amount = floatval($_POST['discount'] ?? 0);
             $transportation_charge = floatval($_POST['transportation_charge'] ?? 0);
             $round_off = floatval($_POST['round_off'] ?? 0);
 
-            $grand_total = $total_amount + $cgst_amount + $sgst_amount + $igst_amount - $discount_amount + $transportation_charge + $round_off;
+            $grand_total = $total_amount - $discount_amount + $transportation_charge + $round_off;
 
-            // Insert udhar transaction
-            $stmt = $conn->prepare("INSERT INTO udhar_transactions (customer_id, bill_no, transaction_date, due_date, amount, cgst_amount, sgst_amount, igst_amount, discount, discount_type, round_off, transportation_charge, description, notes, status, user_id, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)");
-            $stmt->bind_param("isssdddddsddssis", $customer_id, $bill_no, $transaction_date, $due_date, $total_amount, $cgst_amount, $sgst_amount, $igst_amount, $discount_amount, $discount_type, $round_off, $transportation_charge, $description, $notes, $_SESSION['user_id'], $category);
+            // Insert udhar transaction (schema-aware: some DBs don't have user_id/category columns)
+            $columns = [
+                'customer_id',
+                'bill_no',
+                'transaction_date',
+                'due_date',
+                'amount',
+                'cgst_amount',
+                'sgst_amount',
+                'igst_amount',
+                'discount',
+                'discount_type',
+                'round_off',
+                'transportation_charge',
+                'description',
+                'notes',
+                'status'
+            ];
+
+            $placeholders = array_fill(0, count($columns), '?');
+            $types = "i"; // customer_id
+            $params = [$customer_id];
+
+            // bill_no can be string (BILL-...) or int depending on schema
+            if (is_int($bill_no)) {
+                $types .= "i";
+            } else {
+                $types .= "s";
+            }
+            $params[] = $bill_no;
+
+            // transaction_date, due_date
+            $types .= "ss";
+            $params[] = $transaction_date;
+            $params[] = $due_date;
+
+            // amount, cgst_amount, sgst_amount, igst_amount, discount, round_off, transportation_charge
+            $types .= "ddddddd";
+            $params[] = $total_amount;
+            $params[] = $cgst_amount;
+            $params[] = $sgst_amount;
+            $params[] = $igst_amount;
+            $params[] = $discount_amount;
+            $params[] = $round_off;
+            $params[] = $transportation_charge;
+
+            // discount_type, description, notes, status
+            $types .= "ssss";
+            $params[] = $discount_type;
+            $params[] = $description;
+            $params[] = $notes;
+            $params[] = 'pending';
+
+            if (tableColumnExists($conn, 'udhar_transactions', 'user_id')) {
+                $columns[] = 'user_id';
+                $placeholders[] = '?';
+                $types .= 'i';
+                $params[] = (int)$_SESSION['user_id'];
+            }
+
+            if (tableColumnExists($conn, 'udhar_transactions', 'category')) {
+                $columns[] = 'category';
+                $placeholders[] = '?';
+                $types .= 's';
+                $params[] = $category;
+            }
+
+            $sql = "INSERT INTO udhar_transactions (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+            $stmt = $conn->prepare($sql);
+            mysqliBindParamsDynamic($stmt, $types, $params);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error creating udhar transaction: " . $stmt->error);
@@ -180,12 +325,12 @@ if (isset($_POST['add_udhar'])) {
             $conn->commit();
 
             // Redirect to bill print page
-            setMessage("Udhar entry created successfully! Bill No: $bill_no", "success");
+            setMessage("Bill saved! Bill No: $bill_no", "success");
             header("Location: print_bill.php?id=$udhar_id");
             exit();
         } catch (Exception $e) {
             $conn->rollback();
-            setMessage("Error: " . $e->getMessage(), "danger");
+            setMessage("Something went wrong: " . $e->getMessage(), "danger");
         }
     } else {
         setMessage(implode("<br>", $errors), "danger");

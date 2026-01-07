@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title ?? 'Customer Alliance'; ?> | Smart Udhar Pro</title>
+    <title><?php echo $page_title ?? 'Customers'; ?> | Smart Udhar Pro</title>
 
     <!-- Antigravity Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,6 +13,8 @@
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/common.js" defer></script>
 
     <style>
         :root {
@@ -20,7 +22,6 @@
             --accent-indigo: #6366f1;
             --glass-white: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(255, 255, 255, 0.3);
-            --sidebar-width-ag: 280px;
         }
 
         html,
@@ -29,178 +30,12 @@
             scroll-behavior: auto !important;
         }
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-airy);
-            color: #1e293b;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-            background-image:
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
-        }
-
         h1,
         h2,
         h3,
         h4,
         .font-space {
             font-family: 'Space Grotesk', sans-serif;
-        }
-
-        /* Master Layout Engine */
-        .sidebar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: var(--sidebar-width-ag) !important;
-            height: 100vh !important;
-            background: rgba(255, 255, 255, 0.7) !important;
-            backdrop-filter: blur(40px) !important;
-            border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
-            z-index: 50 !important;
-            overflow-y: auto !important;
-            display: flex !important;
-            flex-direction: column !important;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .sidebar.closed {
-            left: calc(-1 * var(--sidebar-width-ag)) !important;
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width-ag) !important;
-            min-height: 100vh !important;
-            padding: 40px !important;
-            position: relative !important;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .main-content.expanded {
-            margin-left: 0 !important;
-        }
-
-        /* Sidebar Visibility Logic */
-        #sidebarOpenBtn {
-            display: none !important;
-        }
-
-        .sidebar.closed~#sidebarOpenBtn {
-            display: flex !important;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-left: calc(-1 * var(--sidebar-width-ag)) !important;
-                left: -100% !important;
-                /* Force off-screen for mobile */
-            }
-
-            .sidebar.active {
-                margin-left: 0 !important;
-                left: 0 !important;
-            }
-
-            .main-content {
-                margin-left: 0 !important;
-                padding: 20px !important;
-            }
-
-            .main-content.active::after {
-                content: '';
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.3);
-                backdrop-filter: blur(8px);
-                z-index: 40;
-            }
-
-            /* Hide open btn on mobile to avoid clutter */
-            .sidebar.closed~#sidebarOpenBtn {
-                display: none !important;
-            }
-        }
-
-        /* Sidebar Navigation Spacing */
-        .sidebar-header {
-            padding: 32px 24px !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-        }
-
-        .sidebar-header h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 800;
-            color: #1e293b;
-            margin: 0 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-        }
-
-        .sidebar .nav-link {
-            margin: 4px 16px !important;
-            padding: 12px 16px !important;
-            border-radius: 16px !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            color: #64748b !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .sidebar .nav-link:hover {
-            background: rgba(99, 102, 241, 0.05) !important;
-            color: #6366f1 !important;
-            transform: translateX(4px);
-        }
-
-        .sidebar .nav-link.active {
-            background: #6366f1 !important;
-            color: white !important;
-            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3) !important;
-        }
-
-        .sidebar .nav-link i {
-            font-size: 1.25rem !important;
-        }
-
-        .shop-name {
-            font-size: 9px !important;
-            font-weight: 900 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.15em !important;
-            color: #94a3b8 !important;
-            margin-top: 2px !important;
-            opacity: 0.8 !important;
-        }
-
-        .sidebar-toggle-btn {
-            width: 36px !important;
-            height: 36px !important;
-            background: rgba(255, 255, 255, 0.8) !important;
-            border: 1px solid rgba(0, 0, 0, 0.05) !important;
-            border-radius: 12px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: #6366f1 !important;
-            cursor: pointer !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-        }
-
-        .sidebar-toggle-btn:hover {
-            background: #6366f1 !important;
-            color: white !important;
-            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.2) !important;
-            transform: scale(1.05);
         }
 
         /* Glassmorphism */
@@ -217,7 +52,6 @@
             transform: translateY(-8px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
-
 
         /* Status & Balance Badges */
         .status-pill {
@@ -371,9 +205,7 @@
             top: 110%;
             left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            background: white;
             border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 32px;
             box-shadow:
@@ -382,6 +214,8 @@
             z-index: 9999 !important;
             overflow: visible !important;
             padding: 12px;
+            max-height: 320px;
+            overflow-y: auto !important;
             transform-origin: top center;
             animation: suggestAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: auto !important;
@@ -412,6 +246,8 @@
             position: relative;
             z-index: 10000 !important;
             pointer-events: auto !important;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0f172a;
         }
 
         .search-suggestion-item:hover,
@@ -427,16 +263,35 @@
         .search-suggestion-item:last-child {
             margin-bottom: 0;
         }
+
+        /* Ensure suggestion text is always readable (even if other CSS overrides Tailwind classes) */
+        .search-suggestion-item h4 {
+            color: #0f172a !important;
+        }
+
+        .search-suggestion-item .text-slate-500,
+        .search-suggestion-item .text-slate-400 {
+            color: #334155 !important;
+        }
+
+        .search-suggestion-item .text-slate-300 {
+            color: #64748b !important;
+        }
+
+        .search-suggestion-item .bg-indigo-100.text-indigo-800 {
+            color: #1e40af !important;
+            background: rgba(224, 231, 255, 0.9) !important;
+        }
+
     </style>
 </head>
-
-<body>
+<body class="bg-[var(--bg-airy)]">
 
     <!-- Aesthetics Layers -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
         <svg class="w-full h-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
             <path class="noodle-path" d="M -100,200 C 200,100 400,400 600,200 C 800,0 1000,300 1200,100" />
-            <path class="noodle-path" style="animation-delay: -5s;"
+            <path class="noodle-path" style="animation-delay: -5s;">
                 d="M -100,500 C 300,400 500,700 800,500 C 1100,300 1400,600 1600,400" />
         </svg>
     </div>
@@ -446,12 +301,8 @@
     <?php include 'includes/sidebar.php'; ?>
 
     <!-- Sidebar Toggle (Visible when closed) -->
-    <button id="sidebarOpenBtn"
-        class="fixed left-0 top-1/2 -translate-y-1/2 w-10 h-28 bg-white backdrop-blur-xl border border-l-0 border-indigo-100 text-indigo-600 rounded-r-3xl flex flex-col items-center justify-center shadow-[10px_0_30px_rgba(99,102,241,0.15)] hover:w-14 hover:bg-white transition-all z-[9999] group">
-        <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone"
-            class="text-2xl group-hover:scale-125 transition-transform mb-1"></iconify-icon>
-        <span
-            class="[writing-mode:vertical-lr] text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Expand</span>
+    <button id="sidebarOpenBtn" class="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-16 bg-white border border-slate-200 text-indigo-600 rounded-r-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:w-14 active:scale-95 transition-all z-[100] hidden">
+        <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
     </button>
 
     <div id="mainContent" class="main-content min-h-screen relative z-10 px-6 py-8 md:px-12">
@@ -467,11 +318,10 @@
                         <iconify-icon icon="solar:alt-arrow-right-bold" class="text-[8px]"></iconify-icon>
                         <span class="text-indigo-500">Customers</span>
                     </nav>
-                    <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
+                    <h1 class="text-4xl font-black text-slate-800 tracking-tighter">
                         <iconify-icon icon="solar:users-group-rounded-bold-duotone"
                             class="text-indigo-500"></iconify-icon>
-                        Client <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Alliance</span>
+                        Customers
                     </h1>
                 </div>
             </div>
@@ -481,13 +331,13 @@
                     <a href="customers.php?action=add"
                         class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
                         <iconify-icon icon="solar:user-plus-bold-duotone" width="22"></iconify-icon>
-                        Onboard New Client
+                        Add Customer
                     </a>
                 <?php else: ?>
                     <a href="customers.php"
                         class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3.5 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all shadow-sm">
                         <iconify-icon icon="solar:alt-arrow-left-bold" width="22"></iconify-icon>
-                        Return to Vault
+                        Back to Customers
                     </a>
                 <?php endif; ?>
             </div>
@@ -504,16 +354,16 @@
                 <div class="glass-card p-6 border-l-4 border-indigo-500">
                     <div class="flex justify-between items-start mb-4">
                         <div
-                            class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center text-2xl">
+                            class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl">
                             <iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
                         </div>
                         <span
-                            class="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-50/50 px-2 py-1 rounded">Population</span>
+                            class="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-50/50 px-2 py-1 rounded">Total Customers</span>
                     </div>
                     <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                         <?php echo number_format($total_customers); ?>
                     </h3>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Total Registered</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Customers</p>
                 </div>
 
                 <div class="glass-card p-6 border-l-4 border-emerald-500">
@@ -523,13 +373,12 @@
                             <iconify-icon icon="solar:user-check-bold-duotone"></iconify-icon>
                         </div>
                         <span
-                            class="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-50/50 px-2 py-1 rounded">Active
-                            Status</span>
+                            class="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-50/50 px-2 py-1 rounded">Active Customers</span>
                     </div>
                     <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                         <?php echo number_format($active_count); ?>
                     </h3>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Verified Nodes</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Active Customers</p>
                 </div>
 
                 <div class="glass-card p-6 border-l-4 border-rose-500">
@@ -539,12 +388,11 @@
                             <iconify-icon icon="solar:hand-money-bold-duotone"></iconify-icon>
                         </div>
                         <span
-                            class="text-[10px] font-black text-rose-400 uppercase tracking-widest bg-rose-50/50 px-2 py-1 rounded">Treasury
-                            Out</span>
+                            class="text-[10px] font-black text-rose-400 uppercase tracking-widest bg-rose-50/50 px-2 py-1 rounded">Total Due</span>
                     </div>
                     <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                         ₹<?php echo number_format($due_total, 2); ?></h3>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Total Receivables</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Total Due</p>
                 </div>
 
                 <div class="glass-card p-6 border-l-4 border-amber-500">
@@ -554,12 +402,11 @@
                             <iconify-icon icon="solar:wallet-bold-duotone"></iconify-icon>
                         </div>
                         <span
-                            class="text-[10px] font-black text-amber-400 uppercase tracking-widest bg-amber-50/50 px-2 py-1 rounded">Advance
-                            Reserve</span>
+                            class="text-[10px] font-black text-amber-400 uppercase tracking-widest bg-amber-50/50 px-2 py-1 rounded">Total Advance</span>
                     </div>
                     <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                         ₹<?php echo number_format(abs($adv_total), 2); ?></h3>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Credit Deposits</p>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-tight mt-1">Total Advance</p>
                 </div>
             </div>
 
@@ -570,16 +417,13 @@
 
                     <div class="w-full md:w-80">
                         <label
-                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 block ms-1">Status
-                            Protocol</label>
+                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 block ms-1">Status</label>
                         <div class="relative">
                             <select name="status" onchange="this.form.submit()"
                                 class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-black text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer pr-16">
-                                <option value="">Universal Overview</option>
-                                <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active
-                                    Pulse</option>
-                                <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Silent
-                                    Nodes</option>
+                                <option value="">All</option>
+                                <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active</option>
+                                <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                             </select>
                             <iconify-icon icon="solar:round-alt-arrow-down-bold-duotone"
                                 class="absolute right-5 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none text-xl"></iconify-icon>
@@ -588,14 +432,13 @@
 
                     <div class="flex-grow w-full relative">
                         <label
-                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 block ms-1">Quantum
-                            Query Search</label>
+                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 block ms-1">Search</label>
                         <div class="relative group">
                             <iconify-icon icon="solar:magnifer-bold-duotone"
                                 class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors text-2xl"></iconify-icon>
                             <input type="text" name="search" id="customer-search"
-                                class="w-full bg-white border border-slate-200 rounded-2xl pl-14 pr-14 py-4 text-sm font-bold text-slate-800 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm"
-                                placeholder="Locate entity by name, contact or digital ID..."
+                                class="w-full bg-white border border-slate-200 rounded-2xl pl-14 pr-14 py-4 text-sm font-bold text-gray-900 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm"
+                                placeholder="Search by name, mobile or email..."
                                 value="<?php echo htmlspecialchars($search); ?>" data-api-url="api/search_customers.php"
                                 autocomplete="off">
                             <?php if (!empty($search)): ?>
@@ -609,7 +452,7 @@
 
                     <button type="submit"
                         class="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-95">
-                        Execute Scan
+                        Search
                     </button>
                 </form>
             </div>
@@ -621,24 +464,27 @@
                         <tr>
                             <th>
                                 <a href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&order_by=name&order_dir=<?php echo $order_by == 'name' && $order_dir == 'ASC' ? 'DESC' : 'ASC'; ?>"
+
                                     class="flex items-center gap-2 group cursor-pointer">
-                                    Client Profile
+                                    Customer
                                     <iconify-icon icon="solar:sort-vertical-linear"
                                         class="text-slate-300 group-hover:text-indigo-500 <?php echo $order_by == 'name' ? 'text-indigo-500' : ''; ?>"></iconify-icon>
                                 </a>
                             </th>
-                            <th>Communication</th>
+                            <th>Mobile</th>
+
                             <th>
                                 <a href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&order_by=balance&order_dir=<?php echo $order_by == 'balance' && $order_dir == 'ASC' ? 'DESC' : 'ASC'; ?>"
+
                                     class="flex items-center gap-2 group cursor-pointer">
-                                    Treasury Balance
+                                    Balance
                                     <iconify-icon icon="solar:sort-vertical-linear"
                                         class="text-slate-300 group-hover:text-indigo-500 <?php echo $order_by == 'balance' ? 'text-indigo-500' : ''; ?>"></iconify-icon>
                                 </a>
                             </th>
-                            <th>Status Node</th>
+                            <th>Status</th>
                             <th>Last Activity</th>
-                            <th class="text-center">Protocol Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -648,11 +494,10 @@
                                     class="text-center py-24 bg-white/50 rounded-3xl border border-dashed border-slate-200">
                                     <iconify-icon icon="solar:user-block-bold-duotone"
                                         class="text-6xl text-slate-200 mb-4"></iconify-icon>
-                                    <h4 class="text-xl font-bold text-slate-400 tracking-tight">Zero Matches Found in Data Core
-                                    </h4>
+                                    <h4 class="text-xl font-bold text-slate-400 tracking-tight">No customers found</h4>
                                     <a href="customers.php?action=add"
-                                        class="text-indigo-500 font-bold hover:underline mt-2 inline-block">Initialize First
-                                        Node</a>
+                                        class="text-indigo-500 font-bold hover:underline mt-2 inline-block">Add your first
+                                        customer</a>
                                 </td>
                             </tr>
                         <?php else: ?>
@@ -669,7 +514,7 @@
                                                     <?php echo htmlspecialchars($customer_item['name']); ?>
                                                 </h6>
                                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                                                    <?php echo htmlspecialchars($customer_item['email'] ?: 'No Email Linked'); ?>
+                                                    <?php echo htmlspecialchars($customer_item['email'] ?: 'No email'); ?>
                                                 </p>
                                             </div>
                                         </div>
@@ -710,7 +555,7 @@
                                     <td>
                                         <div class="flex flex-col">
                                             <span class="text-xs font-bold text-slate-700">
-                                                <?php echo $customer_item['last_transaction_date'] ? date('d M Y', strtotime($customer_item['last_transaction_date'])) : 'Inert Node'; ?>
+                                                <?php echo $customer_item['last_transaction_date'] ? date('d M Y', strtotime($customer_item['last_transaction_date'])) : 'No activity yet'; ?>
                                             </span>
                                             <?php if ($customer_item['last_transaction_date']): ?>
                                                 <span
@@ -722,12 +567,12 @@
                                         <div class="flex justify-center items-center gap-2">
                                             <a href="customers.php?action=view&id=<?php echo $customer_item['id']; ?>"
                                                 class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all"
-                                                title="Scan Profile">
+                                                title="View Customer">
                                                 <iconify-icon icon="solar:eye-bold" width="20"></iconify-icon>
                                             </a>
                                             <a href="customers.php?action=edit&id=<?php echo $customer_item['id']; ?>"
                                                 class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 transition-all"
-                                                title="Modify Node">
+                                                title="Edit Customer">
                                                 <iconify-icon icon="solar:pen-bold" width="20"></iconify-icon>
                                             </a>
 
@@ -741,19 +586,19 @@
                                                     <a href="udhar.php?action=add&customer_id=<?php echo $customer_item['id']; ?>"
                                                         class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors">
                                                         <iconify-icon icon="solar:wad-of-money-bold" class="text-lg"></iconify-icon>
-                                                        Add Udhar Node
+                                                        Add Udhar
                                                     </a>
                                                     <a href="payments.php?action=add&customer_id=<?php echo $customer_item['id']; ?>"
                                                         class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors border-t border-slate-50">
                                                         <iconify-icon icon="solar:cash-out-bold" class="text-lg"></iconify-icon>
-                                                        Receive Credit
+                                                        Add Payment
                                                     </a>
                                                     <button
-                                                        onclick="if(confirm('Purge this node from digital memory?')) { document.getElementById('deleteForm<?php echo $customer_item['id']; ?>').submit(); }"
+                                                        onclick="if(confirm('Delete this customer?')) { document.getElementById('deleteForm<?php echo $customer_item['id']; ?>').submit(); }"
                                                         class="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors border-t border-slate-50">
                                                         <iconify-icon icon="solar:trash-bin-trash-bold"
                                                             class="text-lg"></iconify-icon>
-                                                        Delete Node
+                                                        Delete Customer
                                                     </button>
                                                 </div>
                                             </div>
@@ -804,9 +649,9 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-black text-slate-800 tracking-tight">
-                                <?php echo $action == 'add' ? 'Initialize New Node' : 'Calibrate Entity Data'; ?>
+                                <?php echo $action == 'add' ? 'Add Customer' : 'Edit Customer'; ?>
                             </h2>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Metadata Configuration
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Customer Details
                             </p>
                         </div>
                     </div>
@@ -816,8 +661,8 @@
                             <!-- Field: Name -->
                             <div class="md:col-span-2">
                                 <label
-                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Entity
-                                    Primary Name *</label>
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Customer
+                                    Name *</label>
                                 <div class="relative group">
                                     <iconify-icon icon="solar:user-id-bold-duotone"
                                         class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-slate-300 group-focus-within:text-indigo-500 transition-colors"></iconify-icon>
@@ -830,13 +675,13 @@
                             <!-- Field: Contact -->
                             <div>
                                 <label
-                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Bio-Link
-                                    Contact</label>
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Mobile
+                                    Number</label>
                                 <div class="relative group">
                                     <iconify-icon icon="solar:phone-calling-bold-duotone"
                                         class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-slate-300 group-focus-within:text-indigo-500 transition-colors"></iconify-icon>
                                     <input type="tel" name="mobile" pattern="[0-9]{10}" class="w-full floating-input pl-14"
-                                        placeholder="10 Digit Frequency"
+                                        placeholder="10 digit mobile number"
                                         value="<?php echo $action == 'edit' ? htmlspecialchars($customer['mobile']) : ''; ?>">
                                 </div>
                             </div>
@@ -844,13 +689,12 @@
                             <!-- Field: Email -->
                             <div>
                                 <label
-                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Digital
-                                    Signal (Email)</label>
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Email</label>
                                 <div class="relative group">
                                     <iconify-icon icon="solar:letter-bold-duotone"
                                         class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-slate-300 group-focus-within:text-indigo-500 transition-colors"></iconify-icon>
                                     <input type="email" name="email" class="w-full floating-input pl-14"
-                                        placeholder="node@matrix.com"
+                                        placeholder="example@gmail.com"
                                         value="<?php echo $action == 'edit' ? htmlspecialchars($customer['email']) : ''; ?>">
                                 </div>
                             </div>
@@ -858,13 +702,12 @@
                             <!-- Field: Address -->
                             <div class="md:col-span-2">
                                 <label
-                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Geographic
-                                    Coordinates (Address)</label>
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Address</label>
                                 <div class="relative group">
                                     <iconify-icon icon="solar:map-point-bold-duotone"
                                         class="absolute left-5 top-5 text-2xl text-slate-300 group-focus-within:text-indigo-500 transition-colors"></iconify-icon>
                                     <textarea name="address" rows="3" class="w-full floating-input pl-14 pt-4 resize-none"
-                                        placeholder="Primary residency or base operations..."><?php echo $action == 'edit' ? htmlspecialchars($customer['address']) : ''; ?></textarea>
+                                        placeholder="Address..."><?php echo $action == 'edit' ? htmlspecialchars($customer['address']) : ''; ?></textarea>
                                 </div>
                             </div>
 
@@ -872,13 +715,12 @@
                                 <!-- Node Status -->
                                 <div>
                                     <label
-                                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Node
-                                        Connectivity</label>
+                                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Status</label>
                                     <div class="relative">
                                         <select name="status"
                                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-indigo-500/10 appearance-none cursor-pointer">
-                                            <option value="active" <?php echo $customer['status'] == 'active' ? 'selected' : ''; ?>>Active Stream</option>
-                                            <option value="inactive" <?php echo $customer['status'] == 'inactive' ? 'selected' : ''; ?>>Cold Storage</option>
+                                            <option value="active" <?php echo $customer['status'] == 'active' ? 'selected' : ''; ?>>Active</option>
+                                            <option value="inactive" <?php echo $customer['status'] == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                                         </select>
                                         <iconify-icon icon="solar:alt-arrow-down-bold"
                                             class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></iconify-icon>
@@ -889,7 +731,7 @@
                                 <div>
                                     <label
                                         class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block ms-1">Current
-                                        Fiscal Gravity</label>
+                                        Balance</label>
                                     <div
                                         class="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
                                         <span
@@ -898,7 +740,7 @@
                                         </span>
                                         <span
                                             class="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-white border border-slate-200 rounded-lg">
-                                            <?php echo $customer['balance'] > 0 ? 'Negative Delta (Due)' : ($customer['balance'] < 0 ? 'Positive Surplus (Adv)' : 'Neutral'); ?>
+                                            <?php echo $customer['balance'] > 0 ? 'Due' : ($customer['balance'] < 0 ? 'Advance' : 'Clear'); ?>
                                         </span>
                                     </div>
                                 </div>
@@ -911,17 +753,17 @@
                                 <button type="submit" name="update_customer"
                                     class="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2">
                                     <iconify-icon icon="solar:check-read-bold" class="text-xl"></iconify-icon>
-                                    Confirm Calibration
+                                    Save Changes
                                 </button>
                                 <button type="button" onclick="document.getElementById('editDeleteDialog').showModal();"
                                     class="px-8 bg-rose-50 text-rose-500 border border-rose-100 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-100 transition-all">
-                                    Purge Data
+                                    Delete Customer
                                 </button>
                             <?php else: ?>
                                 <button type="submit" name="add_customer"
                                     class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2">
                                     <iconify-icon icon="solar:rocket-bold" class="text-xl"></iconify-icon>
-                                    Launch Entity Node
+                                    Save Customer
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -937,23 +779,20 @@
                         class="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">
                         <iconify-icon icon="solar:danger-bold-duotone"></iconify-icon>
                     </div>
-                    <h3 class="text-xl font-black text-slate-800 text-center tracking-tight mb-2">Destructive Sequence
-                        Initiated</h3>
+                    <h3 class="text-xl font-black text-slate-800 text-center tracking-tight mb-2">Delete Customer</h3>
                     <p class="text-sm text-slate-500 text-center leading-relaxed mb-8">
-                        Are you certain you wish to purge <span
+                        Are you sure you want to delete <span
                             class="font-black text-slate-800"><?php echo htmlspecialchars($customer['name']); ?></span>?
-                        This action will dissolve all transactional history and linked data.
+                        This will also remove related data.
                     </p>
                     <div class="flex gap-3">
                         <form method="POST" action="" class="flex-grow">
                             <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
                             <button type="submit" name="delete_customer"
-                                class="w-full bg-rose-600 hover:bg-rose-500 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Execute
-                                Purge</button>
+                                class="w-full bg-rose-600 hover:bg-rose-500 text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Delete</button>
                         </form>
                         <button onclick="document.getElementById('editDeleteDialog').close();"
-                            class="flex-grow bg-slate-50 hover:bg-slate-100 text-slate-500 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Abort
-                            Action</button>
+                            class="flex-grow bg-slate-50 hover:bg-slate-100 text-slate-500 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Cancel</button>
                     </div>
                 </div>
             </dialog>
@@ -977,12 +816,12 @@
                             </div>
                         </div>
 
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none mb-2">
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tighter">
                             <?php echo htmlspecialchars($customer['name']); ?>
                         </h2>
                         <span
                             class="status-pill <?php echo $customer['status'] == 'active' ? 'badge-active' : 'badge-inactive'; ?> text-[9px]">
-                            Connection: <?php echo $customer['status']; ?>
+                            Status: <?php echo $customer['status']; ?>
                         </span>
 
                         <div class="mt-8 space-y-4 pt-8 border-t border-slate-100">
@@ -993,7 +832,7 @@
                                         class="text-indigo-400 text-xl"></iconify-icon>
                                     <div class="text-left">
                                         <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Mobile
-                                            Frequency</p>
+                                            Number</p>
                                         <a href="tel:<?php echo $customer['mobile']; ?>"
                                             class="text-sm font-bold text-slate-700 hover:text-indigo-500 transition-colors"><?php echo $customer['mobile']; ?></a>
                                     </div>
@@ -1005,8 +844,7 @@
                                     <iconify-icon icon="solar:letter-bold-duotone"
                                         class="text-violet-400 text-xl"></iconify-icon>
                                     <div class="text-left">
-                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Digital
-                                            Signature</p>
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Email</p>
                                         <a href="mailto:<?php echo $customer['email']; ?>"
                                             class="text-sm font-bold text-slate-700 hover:text-indigo-500 transition-colors truncate block w-full"><?php echo $customer['email']; ?></a>
                                     </div>
@@ -1017,7 +855,7 @@
                         <div class="grid grid-cols-2 gap-3 mt-8">
                             <a href="customers.php?action=edit&id=<?php echo $customer['id']; ?>"
                                 class="flex items-center justify-center gap-2 bg-white border border-slate-200 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:border-indigo-500 hover:text-indigo-500 transition-all active:scale-95 shadow-sm">
-                                <iconify-icon icon="solar:pen-new-square-bold"></iconify-icon> Modify
+                                <iconify-icon icon="solar:pen-new-square-bold"></iconify-icon> Edit
                             </a>
                             <a href="udhar.php?action=add&customer_id=<?php echo $customer['id']; ?>"
                                 class="flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-lg shadow-indigo-100">
@@ -1029,34 +867,30 @@
                     <!-- Technical Specs -->
                     <div class="glass-card overflow-hidden">
                         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
-                            <h6 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Technical
-                                Specifications</h6>
+                            <h6 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Details</h6>
                         </div>
                         <div class="p-6">
                             <ul class="space-y-4">
                                 <li class="flex justify-between items-center text-xs">
-                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Entity ID</span>
+                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Customer ID</span>
                                     <span
                                         class="font-black text-slate-800">#<?php echo str_pad($customer['id'], 5, '0', STR_PAD_LEFT); ?></span>
                                 </li>
                                 <li class="flex justify-between items-center text-xs">
-                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Member
-                                        Activation</span>
+                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Customer Since</span>
                                     <span
                                         class="font-black text-slate-800"><?php echo date('d M Y', strtotime($customer['created_at'])); ?></span>
                                 </li>
                                 <li class="flex justify-between items-center text-xs">
-                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Last
-                                        Synchronization</span>
+                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Last Updated</span>
                                     <span
                                         class="font-black text-slate-800"><?php echo date('d M Y', strtotime($customer['updated_at'])); ?></span>
                                 </li>
                                 <li class="flex justify-between items-center text-xs">
-                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Recent
-                                        Pulsation</span>
+                                    <span class="font-bold text-slate-400 uppercase tracking-tighter">Last Activity</span>
                                     <span
                                         class="font-black <?php echo $customer['last_transaction_date'] ? 'text-indigo-500' : 'text-slate-300'; ?>">
-                                        <?php echo $customer['last_transaction_date'] ? date('d M Y', strtotime($customer['last_transaction_date'])) : 'Never Pulse'; ?>
+                                        <?php echo $customer['last_transaction_date'] ? date('d M Y', strtotime($customer['last_transaction_date'])) : 'No activity yet'; ?>
                                     </span>
                                 </li>
                             </ul>
@@ -1065,8 +899,7 @@
 
                     <?php if ($customer['address']): ?>
                         <div class="glass-card p-6">
-                            <h6 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Base Operations
-                                (Address)</h6>
+                            <h6 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Address</h6>
                             <p class="text-sm font-bold text-slate-600 leading-relaxed italic">
                                 "<?php echo nl2br(htmlspecialchars($customer['address'])); ?>"</p>
                         </div>
@@ -1082,8 +915,7 @@
                                 class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
                                 <iconify-icon icon="solar:history-bold-duotone" width="120"></iconify-icon>
                             </div>
-                            <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Lifetime
-                                Exposure</p>
+                            <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Lifetime Udhar</p>
                             <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                                 ₹<?php echo number_format($customer['total_udhar'] ?? 0, 2); ?></h3>
                             <div class="mt-4 w-12 h-1 bg-indigo-500 rounded-full"></div>
@@ -1094,8 +926,7 @@
                                 class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 text-emerald-500">
                                 <iconify-icon icon="solar:check-circle-bold-duotone" width="120"></iconify-icon>
                             </div>
-                            <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">Recuperated
-                                Total</p>
+                            <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">Total Paid</p>
                             <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                                 ₹<?php echo number_format($customer['total_paid'] ?? 0, 2); ?></h3>
                             <div class="mt-4 w-12 h-1 bg-emerald-500 rounded-full"></div>
@@ -1109,13 +940,13 @@
                             </div>
                             <p
                                 class="text-[10px] font-black uppercase tracking-widest mb-2 <?php echo $customer['balance'] > 0 ? 'text-rose-400' : ($customer['balance'] < 0 ? 'text-amber-400' : 'text-slate-400'); ?>">
-                                Net Gravity Balance
+                                Current Balance
                             </p>
                             <h3 class="text-3xl font-black text-slate-800 tracking-tighter">
                                 ₹<?php echo number_format(abs($customer['balance']), 2); ?></h3>
                             <p
                                 class="text-[8px] font-black uppercase tracking-[0.2em] mt-1 <?php echo $customer['balance'] > 0 ? 'text-rose-500' : ($customer['balance'] < 0 ? 'text-amber-500' : 'text-slate-400'); ?>">
-                                <?php echo $customer['balance'] > 0 ? 'Current Liabilities (Due)' : ($customer['balance'] < 0 ? 'Asset Reserve (Adv)' : 'Equilibrium'); ?>
+                                <?php echo $customer['balance'] > 0 ? 'Due' : ($customer['balance'] < 0 ? 'Advance' : 'Clear'); ?>
                             </p>
                         </div>
                     </div>
@@ -1126,49 +957,42 @@
                             <div class="flex items-center gap-3">
                                 <iconify-icon icon="solar:history-bold-duotone"
                                     class="text-xl text-slate-400"></iconify-icon>
-                                <h4 class="text-lg font-black text-slate-800 tracking-tight">Recent Synchronizations</h4>
+                                <h4 class="text-lg font-black text-slate-800 tracking-tight">Recent Udhar</h4>
                             </div>
                             <a href="reports.php?customer_id=<?php echo $customer['id']; ?>"
                                 class="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">View
-                                Galactic Log</a>
+                                Report</a>
                         </div>
                         <div class="p-4 overflow-x-auto">
                             <?php if (empty($transactions)): ?>
                                 <div class="text-center py-12 flex flex-col items-center">
                                     <iconify-icon icon="solar:plain-bold-duotone"
                                         class="text-5xl text-slate-200 mb-3"></iconify-icon>
-                                    <p class="text-sm font-bold text-slate-400">No Transaction Data Emitted Yet</p>
+                                    <p class="text-sm font-bold text-slate-400">No udhar records yet</p>
                                 </div>
                             <?php else: ?>
                                 <table class="w-full text-left text-sm">
                                     <thead>
                                         <tr
                                             class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                                            <th class="px-4 py-3">Timestamp</th>
-                                            <th class="px-4 py-3">Mission Narrative</th>
-                                            <th class="px-4 py-3">Flow Vol</th>
-                                            <th class="px-4 py-3">Condition</th>
+                                            <th class="px-4 py-3">Bill No</th>
+                                            <th class="px-4 py-3">Date</th>
+                                            <th class="px-4 py-3">Amount</th>
                                         </tr>
                                     </thead>
+
                                     <tbody class="divide-y divide-slate-50">
                                         <?php foreach ($transactions as $trans): ?>
-                                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <tr class="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                                                onclick="window.location.href='udhar.php?action=view&id=<?php echo (int)$trans['id']; ?>'">
+                                                <td class="px-4 py-6 font-black text-slate-800 tracking-tight">
+                                                    <?php echo htmlspecialchars($trans['bill_no'] ?? ('#' . (int)$trans['id'])); ?>
+                                                </td>
                                                 <td class="px-4 py-6 font-bold text-slate-700">
                                                     <?php echo date('d M, Y', strtotime($trans['transaction_date'])); ?>
                                                 </td>
-                                                <td class="px-4 py-6 text-slate-500 font-medium">
-                                                    <?php echo htmlspecialchars($trans['description']); ?>
-                                                </td>
                                                 <td class="px-4 py-6 font-black text-slate-800 tracking-tight">
-                                                    ₹<?php echo number_format($trans['amount'], 2); ?></td>
-                                                <td class="px-4 py-6">
-                                                    <?php
-                                                    $ts = $trans['status'];
-                                                    $ts_c = ($ts == 'paid') ? 'badge-active' : (($ts == 'partially_paid') ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'badge-inactive');
-                                                    ?>
-                                                    <span class="status-pill <?php echo $ts_c; ?> text-[8px]">
-                                                        <?php echo str_replace('_', ' ', $ts); ?>
-                                                    </span>
+                                                    ₹<?php echo number_format((float)$trans['amount'], 2); ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -1178,36 +1002,37 @@
                         </div>
                     </div>
 
-                    <!-- Treasury Input Log (Payments) -->
+                    <!-- Payments -->
                     <div class="glass-card">
                         <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/20">
                             <div class="flex items-center gap-3">
                                 <iconify-icon icon="solar:cash-out-bold-duotone"
                                     class="text-xl text-emerald-500"></iconify-icon>
-                                <h4 class="text-lg font-black text-slate-800 tracking-tight">Recent Credit Injections</h4>
+                                <h4 class="text-lg font-black text-slate-800 tracking-tight">Recent Payments</h4>
                             </div>
                             <a href="payments.php?customer_id=<?php echo $customer['id']; ?>"
-                                class="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">Full
-                                Treasury Report</a>
+                                class="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">All
+                                Payments</a>
                         </div>
                         <div class="p-4 overflow-x-auto">
                             <?php if (empty($payments)): ?>
                                 <div class="text-center py-12 flex flex-col items-center">
                                     <iconify-icon icon="solar:cloud-snow-bold-duotone"
                                         class="text-5xl text-slate-200 mb-3"></iconify-icon>
-                                    <p class="text-sm font-bold text-slate-400">Zero Credit Intake Detected</p>
+                                    <p class="text-sm font-bold text-slate-400">No payments yet</p>
                                 </div>
                             <?php else: ?>
                                 <table class="w-full text-left text-sm">
                                     <thead>
                                         <tr
                                             class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                                            <th class="px-4 py-3">Timestamp</th>
-                                            <th class="px-4 py-3">Val Intake</th>
-                                            <th class="px-4 py-3">Mode</th>
-                                            <th class="px-4 py-3">Ref ID</th>
+                                            <th class="px-4 py-3">Date</th>
+                                            <th class="px-4 py-3">Amount</th>
+                                            <th class="px-4 py-3">Payment Mode</th>
+                                            <th class="px-4 py-3">Reference</th>
                                         </tr>
                                     </thead>
+
                                     <tbody class="divide-y divide-slate-50">
                                         <?php foreach ($payments as $payment): ?>
                                             <tr class="hover:bg-emerald-50/20 transition-colors">

@@ -338,6 +338,10 @@ $stmt->close();
                         <button class="btn btn-primary" onclick="window.print()">
                             <i class="bi bi-printer"></i> Print Bill
                         </button>
+                        <a href="customers.php?action=view&id=<?php echo $udhar['customer_id']; ?>"
+                            class="btn btn-info">
+                            <i class="bi bi-person-circle"></i> View Customer Profile
+                        </a>
                         <a href="udhar.php" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Back to List
                         </a>

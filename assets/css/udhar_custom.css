@@ -1,31 +1,33 @@
 .search-suggestions-container {
   position: absolute;
-  border: 1px solid #ddd;
-  border-top: none;
-  z-index: 2000;
-  /* Super high to clear all modals and tables */
   top: 100%;
   left: 0;
   right: 0;
+  margin-top: 8px;
   max-height: 450px;
-  /* Increased further to show 5+ items clearly */
   overflow-y: auto;
-  background: white;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  border-radius: 0 0 12px 12px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+  z-index: 99999 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  isolation: isolate;
   display: none;
-  transition: opacity 0.2s ease;
 }
 
 .search-suggestion-item {
-  padding: 10px 15px;
-  /* Slightly more compact */
+  padding: 16px 20px;
   cursor: pointer;
-  border-bottom: 1px solid #f1f3f5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .search-suggestion-item:last-child {
@@ -34,8 +36,27 @@
 
 .search-suggestion-item:hover,
 .search-suggestion-item.active {
-  background-color: #f0f7ff;
-  color: #0056b3;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+  transform: translateX(4px);
+  z-index: 2;
+}
+
+/* Custom Scrollbar for Suggestions */
+.search-suggestions-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-suggestions-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-suggestions-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.search-suggestions-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Improved Search Button Style */
@@ -188,4 +209,15 @@
 /* Ensure inputs don't hide borders in resizable columns */
 .resizable-table td {
   padding: 8px !important;
+}
+
+#udhar-search-suggestions {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin-top: 10px;
+  border-top: 1px solid #f1f3f5;
+  border-radius: 12px;
+  z-index: auto;
 }

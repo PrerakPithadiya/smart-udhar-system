@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('customer_id').value = customer.id;
                 document.getElementById('selected_customer_name').textContent = customer.name;
                 document.getElementById('selected_customer_mobile').textContent = customer.mobile || '';
-                document.getElementById('selected_customer_address').textContent = customer.address || 'No address provided';
+                document.getElementById('selected_customer_address').textContent = customer.address || 'Address not added';
 
                 // Display balance
                 const balance = parseFloat(customer.balance) || 0;
@@ -27,13 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (balance > 0) {
                     balanceBadge.className = 'badge bg-danger';
-                    balanceBadge.textContent += ' (Due)';
+                    balanceBadge.textContent += ' (To pay)';
                 } else if (balance < 0) {
                     balanceBadge.className = 'badge bg-success';
-                    balanceBadge.textContent += ' (Advance)';
+                    balanceBadge.textContent += ' (Extra paid)';
                 } else {
                     balanceBadge.className = 'badge bg-secondary';
-                    balanceBadge.textContent += ' (Clear)';
+                    balanceBadge.textContent += ' (No balance)';
                 }
 
                 infoDiv.style.display = 'block';
@@ -61,11 +61,32 @@ document.addEventListener('DOMContentLoaded', function () {
         customerSearchInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && customerSearchInput.value.trim() !== '' && !document.getElementById('customer_id').value) {
                 e.preventDefault();
-                if (confirm(`Customer "${customerSearchInput.value}" not found. Would you like to add as a new customer?`)) {
+                if (confirm(`Customer "${customerSearchInput.value}" not found. Do you want to add this customer?`)) {
                     window.location.href = `customers.php?action=add&name=${encodeURIComponent(customerSearchInput.value)}`;
                 }
             }
         });
+    }
+
+    // Udhar list page search suggestions (search by customer)
+    if (document.getElementById('udhar-search')) {
+        const udharSearch = new SearchSuggestions('#udhar-search', {
+            apiUrl: 'api/search_customers.php',
+            minChars: 2,
+            delay: 250,
+            maxSuggestions: 10
+        });
+
+        // Prevent overlap with the stats cards below by moving the suggestions container
+        // out of the positioned search box and placing it after the search box.
+        const searchInput = document.getElementById('udhar-search');
+        const searchBox = searchInput?.closest('.udhar-search-box');
+        const suggestionsEl = document.getElementById('udhar-search-suggestions');
+        if (searchBox && suggestionsEl && searchBox.parentNode) {
+            searchBox.parentNode.insertBefore(suggestionsEl, searchBox.nextSibling);
+            suggestionsEl.style.position = 'static';
+            suggestionsEl.style.marginTop = '10px';
+        }
     }
 });
 
@@ -82,9 +103,6 @@ function addItemRow(itemData = null) {
         item_name: '',
         hsn_code: '',
         price: '0.00',
-        cgst_rate: '2.5',
-        sgst_rate: '2.5',
-        igst_rate: '0.00',
         unit: 'PCS'
     };
 
@@ -93,7 +111,7 @@ function addItemRow(itemData = null) {
             <div class="position-relative">
                 <input type="text" class="form-control form-control-sm item-search-input" 
                        id="item_search_${itemCounter}" 
-                       placeholder="Search Item..." 
+                       placeholder="Type item name..." 
                        value="${defaultItem.item_name}"
                        autocomplete="off"
                        required>
@@ -101,6 +119,9 @@ function addItemRow(itemData = null) {
                        value="${defaultItem.id}" class="item-id-input">
                 <input type="hidden" name="items[${itemCounter}][item_name]" 
                        value="${defaultItem.item_name}" class="item-name">
+                <input type="hidden" name="items[${itemCounter}][cgst_rate]" value="0">
+                <input type="hidden" name="items[${itemCounter}][sgst_rate]" value="0">
+                <input type="hidden" name="items[${itemCounter}][igst_rate]" value="0">
             </div>
         </td>
         <td>
@@ -128,33 +149,6 @@ function addItemRow(itemData = null) {
                        name="items[${itemCounter}][price]" 
                        value="${defaultItem.price}" step="0.01" min="0.01" 
                        onchange="calculateItemTotal(${itemCounter})" required>
-            </div>
-        </td>
-         <td>
-            <div class="d-flex flex-column gap-1">
-                <div class="d-flex gap-1">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text px-1" style="min-width: 20px; font-weight: bold; font-size: 0.7rem;">C</span>
-                        <input type="number" class="form-control px-1 cgst-rate" 
-                               name="items[${itemCounter}][cgst_rate]" 
-                               value="${defaultItem.cgst_rate}" step="0.01" min="0" max="100"
-                               onchange="calculateItemTotal(${itemCounter})">
-                    </div>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text px-1" style="min-width: 20px; font-weight: bold; font-size: 0.7rem;">S</span>
-                        <input type="number" class="form-control px-1 sgst-rate" 
-                               name="items[${itemCounter}][sgst_rate]" 
-                               value="${defaultItem.sgst_rate}" step="0.01" min="0" max="100"
-                               onchange="calculateItemTotal(${itemCounter})">
-                    </div>
-                </div>
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text px-1" style="min-width: 20px; font-weight: bold; font-size: 0.7rem;">I</span>
-                    <input type="number" class="form-control px-1 igst-rate" 
-                           name="items[${itemCounter}][igst_rate]" 
-                           value="${defaultItem.igst_rate}" step="0.01" min="0" max="100"
-                           onchange="calculateItemTotal(${itemCounter})">
-                </div>
             </div>
         </td>
         <td class="text-end fw-bold">
@@ -198,9 +192,6 @@ function addItemRow(itemData = null) {
             row.querySelector('.item-hsn').value = item.hsn_code;
             row.querySelector('.item-unit').value = item.unit;
             row.querySelector('.price').value = item.price;
-            row.querySelector('.cgst-rate').value = item.cgst_rate;
-            row.querySelector('.sgst-rate').value = item.sgst_rate;
-            row.querySelector('.igst-rate').value = item.igst_rate;
 
             calculateItemTotal(currIndex);
         }
@@ -251,9 +242,6 @@ function calculateItemTotal(rowIndex) {
     const row = document.getElementById('itemRow_' + rowIndex);
     const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
     const price = parseFloat(row.querySelector('.price').value) || 0;
-    const cgstRate = parseFloat(row.querySelector('.cgst-rate').value) || 0;
-    const sgstRate = parseFloat(row.querySelector('.sgst-rate').value) || 0;
-    const igstRate = parseFloat(row.querySelector('.igst-rate').value) || 0;
 
     const itemTotal = quantity * price;
     row.querySelector('.item-total').textContent = itemTotal.toFixed(2);
@@ -271,9 +259,6 @@ function removeItemRow(rowIndex) {
 // Calculate all totals
 function calculateTotals() {
     let subTotal = 0;
-    let cgstTotal = 0;
-    let sgstTotal = 0;
-    let igstTotal = 0;
 
     // Calculate from all item rows
     for (let i = 0; i < itemCounter; i++) {
@@ -281,29 +266,14 @@ function calculateTotals() {
         if (row) {
             const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
             const price = parseFloat(row.querySelector('.price').value) || 0;
-            const cgstRate = parseFloat(row.querySelector('.cgst-rate').value) || 0;
-            const sgstRate = parseFloat(row.querySelector('.sgst-rate').value) || 0;
-            const igstRate = parseFloat(row.querySelector('.igst-rate').value) || 0;
 
             const itemTotal = quantity * price;
             subTotal += itemTotal;
-
-            if (igstRate > 0) {
-                igstTotal += (itemTotal * igstRate) / 100;
-            } else {
-                cgstTotal += (itemTotal * cgstRate) / 100;
-                sgstTotal += (itemTotal * sgstRate) / 100;
-            }
         }
     }
 
     // Update display for fixed subtotal
     document.getElementById('subTotal').textContent = subTotal.toFixed(2);
-
-    // Auto-populate editable GST fields
-    document.getElementById('cgst_amount').value = cgstTotal.toFixed(2);
-    document.getElementById('sgst_amount').value = sgstTotal.toFixed(2);
-    document.getElementById('igst_amount').value = igstTotal.toFixed(2);
 
     // Recalculate grand total
     calculateGrandTotal();
@@ -311,14 +281,11 @@ function calculateTotals() {
 
 function calculateGrandTotal() {
     const subTotal = parseFloat(document.getElementById('subTotal').textContent) || 0;
-    const cgst = parseFloat(document.getElementById('cgst_amount').value) || 0;
-    const sgst = parseFloat(document.getElementById('sgst_amount').value) || 0;
-    const igst = parseFloat(document.getElementById('igst_amount').value) || 0;
     const discount = parseFloat(document.getElementById('discount').value) || 0;
     const transportation = parseFloat(document.getElementById('transportation_charge').value) || 0;
     const roundOff = parseFloat(document.getElementById('round_off').value) || 0;
 
-    const grandTotal = subTotal + cgst + sgst + igst - discount + transportation + roundOff;
+    const grandTotal = subTotal - discount + transportation + roundOff;
     document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
 }
 
@@ -328,19 +295,49 @@ function addItemFromList() {
     modal.show();
 }
 
+function safeCloseItemsModal() {
+    const modalEl = document.getElementById('itemsModal');
+    if (!modalEl) return;
+
+    try {
+        const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        instance.hide();
+    } catch (e) {
+        // ignore
+    }
+
+    // Ensure backdrop is removed and page becomes interactive again
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+}
+
 // Add selected items from modal
 function addSelectedItems() {
-    const checkboxes = document.querySelectorAll('.item-checkbox:checked');
-    checkboxes.forEach(checkbox => {
-        const itemData = JSON.parse(checkbox.value);
-        addItemRow(itemData);
-    });
+    try {
+        const checkboxes = document.querySelectorAll('.item-checkbox:checked');
 
-    // Close modal
-    bootstrap.Modal.getInstance(document.getElementById('itemsModal')).hide();
+        // Build an ID -> item map once
+        const itemsById = new Map();
+        (Array.isArray(window.ITEMS_LIST) ? window.ITEMS_LIST : []).forEach(it => {
+            if (it && typeof it.id !== 'undefined') {
+                itemsById.set(String(it.id), it);
+            }
+        });
 
-    // Uncheck all checkboxes
-    document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = false);
+        checkboxes.forEach(checkbox => {
+            const itemId = String(checkbox.value || '').trim();
+            const itemData = itemsById.get(itemId);
+            if (itemData) {
+                addItemRow(itemData);
+            }
+        });
+    } finally {
+        // Always cleanup so the screen never gets stuck
+        safeCloseItemsModal();
+        document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = false);
+    }
 }
 
 // Form validation
@@ -349,7 +346,7 @@ document.getElementById('udharForm')?.addEventListener('submit', function (e) {
     const customerId = document.getElementById('customer_id').value;
     if (!customerId) {
         e.preventDefault();
-        alert('Please select a customer');
+        alert('Please choose a customer');
         document.getElementById('customer_search').focus();
         return false;
     }
@@ -357,7 +354,7 @@ document.getElementById('udharForm')?.addEventListener('submit', function (e) {
     // Check if at least one item is added
     if (itemCounter === 0) {
         e.preventDefault();
-        alert('Please add at least one item to the bill');
+        alert('Please add at least one item');
         return false;
     }
 
@@ -379,7 +376,7 @@ document.getElementById('udharForm')?.addEventListener('submit', function (e) {
 
     if (hasErrors) {
         e.preventDefault();
-        alert('Please fill all item details correctly');
+        alert('Please fill item details correctly');
         return false;
     }
 
@@ -391,7 +388,7 @@ document.getElementById('udharForm')?.addEventListener('submit', function (e) {
 
 // Delete confirmation
 function confirmDelete(id, billNo) {
-    if (confirm('Are you sure you want to delete bill "' + billNo + '"? This action cannot be undone.')) {
+    if (confirm('Delete bill "' + billNo + '"? This cannot be undone.')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '';

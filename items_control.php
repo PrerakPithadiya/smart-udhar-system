@@ -18,9 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $item_code = sanitizeInput($_POST['item_code']);
         $hsn_code = sanitizeInput($_POST['hsn_code']);
         $price = floatval($_POST['price']);
-        $cgst_rate = floatval($_POST['cgst_rate']);
-        $sgst_rate = floatval($_POST['sgst_rate']);
-        $igst_rate = floatval($_POST['igst_rate']);
+        $cgst_rate = floatval($_POST['cgst_rate'] ?? 0);
+        $sgst_rate = floatval($_POST['sgst_rate'] ?? 0);
+        $igst_rate = floatval($_POST['igst_rate'] ?? 0);
         $unit = sanitizeInput($_POST['unit']);
         $description = sanitizeInput($_POST['description']);
         $category = sanitizeInput($_POST['category']);
@@ -70,9 +70,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $item_code = sanitizeInput($_POST['item_code']);
         $hsn_code = sanitizeInput($_POST['hsn_code']);
         $price = floatval($_POST['price']);
-        $cgst_rate = floatval($_POST['cgst_rate']);
-        $sgst_rate = floatval($_POST['sgst_rate']);
-        $igst_rate = floatval($_POST['igst_rate']);
+        $cgst_rate = floatval($_POST['cgst_rate'] ?? 0);
+        $sgst_rate = floatval($_POST['sgst_rate'] ?? 0);
+        $igst_rate = floatval($_POST['igst_rate'] ?? 0);
         $unit = sanitizeInput($_POST['unit']);
         $description = sanitizeInput($_POST['description']);
         $category = sanitizeInput($_POST['category']);

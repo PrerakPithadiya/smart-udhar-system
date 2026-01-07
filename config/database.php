@@ -2,12 +2,22 @@
 // File: smart-udhar-system/config/database.php
 
 // Database configuration
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', 3307);
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'smart_udhar_db');
-define('SITE_URL', 'http://localhost/smart-udhar-system-2/');
+$httpHost = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+$isLocal = ($httpHost === 'localhost' || str_starts_with($httpHost, 'localhost:') || $httpHost === '127.0.0.1' || str_starts_with($httpHost, '127.0.0.1:'));
+
+$defaultDbHost = $isLocal ? '127.0.0.1' : 'localhost';
+$defaultDbPort = $isLocal ? 3307 : 3306;
+$defaultDbUser = $isLocal ? 'root' : 'u810585351_bhavy';
+$defaultDbPass = $isLocal ? '' : 'hT43=K~9p:~';
+$defaultDbName = $isLocal ? 'smart_udhar_db' : 'u810585351_udhar_system';
+$defaultSiteUrl = $isLocal ? 'http://localhost/smart-udhar-system-2/' : 'https://admin.jamkaapcl.com/';
+
+define('DB_HOST', getenv('DB_HOST') ?: $defaultDbHost);
+define('DB_PORT', (int)(getenv('DB_PORT') ?: $defaultDbPort));
+define('DB_USER', getenv('DB_USER') ?: $defaultDbUser);
+define('DB_PASS', getenv('DB_PASS') ?: $defaultDbPass);
+define('DB_NAME', getenv('DB_NAME') ?: $defaultDbName);
+define('SITE_URL', getenv('SITE_URL') ?: $defaultSiteUrl);
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {

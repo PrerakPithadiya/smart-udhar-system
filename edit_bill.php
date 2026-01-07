@@ -472,6 +472,12 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                             <input type="text" class="form-control"
                                 value="<?php echo htmlspecialchars($udhar['customer_name']); ?>" readonly>
                             <small class="text-muted">Customer cannot be changed after bill creation</small>
+                            <div class="mt-2">
+                                <a href="customers.php?action=view&id=<?php echo $udhar['customer_id']; ?>"
+                                    class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-person-circle"></i> View Customer Profile
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Bill Number (Read-only) -->

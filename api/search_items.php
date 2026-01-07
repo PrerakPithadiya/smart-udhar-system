@@ -16,7 +16,7 @@ $conn = getDBConnection();
 // Get search query
 $query = isset($_GET['q']) ? trim($_GET['q']) : '';
 
-if (strlen($query) < 2 && strlen($query) > 0) {
+if (strlen($query) < 1 && strlen($query) > 0) {
     echo json_encode(['suggestions' => []]);
     exit;
 }
@@ -39,12 +39,12 @@ $stmt = $conn->prepare("
     FROM items 
     WHERE user_id = ? 
       AND status = 'active'
-      AND (item_name LIKE ? OR item_code LIKE ?)
+      AND (item_name LIKE ? OR item_code LIKE ? OR hsn_code LIKE ?)
     ORDER BY item_name
     LIMIT ?
 ");
 
-$stmt->bind_param("issi", $_SESSION['user_id'], $searchTerm, $searchTerm, $limit);
+$stmt->bind_param("isssi", $_SESSION['user_id'], $searchTerm, $searchTerm, $searchTerm, $limit);
 $stmt->execute();
 $result = $stmt->get_result();
 

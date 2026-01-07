@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Udhar Entry - Smart Udhar System</title>
+    <title>Udhar - Smart Udhar System</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
@@ -112,12 +112,30 @@
         .udhar-container .udhar-table thead {
             background: rgba(248, 250, 252, 0.6) !important;
         }
+
+        /* Ensure containers allow search suggestions overflow */
+        .udhar-container .bill-form-container,
+        .udhar-container .bill-form-body {
+            overflow: visible !important;
+        }
+
+        /* Prevent transform on containers with search */
+        .udhar-container .bill-form-container:has(#customer_search) {
+            transform: none !important;
+        }
+
+        /* Ensure customer search wrapper has proper stacking */
+        .customer-search-wrapper {
+            position: relative;
+            z-index: 1000;
+        }
     </style>
 </head>
 
 <body class="bg-[var(--bg-airy)]">
     <!-- Sidebar Toggle Commander (Visible when closed) -->
-    <button id="sidebarOpenBtn" class="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-16 bg-white border border-slate-200 text-indigo-600 rounded-r-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:w-14 active:scale-95 transition-all z-[100] hidden">
+    <button id="sidebarOpenBtn"
+        class="fixed left-0 top-1/2 -translate-y-1/2 w-12 h-16 bg-white border border-slate-200 text-indigo-600 rounded-r-2xl flex items-center justify-center shadow-xl shadow-indigo-100/50 hover:w-14 active:scale-95 transition-all z-[100] hidden">
         <iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" width="24"></iconify-icon>
     </button>
 
@@ -130,32 +148,39 @@
             <div class="container-fluid udhar-container">
                 <div class="row">
                     <div class="col-12">
-                        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <header
+                            class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div class="flex items-center gap-4">
                                 <div class="flex flex-col">
-                                    <nav class="flex text-[10px] items-center gap-1.5 font-bold uppercase tracking-widest text-slate-400 mb-2">
+                                    <nav
+                                        class="flex text-[10px] items-center gap-1.5 font-bold uppercase tracking-widest text-slate-400 mb-2">
                                         <iconify-icon icon="solar:home-2-bold" class="text-xs"></iconify-icon>
                                         <span>Smart Udhar</span>
-                                        <iconify-icon icon="solar:alt-arrow-right-bold" class="text-[8px]"></iconify-icon>
+                                        <iconify-icon icon="solar:alt-arrow-right-bold"
+                                            class="text-[8px]"></iconify-icon>
                                         <span class="text-indigo-500">Udhar</span>
                                     </nav>
-                                    <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
-                                        <iconify-icon icon="solar:card-transfer-bold-duotone" class="text-indigo-500"></iconify-icon>
-                                        Udhar Ledger
+                                    <h1
+                                        class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
+                                        <iconify-icon icon="solar:card-transfer-bold-duotone"
+                                            class="text-indigo-500"></iconify-icon>
+                                        Udhar Book
                                     </h1>
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-3">
                                 <?php if ($action == 'list'): ?>
-                                    <a href="udhar.php?action=add" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
+                                    <a href="udhar.php?action=add"
+                                        class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
                                         <iconify-icon icon="solar:add-circle-bold" class="text-xl"></iconify-icon>
-                                        New Udhar Entry
+                                        Add New Udhar Bill
                                     </a>
                                 <?php else: ?>
-                                    <a href="udhar.php" class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all">
+                                    <a href="udhar.php"
+                                        class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all">
                                         <iconify-icon icon="solar:arrow-left-bold" class="text-xl"></iconify-icon>
-                                        Back to List
+                                        Back
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -168,22 +193,22 @@
                             <div class="udhar-stat-card mb-4">
                                 <div class="row align-items-center">
                                     <div class="col-md-4">
-                                        <h5 class="mb-0">All Udhar Entries (<?php echo $total_udhar; ?>)</h5>
+                                        <h5 class="mb-0">All Udhar Bills (<?php echo $total_udhar; ?>)</h5>
                                     </div>
                                     <div class="col-md-8">
                                         <form method="GET" class="row g-2">
                                             <input type="hidden" name="action" value="list">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <select name="status" class="form-select" onchange="this.form.submit()">
-                                                    <option value="">All Status</option>
-                                                    <option value="pending" <?php echo $status_filter == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                                    <option value="partially_paid" <?php echo $status_filter == 'partially_paid' ? 'selected' : ''; ?>>Partially
-                                                        Paid</option>
+                                                    <option value="">All</option>
+                                                    <option value="pending" <?php echo $status_filter == 'pending' ? 'selected' : ''; ?>>Not paid</option>
+                                                    <option value="partially_paid" <?php echo $status_filter == 'partially_paid' ? 'selected' : ''; ?>>Paid a little
+                                                    </option>
                                                     <option value="paid" <?php echo $status_filter == 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                                    <option value="overdue" <?php echo $status_filter == 'overdue' ? 'selected' : ''; ?>>Overdue Bills</option>
+                                                    <option value="overdue" <?php echo $status_filter == 'overdue' ? 'selected' : ''; ?>>Past due date</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <select name="category" class="form-select" onchange="this.form.submit()">
                                                     <option value="">All Categories</option>
                                                     <option value="Fertilizers" <?php echo $category_filter == 'Fertilizers' ? 'selected' : ''; ?>>Fertilizers</option>
@@ -192,11 +217,11 @@
                                                     <option value="Others" <?php echo $category_filter == 'Others' ? 'selected' : ''; ?>>Others</option>
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-12">
                                                 <div class="udhar-search-box">
                                                     <i class="bi bi-search search-icon"></i>
-                                                    <input type="text" name="search" class="form-control"
-                                                        placeholder="Search..."
+                                                    <input type="text" id="udhar-search" name="search" class="form-control"
+                                                        autocomplete="off" placeholder="Search bill or customer..."
                                                         value="<?php echo htmlspecialchars($search); ?>">
                                                 </div>
                                             </div>
@@ -240,28 +265,28 @@
                                 <div class="udhar-stat-card">
                                     <div class="stat-value">
                                         ₹<?php echo number_format($total_result['total'] ?? 0, 2); ?></div>
-                                    <div class="stat-label">Total Udhar</div>
+                                    <div class="stat-label">Total amount</div>
                                     <i class="bi bi-cash-coin stat-icon"></i>
                                 </div>
 
                                 <div class="udhar-stat-card stat-danger">
                                     <div class="stat-value">
                                         ₹<?php echo number_format($pending_result['total'] ?? 0, 2); ?></div>
-                                    <div class="stat-label">Pending Udhar</div>
+                                    <div class="stat-label">Not paid amount</div>
                                     <i class="bi bi-clock-history stat-icon"></i>
                                 </div>
 
                                 <div class="udhar-stat-card stat-warning">
                                     <div class="stat-value"><?php echo number_format($overdue_result['count'] ?? 0); ?>
                                     </div>
-                                    <div class="stat-label">Overdue Bills</div>
+                                    <div class="stat-label">Past due date</div>
                                     <i class="bi bi-exclamation-triangle stat-icon"></i>
                                 </div>
 
                                 <div class="udhar-stat-card stat-success">
                                     <div class="stat-value"><?php echo number_format($paid_result['count'] ?? 0); ?>
                                     </div>
-                                    <div class="stat-label">Paid Bills</div>
+                                    <div class="stat-label">Paid bills</div>
                                     <i class="bi bi-check-circle stat-icon"></i>
                                 </div>
                             </div>
@@ -271,10 +296,10 @@
                                     <?php if (empty($udhar_list)): ?>
                                         <div class="udhar-empty-state">
                                             <i class="bi bi-receipt display-1 empty-icon"></i>
-                                            <h4 class="mt-3">No udhar entries found</h4>
-                                            <p class="text-muted">Create your first udhar entry</p>
+                                            <h4 class="mt-3">No udhar bills found</h4>
+                                            <p class="text-muted">Add your first udhar bill</p>
                                             <a href="udhar.php?action=add" class="btn btn-primary">
-                                                <i class="bi bi-plus-circle"></i> Create First Udhar Entry
+                                                <i class="bi bi-plus-circle"></i> Add First Udhar Bill
                                             </a>
                                         </div>
                                     <?php else: ?>
@@ -282,13 +307,13 @@
                                             <table class="table udhar-table">
                                                 <thead>
                                                     <tr>
-                                                        <th>Bill No</th>
+                                                        <th>Bill No.</th>
                                                         <th>Customer</th>
                                                         <th>Date</th>
                                                         <th>Amount</th>
                                                         <th>Due Date</th>
                                                         <th>Status</th>
-                                                        <th>Actions</th>
+                                                        <th>Options</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -328,7 +353,7 @@
                                                                     <span
                                                                         class="udhar-date"><?php echo date('d M Y', strtotime($entry['due_date'])); ?></span>
                                                                     <?php if (strtotime($entry['due_date']) < time() && $entry['status'] != 'paid'): ?>
-                                                                        <br><span class="udhar-overdue-badge">Overdue</span>
+                                                                        <br><span class="udhar-overdue-badge">Late</span>
                                                                     <?php endif; ?>
                                                                 <?php else: ?>
                                                                     <span class="text-muted">No due date</span>
@@ -336,15 +361,25 @@
                                                             </td>
                                                             <td>
                                                                 <?php
-                                                                $status_class = 'udhar-status-pending';
-                                                                if ($entry['status'] == 'paid') {
-                                                                    $status_class = 'udhar-status-paid';
+                                                                $status_class = 'udhar-status-paid';
+                                                                if ($entry['status'] == 'pending') {
+                                                                    $status_class = 'udhar-status-pending';
                                                                 } elseif ($entry['status'] == 'partially_paid') {
                                                                     $status_class = 'udhar-status-partially_paid';
                                                                 }
                                                                 ?>
                                                                 <span class="udhar-status-badge <?php echo $status_class; ?>">
-                                                                    <?php echo ucfirst(str_replace('_', ' ', $entry['status'])); ?>
+                                                                    <?php
+                                                                    $status_label = $entry['status'];
+                                                                    if ($status_label === 'pending') {
+                                                                        $status_label = 'Not paid';
+                                                                    } elseif ($status_label === 'partially_paid') {
+                                                                        $status_label = 'Paid a little';
+                                                                    } elseif ($status_label === 'paid') {
+                                                                        $status_label = 'Paid';
+                                                                    }
+                                                                    echo $status_label;
+                                                                    ?>
                                                                 </span>
                                                             </td>
                                                             <td>
@@ -409,32 +444,33 @@
 
                         <?php elseif ($action == 'add'): ?>
                             <!-- Add New Udhar Entry Form -->
-                            <div class="bill-form-container">
+                            <div class="bill-form-container" style="position: relative; z-index: 100;">
                                 <div class="bill-form-header">
-                                    <h3><i class="bi bi-plus-circle"></i> New Udhar Entry (Bill)</h3>
+                                    <h3><i class="bi bi-plus-circle"></i> Add New Udhar Bill</h3>
                                 </div>
                                 <div class="bill-form-body">
                                     <form method="POST" action="" id="udharForm">
                                         <div class="bill-form-section">
-                                            <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
+                                            <h5><i class="bi bi-info-circle"></i> Basic Details</h5>
                                             <div class="bill-form-row">
                                                 <div class="bill-form-group" style="grid-column: span 2;">
                                                     <label for="customer_search"><i class="bi bi-person"></i> Customer
                                                         *</label>
-                                                    <div class="position-relative customer-search-wrapper">
+                                                    <div class="position-relative customer-search-wrapper"
+                                                        style="z-index: 1000;">
                                                         <input type="text" class="bill-form-control shadow-sm"
                                                             id="customer_search" name="customer_search"
-                                                            placeholder="Type customer name or mobile number..."
+                                                            placeholder="Type customer name or mobile..."
                                                             style="height: 55px; font-size: 1.1rem;" required>
 
                                                         <div class="mt-2 d-flex align-items-center justify-content-between">
                                                             <button type="button" class="btn-search-dynamic"
-                                                                id="customer_search_btn" title="Search Customer" disabled>
-                                                                <i class="bi bi-search"></i> Search
+                                                                id="customer_search_btn" title="Find Customer" disabled>
+                                                                <i class="bi bi-search"></i> Find
                                                             </button>
                                                             <div class="form-text mt-0">
                                                                 <i class="bi bi-info-circle-fill me-1"></i>
-                                                                Start typing to search existing customers
+                                                                Type to find an existing customer
                                                             </div>
                                                         </div>
                                                     </div>
@@ -471,7 +507,7 @@
                                                     <label for="category"><i class="bi bi-tags"></i> Category *</label>
                                                     <select class="bill-form-control" id="category" name="category"
                                                         required>
-                                                        <option value="">Select Category</option>
+                                                        <option value="">Choose Category</option>
                                                         <option value="Fertilizers">Fertilizers</option>
                                                         <option value="Seeds">Seeds</option>
                                                         <option value="Insecticides">Insecticides</option>
@@ -480,16 +516,16 @@
                                                 </div>
 
                                                 <div class="bill-form-group">
-                                                    <label for="transaction_date"><i class="bi bi-calendar"></i> Bill
-                                                        Date *</label>
+                                                    <label for="transaction_date"><i class="bi bi-calendar"></i> Bill Date
+                                                        *</label>
                                                     <input type="date" class="bill-form-control" id="transaction_date"
                                                         name="transaction_date" value="<?php echo date('Y-m-d'); ?>"
                                                         required>
                                                 </div>
 
                                                 <div class="bill-form-group">
-                                                    <label for="due_date"><i class="bi bi-calendar-check"></i> Due Date
-                                                        (Optional)</label>
+                                                    <label for="due_date"><i class="bi bi-calendar-check"></i> Due date
+                                                        (if any)</label>
                                                     <input type="date" class="bill-form-control" id="due_date"
                                                         name="due_date">
                                                 </div>
@@ -499,7 +535,7 @@
                                                 <div class="bill-form-group" style="grid-column: span 3;">
                                                     <label for="notes"><i class="bi bi-sticky"></i> Notes</label>
                                                     <input type="text" class="bill-form-control" id="notes" name="notes"
-                                                        placeholder="Additional notes or description">
+                                                        placeholder="Any notes (optional)">
                                                 </div>
                                             </div>
                                         </div>
@@ -507,12 +543,12 @@
                                         <!-- Items Section -->
                                         <div class="bill-form-section">
                                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                                <h5 class="mb-0"><i class="bi bi-cart-plus"></i> Bill Items</h5>
+                                                <h5 class="mb-0"><i class="bi bi-cart-plus"></i> Items in this bill</h5>
                                                 <div class="form-check form-switch premium-switch">
                                                     <input class="form-check-input" type="checkbox" id="toggleRowColors">
                                                     <label class="form-check-label fw-500" for="toggleRowColors"
                                                         style="font-size: 0.9rem; color: #666;">
-                                                        <i class="bi bi-palette2 me-1"></i> Multi-color Rows
+                                                        <i class="bi bi-palette2 me-1"></i> Color rows
                                                     </label>
                                                 </div>
                                             </div>
@@ -522,7 +558,7 @@
                                                     id="billTable">
                                                     <thead class="table-light">
                                                         <tr class="resizable-header">
-                                                            <th style="width: 300px;">Item Name<div class="resizer"></div>
+                                                            <th style="width: 300px;">Item<div class="resizer"></div>
                                                             </th>
                                                             <th style="width: 120px;">HSN<div class="resizer"></div>
                                                             </th>
@@ -530,11 +566,9 @@
                                                             </th>
                                                             <th style="width: 110px;">Unit<div class="resizer"></div>
                                                             </th>
-                                                            <th style="width: 150px;">Price<div class="resizer"></div>
+                                                            <th style="width: 150px;">Rate<div class="resizer"></div>
                                                             </th>
-                                                            <th style="width: 190px;">GST (%)<div class="resizer"></div>
-                                                            </th>
-                                                            <th style="width: 140px;">Total<div class="resizer"></div>
+                                                            <th style="width: 140px;">Amount<div class="resizer"></div>
                                                             </th>
                                                             <th style="width: 60px;"></th>
                                                         </tr>
@@ -546,11 +580,11 @@
 
                                                 <div class="d-flex gap-2">
                                                     <button type="button" class="btn-add-item" onclick="addItemRow()">
-                                                        <i class="bi bi-plus-circle"></i> Add Item
+                                                        <i class="bi bi-plus-circle"></i> Add Item Row
                                                     </button>
                                                     <button type="button" class="btn btn-outline-info"
                                                         onclick="addItemFromList()">
-                                                        <i class="bi bi-list-check"></i> Add from Items List
+                                                        <i class="bi bi-list-check"></i> Pick from list
                                                     </button>
                                                 </div>
                                             </div>
@@ -564,36 +598,12 @@
                                                         class="bill-summary-card shadow-sm h-100 d-flex flex-column justify-content-between">
                                                         <table class="bill-summary-table mb-0">
                                                             <tr>
-                                                                <td class="summary-label">Sub Total:</td>
+                                                                <td class="summary-label">Items total:</td>
                                                                 <td class="summary-value">₹<span id="subTotal">0.00</span>
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td class="summary-label">CGST (+):</td>
-                                                                <td class="summary-value">
-                                                                    <input type="number" step="0.01" class="summary-input"
-                                                                        id="cgst_amount" name="cgst_amount" value="0.00"
-                                                                        oninput="calculateGrandTotal()">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="summary-label">SGST (+):</td>
-                                                                <td class="summary-value">
-                                                                    <input type="number" step="0.01" class="summary-input"
-                                                                        id="sgst_amount" name="sgst_amount" value="0.00"
-                                                                        oninput="calculateGrandTotal()">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="summary-label">IGST (+):</td>
-                                                                <td class="summary-value">
-                                                                    <input type="number" step="0.01" class="summary-input"
-                                                                        id="igst_amount" name="igst_amount" value="0.00"
-                                                                        oninput="calculateGrandTotal()">
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="summary-label">Discount (-):</td>
+                                                                <td class="summary-label">Discount (minus):</td>
                                                                 <td class="summary-value">
                                                                     <input type="number" step="0.01" class="summary-input"
                                                                         id="discount" name="discount" value="0.00"
@@ -601,7 +611,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td class="summary-label">Transportation (+):</td>
+                                                                <td class="summary-label">Transport charge (plus):</td>
                                                                 <td class="summary-value">
                                                                     <input type="number" step="0.01" class="summary-input"
                                                                         id="transportation_charge"
@@ -610,7 +620,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td class="summary-label">Round Off (+/-):</td>
+                                                                <td class="summary-label">Round off (+/-):</td>
                                                                 <td class="summary-value">
                                                                     <input type="number" step="0.01" class="summary-input"
                                                                         id="round_off" name="round_off" value="0.00"
@@ -618,7 +628,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td class="summary-label grand-total">Grand Total:</td>
+                                                                <td class="summary-label grand-total">Final total:</td>
                                                                 <td class="summary-value grand-total">₹<span
                                                                         id="grandTotal">0.00</span></td>
                                                             </tr>
@@ -633,7 +643,7 @@
                                                 <i class="bi bi-x-circle"></i> Cancel
                                             </a>
                                             <button type="submit" name="add_udhar" class="btn btn-primary btn-lg">
-                                                <i class="bi bi-check-circle"></i> Create Bill & Print
+                                                <i class="bi bi-check-circle"></i> Save & Print Bill
                                             </button>
                                         </div>
                                     </form>
@@ -647,7 +657,7 @@
                                     <div class="bill-view-header">
                                         <h3>
                                             <i class="bi bi-<?php echo $action == 'edit' ? 'pencil' : 'eye'; ?>"></i>
-                                            <?php echo $action == 'edit' ? 'Edit Udhar Entry' : 'Udhar Entry Details'; ?>
+                                            <?php echo $action == 'edit' ? 'Edit Bill' : 'Bill Details'; ?>
                                             <span
                                                 class="bill-number-badge"><?php echo htmlspecialchars($udhar['bill_no']); ?></span>
                                         </h3>
@@ -659,7 +669,7 @@
 
                                                 <div class="bill-info-section">
                                                     <div class="bill-info-card">
-                                                        <h5>Bill Information</h5>
+                                                        <h5>Bill info</h5>
                                                         <table class="bill-info-table">
                                                             <tr>
                                                                 <td class="bill-info-label">Bill Number:</td>
@@ -683,7 +693,7 @@
                                                     </div>
 
                                                     <div class="bill-info-card">
-                                                        <h5>Update Details</h5>
+                                                        <h5>Change details</h5>
                                                         <div class="bill-form-group">
                                                             <label for="due_date">Due Date</label>
                                                             <input type="date" class="bill-form-control" id="due_date"
@@ -714,7 +724,7 @@
                                                 <div class="d-flex justify-content-between mt-4">
                                                     <div>
                                                         <button type="submit" name="update_udhar" class="btn btn-primary">
-                                                            <i class="bi bi-check-circle"></i> Update Udhar Entry
+                                                            <i class="bi bi-check-circle"></i> Save Changes
                                                         </button>
                                                         <a href="udhar.php?action=view&id=<?php echo $udhar['id']; ?>"
                                                             class="btn btn-outline-secondary">
@@ -723,7 +733,7 @@
                                                     </div>
                                                     <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                                         data-bs-target="#deleteModal">
-                                                        <i class="bi bi-trash"></i> Delete
+                                                        <i class="bi bi-trash"></i> Delete Bill
                                                     </button>
                                                 </div>
                                             </form>
@@ -731,7 +741,7 @@
                                             <!-- View Mode -->
                                             <div class="bill-info-section">
                                                 <div class="bill-info-card">
-                                                    <h5>Customer Information</h5>
+                                                    <h5>Customer info</h5>
                                                     <table class="bill-info-table">
                                                         <tr>
                                                             <td class="bill-info-label">Customer:</td>
@@ -760,15 +770,23 @@
                                                                         <span class="udhar-overdue-badge">Overdue</span>
                                                                     <?php endif; ?>
                                                                 <?php else: ?>
-                                                                    <span class="text-muted">Not set</span>
+                                                                    <span class="text-muted">Not added</span>
                                                                 <?php endif; ?>
                                                             </td>
                                                         </tr>
                                                     </table>
+
+                                                    <!-- View Customer Profile Button -->
+                                                    <div class="mt-3">
+                                                        <a href="customers.php?action=view&id=<?php echo $udhar['customer_id']; ?>"
+                                                            class="btn btn-outline-primary btn-sm w-100">
+                                                            <i class="bi bi-person-circle"></i> View Customer Profile
+                                                        </a>
+                                                    </div>
                                                 </div>
 
                                                 <div class="bill-info-card">
-                                                    <h5>Bill Summary</h5>
+                                                    <h5>Totals</h5>
                                                     <table class="bill-info-table">
                                                         <tr>
                                                             <td class="bill-info-label">Status:</td>
@@ -792,23 +810,6 @@
                                                                 ₹<?php echo number_format($udhar['total_amount'], 2); ?>
                                                             </td>
                                                         </tr>
-                                                        <tr>
-                                                            <td class="bill-info-label">CGST:</td>
-                                                            <td class="bill-info-value">
-                                                                ₹<?php echo number_format($udhar['cgst_amount'], 2); ?></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="bill-info-label">SGST:</td>
-                                                            <td class="bill-info-value">
-                                                                ₹<?php echo number_format($udhar['sgst_amount'], 2); ?></td>
-                                                        </tr>
-                                                        <?php if ($udhar['igst_amount'] > 0): ?>
-                                                            <tr>
-                                                                <td class="bill-info-label">IGST:</td>
-                                                                <td class="bill-info-value">
-                                                                    ₹<?php echo number_format($udhar['igst_amount'], 2); ?></td>
-                                                            </tr>
-                                                        <?php endif; ?>
                                                         <?php if ($udhar['discount'] > 0): ?>
                                                             <tr>
                                                                 <td class="bill-info-label">Discount:</td>
@@ -833,14 +834,13 @@
                                                             </tr>
                                                         <?php endif; ?>
                                                         <tr>
-                                                            <td class="bill-info-label">Grand Total:</td>
+                                                            <td class="bill-info-label">Final total:</td>
                                                             <td class="bill-info-value fw-bold">
                                                                 ₹<?php echo number_format($udhar['grand_total'], 2); ?></td>
                                                         </tr>
                                                     </table>
                                                 </div>
                                             </div>
-
 
                                             <?php if (!empty($udhar['notes'])): ?>
                                                 <div class="alert alert-light mt-3">
@@ -851,14 +851,13 @@
 
                                             <!-- Items List -->
                                             <div class="bill-items-section">
-                                                <h5>Bill Items</h5>
+                                                <h5>Items in this bill</h5>
                                                 <div class="bill-items-list">
                                                     <div class="bill-item-row header">
                                                         <div class="bill-item-sno">#</div>
                                                         <div class="bill-item-name">Item Name</div>
                                                         <div class="bill-item-qty">Qty</div>
                                                         <div class="bill-item-price">Price</div>
-                                                        <div class="bill-item-gst-view">GST</div>
                                                         <div class="bill-item-total-view">Total</div>
                                                     </div>
 
@@ -878,14 +877,6 @@
                                                                 </div>
                                                                 <div class="bill-item-price">
                                                                     ₹<?php echo number_format($item['unit_price'], 2); ?></div>
-                                                                <div class="bill-item-gst-view">
-                                                                    <?php if ($item['igst_rate'] > 0): ?>
-                                                                        IGST: <?php echo $item['igst_rate']; ?>%
-                                                                    <?php else: ?>
-                                                                        CGST: <?php echo $item['cgst_rate']; ?>%<br>
-                                                                        SGST: <?php echo $item['sgst_rate']; ?>%
-                                                                    <?php endif; ?>
-                                                                </div>
                                                                 <div class="bill-item-total-view">
                                                                     ₹<?php echo number_format($item['total_amount'], 2); ?></td>
                                                                 </div>
@@ -897,7 +888,7 @@
                                                 <div class="d-flex justify-content-between mt-4">
                                                     <a href="print_bill.php?id=<?php echo $udhar['id']; ?>"
                                                         class="btn btn-primary" target="_blank">
-                                                        <i class="bi bi-printer"></i> Print Bill
+                                                        <i class="bi bi-printer"></i> Print
                                                     </a>
                                                     <div>
                                                         <a href="udhar.php?action=edit&id=<?php echo $udhar['id']; ?>"
@@ -921,15 +912,14 @@
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                                    <h5 class="modal-title" id="deleteModalLabel">Delete bill?</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="alert alert-warning">
                                                         <i class="bi bi-exclamation-triangle"></i>
-                                                        <strong>Warning:</strong> Are you sure you want to delete this udhar
-                                                        entry?
+                                                        <strong>Warning:</strong> Are you sure you want to delete this bill?
                                                     </div>
                                                     <p class="mb-0">
                                                         Bill No:
@@ -940,8 +930,8 @@
                                                         <strong>₹<?php echo number_format($udhar['amount'], 2); ?></strong>
                                                     </p>
                                                     <p class="mt-2 text-danger">
-                                                        This action cannot be undone. All items and payments related to this
-                                                        entry will also be deleted.
+                                                        This cannot be undone. Items and payments linked to this bill will also
+                                                        be deleted.
                                                     </p>
                                                 </div>
                                                 <div class="modal-footer">
@@ -949,7 +939,7 @@
                                                         <input type="hidden" name="udhar_id"
                                                             value="<?php echo $udhar['id']; ?>">
                                                         <button type="submit" name="delete_udhar" class="btn btn-danger">
-                                                            <i class="bi bi-trash"></i> Delete Permanently
+                                                            <i class="bi bi-trash"></i> Delete Forever
                                                         </button>
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                             <i class="bi bi-x-circle"></i> Cancel
@@ -968,23 +958,22 @@
                 <!-- Items Modal for Selection -->
                 <div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="itemsModalLabel">Select Items</h5>
+                                <h5 class="modal-title" id="itemsModalLabel">Choose items</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="table-responsive">
+                                <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
                                     <table class="table table-hover" id="itemsSelectTable">
                                         <thead>
                                             <tr>
-                                                <th width="5%">Select</th>
-                                                <th width="30%">Item Name</th>
-                                                <th width="15%">HSN Code</th>
+                                                <th width="5%">Pick</th>
+                                                <th width="30%">Item</th>
+                                                <th width="15%">HSN</th>
                                                 <th width="15%">Price</th>
-                                                <th width="20%">GST</th>
                                                 <th width="15%">Unit</th>
                                             </tr>
                                         </thead>
@@ -993,19 +982,11 @@
                                                 <tr>
                                                     <td>
                                                         <input type="checkbox" class="form-check-input item-checkbox"
-                                                            value='<?php echo json_encode($itm); ?>'>
+                                                            value="<?php echo (int) $itm['id']; ?>">
                                                     </td>
                                                     <td><?php echo htmlspecialchars($itm['item_name']); ?></td>
                                                     <td><?php echo htmlspecialchars($itm['hsn_code']); ?></td>
                                                     <td>₹<?php echo number_format($itm['price'], 2); ?></td>
-                                                    <td>
-                                                        <?php if ($itm['igst_rate'] > 0): ?>
-                                                            IGST: <?php echo $itm['igst_rate']; ?>%
-                                                        <?php else: ?>
-                                                            CGST: <?php echo $itm['cgst_rate']; ?>%<br>
-                                                            SGST: <?php echo $itm['sgst_rate']; ?>%
-                                                        <?php endif; ?>
-                                                    </td>
                                                     <td><?php echo htmlspecialchars($itm['unit']); ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -1015,8 +996,8 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" onclick="addSelectedItems()">Add
-                                    Selected Items</button>
+                                <button type="button" class="btn btn-primary" onclick="addSelectedItems()">Add selected
+                                    items</button>
                             </div>
                         </div>
                     </div>
