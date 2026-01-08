@@ -39,6 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $mobile = sanitizeInput($_POST['mobile']);
     $address = sanitizeInput($_POST['address']);
 
+    // Shop details for tax invoice
+    $license_no = sanitizeInput($_POST['license_no']);
+    $license_date = !empty($_POST['license_date']) ? $_POST['license_date'] : null;
+    $gst_no = sanitizeInput($_POST['gst_no']);
+    $registration_no = sanitizeInput($_POST['registration_no']);
+    $registration_date = !empty($_POST['registration_date']) ? $_POST['registration_date'] : null;
+
     $conn = getDBConnection();
 
     // Check if username already exists for another user
@@ -52,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     }
     $check_stmt->close();
 
-    $stmt = $conn->prepare("UPDATE users SET username = ?, full_name = ?, email = ?, shop_name = ?, mobile = ?, address = ? WHERE id = ?");
-    $stmt->bind_param("ssssssi", $username, $full_name, $email, $shop_name, $mobile, $address, $_SESSION['user_id']);
+    $stmt = $conn->prepare("UPDATE users SET username = ?, full_name = ?, email = ?, shop_name = ?, mobile = ?, address = ?, license_no = ?, license_date = ?, gst_no = ?, registration_no = ?, registration_date = ? WHERE id = ?");
+    $stmt->bind_param("sssssssssssi", $username, $full_name, $email, $shop_name, $mobile, $address, $license_no, $license_date, $gst_no, $registration_no, $registration_date, $_SESSION['user_id']);
 
     if ($stmt->execute()) {
         setMessage('Profile updated successfully!', 'success');
@@ -172,6 +179,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                     <label class="form-label">Address</label>
                                     <textarea class="form-control" name="address"
                                         rows="3"><?php echo htmlspecialchars($user['address']); ?></textarea>
+                                </div>
+
+                                <!-- Tax Invoice Details -->
+                                <hr class="my-4">
+                                <h6 class="text-primary mb-3"><i class="bi bi-receipt"></i> Tax Invoice Details</h6>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">License Number</label>
+                                        <input type="text" class="form-control" name="license_no"
+                                            value="<?php echo htmlspecialchars($user['license_no'] ?? ''); ?>"
+                                            placeholder="e.g., FFR230000228">
+                                        <small class="text-muted">Will appear on tax invoice</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">License Date</label>
+                                        <input type="date" class="form-control" name="license_date"
+                                            value="<?php echo htmlspecialchars($user['license_date'] ?? ''); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">GST Number</label>
+                                    <input type="text" class="form-control" name="gst_no"
+                                        value="<?php echo htmlspecialchars($user['gst_no'] ?? ''); ?>"
+                                        placeholder="e.g., 24AAFCJ3152N1ZG">
+                                    <small class="text-muted">15-character GST identification number</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Registration Number</label>
+                                        <input type="text" class="form-control" name="registration_no"
+                                            value="<?php echo htmlspecialchars($user['registration_no'] ?? ''); ?>"
+                                            placeholder="e.g., 125338">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Registration Date</label>
+                                        <input type="date" class="form-control" name="registration_date"
+                                            value="<?php echo htmlspecialchars($user['registration_date'] ?? ''); ?>">
+                                    </div>
                                 </div>
 
                                 <div class="d-flex justify-content-between">

@@ -203,15 +203,39 @@ if ($action == 'list') {
 if ($action == 'view' && $customer) {
     // Get recent transactions
     $trans_stmt = $conn->prepare("
-        SELECT * FROM udhar_transactions 
-        WHERE customer_id = ? 
-        ORDER BY transaction_date DESC 
+        SELECT 
+            ut.*,
+            COALESCE(SUM(CASE WHEN ui.quantity > 0 AND ui.total_amount > 0 THEN ui.total_amount ELSE 0 END), 0) AS items_total,
+            COALESCE(SUM(CASE WHEN ui.quantity > 0 AND ui.total_amount > 0 THEN 1 ELSE 0 END), 0) AS items_count
+        FROM udhar_transactions ut
+        LEFT JOIN udhar_items ui ON ui.udhar_id = ut.id
+        WHERE ut.customer_id = ?
+        GROUP BY ut.id
+        ORDER BY ut.transaction_date DESC 
         LIMIT 5
     ");
     $trans_stmt->bind_param("i", $customer['id']);
     $trans_stmt->execute();
     $transactions = $trans_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $trans_stmt->close();
+
+    foreach ($transactions as &$trans) {
+        $items_count = (int) ($trans['items_count'] ?? 0);
+        if ($items_count <= 0) {
+            $trans['amount'] = 0.00;
+        } else {
+            $items_total = (float) ($trans['items_total'] ?? 0);
+            $discount_amount = (float) ($trans['discount'] ?? 0);
+            $transportation_charge = (float) ($trans['transportation_charge'] ?? 0);
+            $round_off = (float) ($trans['round_off'] ?? 0);
+            $trans['amount'] = round($items_total - $discount_amount + $transportation_charge + $round_off, 2);
+        }
+    }
+    unset($trans);
+
+    $transactions = array_values(array_filter($transactions, function ($trans) {
+        return (float) ($trans['amount'] ?? 0) > 0;
+    }));
 
     // Get recent payments
     $pay_stmt = $conn->prepare("

@@ -122,9 +122,9 @@ if (isset($_POST['update_bill'])) {
             $description = sanitizeInput($_POST['description']);
             $notes = sanitizeInput($_POST['notes']);
             $status = sanitizeInput($_POST['status']);
-            $discount = floatval($_POST['discount'] ?? 0);
-            $discount_type = sanitizeInput($_POST['discount_type'] ?? 'fixed');
-            $round_off = floatval($_POST['round_off'] ?? 0);
+            $discount = 0.0;
+            $discount_type = 'fixed';
+            $round_off = 0.0;
             $category = sanitizeInput($_POST['category'] ?? '');
 
             // Calculate totals from items
@@ -327,91 +327,212 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
+            --bg-airy: #f8fafc;
+            --accent-indigo: #6366f1;
+            --glass-white: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.3);
         }
 
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+            /* Softer, calming background */
         }
 
-        .edit-container {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 20px;
+        h1,
+        h2,
+        h3,
+        h4,
+        .font-space {
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        .bill-header {
-            background: linear-gradient(135deg, var(--warning-color), #e67e22);
-            color: white;
-            padding: 20px;
-            border-radius: 10px 10px 0 0;
-            margin-bottom: 0;
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
         }
 
-        .bill-card {
-            background: white;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+        .section-header-bar {
+            background: #f8fafc;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 16px 24px;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .alert-warning {
-            border-left: 4px solid var(--warning-color);
+        .accent-card-indigo {
+            border-left: 4px solid rgba(99, 102, 241, 1);
         }
 
-        .items-table {
-            margin-top: 20px;
+        .accent-card-amber {
+            border-left: 4px solid #f59e0b;
         }
 
-        .items-table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            font-size: 0.9rem;
+        .accent-card-emerald {
+            border-left: 4px solid #10b981;
         }
 
-        .revision-badge {
-            background: #3498db;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
+        .accent-card-violet {
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .accent-card-slate {
+            border-left: 4px solid #64748b;
+        }
+
+        .inner-field-card {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .resizable-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        .resizable-table th {
+            position: relative;
+            user-select: none;
+        }
+
+        .resizable-table th .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            cursor: col-resize;
+            z-index: 20;
+            border-right: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .resizable-table th .resizer:hover,
+        .resizable-table th .resizer.resizing {
+            border-right: 2px solid #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .resizable-table th .resizer:hover {
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        /* Visible Column Dividers */
+        #itemsTable thead th:not(:last-child) {
+            border-right: 1px solid #e2e8f0;
+        }
+
+        #itemsTable tbody td:not(:last-child) {
+            border-right: 1px solid #f1f5f9;
+        }
+
+        .row-colored td {
+            background-color: var(--row-bg);
+        }
+
+        .table-input {
+            background: rgba(248, 250, 252, 0.5);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            width: 100%;
             font-size: 0.85rem;
-            display: inline-block;
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .revision-history {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+        .table-input:hover {
+            border-color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.8);
         }
 
-        .revision-item {
-            padding: 15px;
+        .table-input:focus {
+            outline: none;
+            border-color: #6366f1;
             background: white;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            color: #0f172a;
         }
 
-        .btn-add-item {
-            background: linear-gradient(135deg, var(--success-color), #219653);
-            color: white;
-            border: none;
+        /* Fixed Read-only styling */
+        .table-input:read-only {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #64748b;
+            cursor: default;
         }
 
-        .btn-add-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        .table-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+        }
+
+        .price-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .price-input-wrapper .currency-symbol {
+            position: absolute;
+            left: 14px;
+            font-size: 0.8rem;
+            color: #6366f1;
+            font-weight: 800;
+            pointer-events: none;
+        }
+
+        .price-input-wrapper input {
+            padding-left: 28px !important;
+        }
+
+        #itemsTable thead th {
+            vertical-align: middle;
+            background: #f8fafc;
+            border-bottom: 2px solid #f1f5f9;
+            padding: 16px 12px;
+        }
+
+        #itemsTable tbody td {
+            vertical-align: middle;
+            padding: 12px 8px;
+        }
+
+        .item-row {
+            transition: background-color 0.2s;
+        }
+
+        .item-row:hover {
+            background-color: #f8fafc;
+        }
+
+        .total-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #1e293b;
+            letter-spacing: -0.02em;
         }
     </style>
 </head>
@@ -420,240 +541,372 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
     <?php include 'includes/sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div id="mainContent" class="main-content min-h-screen relative z-10 px-4 py-8 md:px-10">
         <!-- Floating Toggle Button (visible when sidebar is closed) -->
         <button class="floating-toggle-btn" id="floatingToggle">
             <i class="bi bi-chevron-right"></i>
         </button>
 
-        <div class="edit-container">
-            <div class="bill-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3><i class="bi bi-pencil-square"></i> Edit Bill</h3>
-                        <p class="mb-0">Bill No: <?php echo htmlspecialchars($udhar['bill_no']); ?></p>
-                        <?php if (isset($udhar['revision_number']) && $udhar['revision_number'] > 1): ?>
-                            <span class="revision-badge">Revision #<?php echo $udhar['revision_number']; ?></span>
-                        <?php endif; ?>
+        <div class="container-fluid">
+            <div class="container-fluid">
+                <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col">
+                            <nav
+                                class="flex text-[10px] items-center gap-1.5 font-black uppercase tracking-widest text-slate-400 mb-2">
+                                <iconify-icon icon="solar:home-2-bold" class="text-xs"></iconify-icon>
+                                <span>Smart Udhar</span>
+                                <iconify-icon icon="solar:alt-arrow-right-bold" class="text-[8px]"></iconify-icon>
+                                <span class="text-indigo-500">Edit Bill</span>
+                            </nav>
+                            <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
+                                <iconify-icon icon="solar:pen-new-square-bold-duotone"
+                                    class="text-indigo-500"></iconify-icon>
+                                Edit Bill
+                            </h1>
+                        </div>
                     </div>
-                    <a href="udhar.php" class="btn btn-light">
-                        <i class="bi bi-x-circle"></i> Cancel
-                    </a>
-                </div>
-            </div>
 
-            <div class="bill-card">
+                    <div class="flex items-center gap-3">
+                        <a href="udhar.php"
+                            class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all">
+                            <iconify-icon icon="solar:arrow-left-bold" class="text-xl"></iconify-icon>
+                            Back
+                        </a>
+                    </div>
+                </header>
+
                 <?php displayMessage(); ?>
 
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <strong>Important:</strong> Editing this bill will create a revision for audit purposes.
-                    The original bill data will be preserved in the revision history. Please provide a clear reason for
-                    the
-                    changes.
+                <div class="glass-card overflow-hidden">
+                    <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <iconify-icon icon="solar:bill-list-bold-duotone"
+                                class="text-xl text-slate-400"></iconify-icon>
+                            <h4 class="text-lg font-black text-slate-800 tracking-tight mb-0">Bill No:
+                                <?php echo htmlspecialchars($udhar['bill_no']); ?></h4>
+                        </div>
+                        <?php if (isset($udhar['revision_number']) && $udhar['revision_number'] > 1): ?>
+                            <span
+                                class="px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                Revision #<?php echo (int) $udhar['revision_number']; ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="p-6 md:p-8">
+                        <div class="glass-card p-6 border-2 border-amber-100 mb-6">
+                            <div class="flex items-start gap-3">
+                                <iconify-icon icon="solar:danger-triangle-bold-duotone"
+                                    class="text-2xl text-amber-500"></iconify-icon>
+                                <div>
+                                    <p class="text-sm font-black text-slate-800 mb-1">Important</p>
+                                    <p class="text-sm font-bold text-slate-600 mb-0">
+                                        Editing this bill will create a revision for audit purposes. Please provide a
+                                        clear reason for the changes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="" id="editBillForm" class="space-y-6">
+                            <!-- Change Reason -->
+                            <div class="glass-card accent-card-amber overflow-hidden">
+                                <div class="section-header-bar">
+                                    <iconify-icon icon="solar:chat-round-line-bold-duotone"
+                                        class="text-amber-500 text-xl"></iconify-icon>
+                                    <h5 class="text-sm font-black text-slate-800 tracking-tight mb-0">Reason for Editing
+                                        *</h5>
+                                </div>
+                                <div class="p-6">
+                                    <textarea
+                                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-200 transition-all"
+                                        id="change_reason" name="change_reason" rows="2"
+                                        placeholder="E.g., Correcting item quantity, Updating price, Customer requested changes..."
+                                        required></textarea>
+                                    <p class="text-[10px] font-bold text-slate-400 mt-2">This will be logged in the
+                                        revision history for transparency.</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="glass-card accent-card-indigo p-6">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <iconify-icon icon="solar:user-bold-duotone"
+                                            class="text-indigo-500 text-xl"></iconify-icon>
+                                        <h6
+                                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0">
+                                            Customer</h6>
+                                        </div>
+                                        <div class="inner-field-card">
+                                            <span class="text-sm font-black text-slate-800">
+                                                <?php echo htmlspecialchars($udhar['customer_name']); ?>
+                                            </span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="customers.php?action=view&id=<?php echo $udhar['customer_id']; ?>"
+                                                class="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline flex items-center gap-1">
+                                                View Customer Profile
+                                                <iconify-icon icon="solar:arrow-right-up-bold"
+                                                    class="text-xs"></iconify-icon>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card accent-card-indigo p-6">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <iconify-icon icon="solar:hashtag-bold-duotone"
+                                                class="text-indigo-500 text-xl"></iconify-icon>
+                                            <h6
+                                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0">
+                                                Bill Number</h6>
+                                        </div>
+                                        <div class="inner-field-card">
+                                            <span class="text-sm font-black text-slate-800"><?php echo htmlspecialchars($udhar['bill_no']); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class=" glass-card accent-card-indigo overflow-hidden">
+                                                <div class="section-header-bar">
+                                                    <iconify-icon icon="solar:calendar-bold-duotone"
+                                                        class="text-indigo-500 text-xl"></iconify-icon>
+                                                    <h5 class="text-sm font-black text-slate-800 tracking-tight mb-0">
+                                                        Timeline & Status</h5>
+                                                </div>
+                                                <div class="p-6">
+                                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                        <div>
+                                                            <label for="transaction_date"
+                                                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Bill
+                                                                Date *</label>
+                                                            <input type="date" id="transaction_date"
+                                                                name="transaction_date"
+                                                                value="<?php echo $udhar['transaction_date']; ?>"
+                                                                required
+                                                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all" />
+                                                        </div>
+                                                        <div>
+                                                            <label for="due_date"
+                                                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Due
+                                                                Date</label>
+                                                            <input type="date" id="due_date" name="due_date"
+                                                                value="<?php echo $udhar['due_date']; ?>"
+                                                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all" />
+                                                        </div>
+                                                        <div>
+                                                            <label for="status"
+                                                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status
+                                                                *</label>
+                                                            <select id="status" name="status" required
+                                                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all">
+                                                                <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
+                                                                    Pending</option>
+                                                                <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>Partially Paid</option>
+                                                                <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </div>
+
+                                        <!-- Billing Details (Category & Description) -->
+                                        <div class="glass-card accent-card-violet overflow-hidden">
+                                            <div class="section-header-bar">
+                                                <iconify-icon icon="solar:folder-with-files-bold-duotone"
+                                                    class="text-violet-500 text-xl"></iconify-icon>
+                                                <h5 class="text-sm font-black text-slate-800 tracking-tight mb-0">
+                                                    Classification & Description</h5>
+                                            </div>
+                                            <div class="p-6">
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div>
+                                                        <label for="category"
+                                                            class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
+                                                        <select id="category" name="category"
+                                                            class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-200 transition-all">
+                                                            <option value="">Select Category</option>
+                                                            <option value="Fertilizers" <?php echo ($udhar['category'] ?? '') == 'Fertilizers' ? 'selected' : ''; ?>>
+                                                                Fertilizers</option>
+                                                            <option value="Seeds" <?php echo ($udhar['category'] ?? '') == 'Seeds' ? 'selected' : ''; ?>>
+                                                                Seeds
+                                                            </option>
+                                                            <option value="Insecticides" <?php echo ($udhar['category'] ?? '') == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
+                                                            <option value="Others" <?php echo ($udhar['category'] ?? '') == 'Others' ? 'selected' : ''; ?>>
+                                                                Others
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label for="description"
+                                                            class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Description</label>
+                                                        <input type="text" id="description" name="description"
+                                                            placeholder="Main purpose of this bill..."
+                                                            value="<?php echo htmlspecialchars($udhar['description']); ?>"
+                                                            class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-200 transition-all" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Items Section -->
+                                        <div class="glass-card accent-card-emerald overflow-hidden">
+                                            <div class="section-header-bar justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <iconify-icon icon="solar:box-bold-duotone"
+                                                        class="text-emerald-500 text-xl"></iconify-icon>
+                                                    <h4 class="text-lg font-black text-slate-800 tracking-tight mb-0">
+                                                        Bill Items</h4>
+                                                </div>
+                                                <div class="flex items-center gap-4">
+                                                    <button type="button" onclick="addItemRow()"
+                                                        class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-100 transition-all">
+                                                        <iconify-icon icon="solar:add-circle-bold"
+                                                            class="text-xl"></iconify-icon>
+                                                        Add Item
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="p-4 overflow-x-auto bg-slate-50/30">
+                                                <table id="itemsTable" class="w-full text-left text-sm resizable-table">
+                                                    <thead>
+                                                        <tr
+                                                            class="text-[11px] font-black text-slate-500 uppercase tracking-[0.1em]">
+                                                            <th class="px-6 rounded-tl-2xl" style="width: 280px;">
+                                                                <div class="flex items-center gap-2">
+                                                                    <iconify-icon
+                                                                        icon="solar:box-minimalistic-bold-duotone"
+                                                                        class="text-indigo-500 text-lg"></iconify-icon>
+                                                                    Item Name
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-6" style="width: 130px;">
+                                                                <div class="flex items-center gap-2">
+                                                                    <iconify-icon icon="solar:qr-code-bold-duotone"
+                                                                        class="text-indigo-500 text-lg"></iconify-icon>
+                                                                    HSN Code
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-6 text-center" style="width: 110px;">
+                                                                <div class="flex items-center gap-2 justify-center">
+                                                                    Quantity
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-6 text-center" style="width: 100px;">
+                                                                <div class="flex items-center gap-2 justify-center">
+                                                                    Unit
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-6" style="width: 160px;">
+                                                                <div class="flex items-center gap-2">
+                                                                    <iconify-icon icon="solar:wad-of-money-bold-duotone"
+                                                                        class="text-indigo-500 text-lg"></iconify-icon>
+                                                                    Unit Price
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-6 text-right" style="width: 150px;">
+                                                                <div class="flex items-center gap-2 justify-end">
+                                                                    <iconify-icon
+                                                                        icon="solar:calculator-minimalistic-bold-duotone"
+                                                                        class="text-indigo-500 text-lg"></iconify-icon>
+                                                                    Subtotal
+                                                                </div>
+                                                                <div class="resizer"></div>
+                                                            </th>
+                                                            <th class="px-4 rounded-tr-2xl" style="width: 60px;"></th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody id="itemsBody" class="divide-y divide-slate-50">
+                                                        <!-- Items will be loaded here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <div class="glass-card accent-card-indigo p-6 flex flex-col justify-center">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <iconify-icon icon="solar:wad-of-money-bold-duotone" class="text-indigo-500"></iconify-icon>
+                                                    <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-0">
+                                                        Grand Total</p>
+                                                </div>
+                                                <h3 class="text-4xl font-black text-slate-800 tracking-tighter mb-0">₹<span
+                                                        id="grandTotal">0.00</span></h3>
+                                                <div class="mt-4 w-12 h-1 bg-indigo-500 rounded-full"></div>
+                                            </div>
+ 
+                                            <div class="glass-card accent-card-slate overflow-hidden md:col-span-2">
+                                                <div class="section-header-bar">
+                                                    <iconify-icon icon="solar:notes-bold-duotone"
+                                                        class="text-slate-500 text-xl"></iconify-icon>
+                                                    <h5 class="text-sm font-black text-slate-800 tracking-tight mb-0">
+                                                        Internal Notes & Remarks</h5>
+                                                </div>
+                                                <div class="p-6 bg-slate-50/30">
+                                                    <textarea id="notes" name="notes" rows="2"
+                                                        placeholder="Add any specific details for future reference..."
+                                                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-slate-200 transition-all font-bold min-h-[100px]"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                                            <a href="udhar.php"
+                                                class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center justify-center gap-2 transition-all">
+                                                <iconify-icon icon="solar:arrow-left-bold"
+                                                    class="text-xl"></iconify-icon>
+                                                Cancel
+                                            </a>
+                                            <button type="submit" name="update_bill"
+                                                class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all">
+                                                <iconify-icon icon="solar:check-circle-bold"
+                                                    class="text-xl"></iconify-icon>
+                                                Update Bill
+                                            </button>
+                                        </div>
+                        </form>
+
+                        <!-- Revision History -->
+                        <?php if (!empty($revisions)): ?>
+                            <div class="revision-history">
+                                <h5><i class="bi bi-clock-history"></i> Revision History</h5>
+                                <p class="text-muted">This bill has been edited <?php echo count($revisions); ?> time(s)</p>
+
+                                <?php foreach ($revisions as $rev): ?>
+                                    <div class="revision-item">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>Revision #<?php echo $rev['revision_number']; ?></strong>
+                                                <span class="text-muted"> -
+                                                    <?php echo date('d M Y, h:i A', strtotime($rev['changed_at'])); ?></span>
+                                            </div>
+                                            <span
+                                                class="badge bg-info">₹<?php echo number_format($rev['grand_total'], 2); ?></span>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-person"></i> By:
+                                                <?php echo htmlspecialchars($rev['changed_by_name'] ?? 'Unknown'); ?>
+                                            </small>
+                                        </div>
+                                        <?php if (!empty($rev['change_reason'])): ?>
+                                            <div class="mt-2">
+                                                <small><strong>Reason:</strong>
+                                                    <?php echo htmlspecialchars($rev['change_reason']); ?></small>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-
-                <form method="POST" action="" id="editBillForm">
-                    <!-- Change Reason -->
-                    <div class="mb-4">
-                        <label for="change_reason" class="form-label">
-                            <i class="bi bi-chat-left-text"></i> Reason for Editing *
-                        </label>
-                        <textarea class="form-control" id="change_reason" name="change_reason" rows="2"
-                            placeholder="E.g., Correcting item quantity, Updating price, Customer requested changes..."
-                            required></textarea>
-                        <small class="text-muted">This will be logged in the revision history</small>
-                    </div>
-
-                    <div class="row">
-                        <!-- Customer Info (Read-only) -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="bi bi-person"></i> Customer</label>
-                            <input type="text" class="form-control"
-                                value="<?php echo htmlspecialchars($udhar['customer_name']); ?>" readonly>
-                            <small class="text-muted">Customer cannot be changed after bill creation</small>
-                            <div class="mt-2">
-                                <a href="customers.php?action=view&id=<?php echo $udhar['customer_id']; ?>"
-                                    class="btn btn-outline-info btn-sm">
-                                    <i class="bi bi-person-circle"></i> View Customer Profile
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Bill Number (Read-only) -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label"><i class="bi bi-receipt"></i> Bill Number</label>
-                            <input type="text" class="form-control"
-                                value="<?php echo htmlspecialchars($udhar['bill_no']); ?>" readonly>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Transaction Date -->
-                        <div class="col-md-4 mb-3">
-                            <label for="transaction_date" class="form-label"><i class="bi bi-calendar"></i> Bill Date
-                                *</label>
-                            <input type="date" class="form-control" id="transaction_date" name="transaction_date"
-                                value="<?php echo $udhar['transaction_date']; ?>" required>
-                        </div>
-
-                        <!-- Due Date -->
-                        <div class="col-md-4 mb-3">
-                            <label for="due_date" class="form-label"><i class="bi bi-calendar-check"></i> Due
-                                Date</label>
-                            <input type="date" class="form-control" id="due_date" name="due_date"
-                                value="<?php echo $udhar['due_date']; ?>">
-                        </div>
-
-                        <!-- Status -->
-                        <div class="col-md-4 mb-3">
-                            <label for="status" class="form-label"><i class="bi bi-flag"></i> Status *</label>
-                            <select class="form-select" id="status" name="status" required>
-                                <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
-                                    Pending
-                                </option>
-                                <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>Partially Paid</option>
-                                <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Category -->
-                    <div class="mb-3">
-                        <label for="category" class="form-label"><i class="bi bi-tags"></i> Category</label>
-                        <select class="form-select" id="category" name="category">
-                            <option value="">Select Category</option>
-                            <option value="Fertilizers" <?php echo ($udhar['category'] ?? '') == 'Fertilizers' ? 'selected' : ''; ?>>
-                                Fertilizers</option>
-                            <option value="Seeds" <?php echo ($udhar['category'] ?? '') == 'Seeds' ? 'selected' : ''; ?>>
-                                Seeds
-                            </option>
-                            <option value="Insecticides" <?php echo ($udhar['category'] ?? '') == 'Insecticides' ? 'selected' : ''; ?>>Insecticides</option>
-                            <option value="Others" <?php echo ($udhar['category'] ?? '') == 'Others' ? 'selected' : ''; ?>>
-                                Others
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-3">
-                        <label for="description" class="form-label"><i class="bi bi-file-text"></i> Description</label>
-                        <input type="text" class="form-control" id="description" name="description"
-                            value="<?php echo htmlspecialchars($udhar['description']); ?>">
-                    </div>
-
-                    <!-- Items Section -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5><i class="bi bi-box-seam"></i> Bill Items</h5>
-                            <button type="button" class="btn btn-add-item" onclick="addItemRow()">
-                                <i class="bi bi-plus-circle"></i> Add Item
-                            </button>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-bordered items-table">
-                                <thead>
-                                    <tr>
-                                        <th width="25%">Item</th>
-                                        <th width="12%">HSN</th>
-                                        <th width="10%">Qty</th>
-                                        <th width="8%">Unit</th>
-                                        <th width="12%">Price</th>
-                                        <th width="18%">GST Rates</th>
-                                        <th width="12%">Total</th>
-                                        <th width="3%"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="itemsBody">
-                                    <!-- Items will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Discount and Round Off -->
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="discount" class="form-label"><i class="bi bi-percent"></i> Discount</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="discount" name="discount"
-                                    value="<?php echo $udhar['discount']; ?>" step="0.01" min="0"
-                                    onchange="calculateTotals()">
-                                <select class="form-select" name="discount_type" style="max-width: 120px;"
-                                    onchange="calculateTotals()">
-                                    <option value="fixed" <?php echo $udhar['discount_type'] == 'fixed' ? 'selected' : ''; ?>>
-                                        Fixed (₹)</option>
-                                    <option value="percentage" <?php echo $udhar['discount_type'] == 'percentage' ? 'selected' : ''; ?>>Percentage (%)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label for="round_off" class="form-label"><i class="bi bi-calculator"></i> Round Off</label>
-                            <input type="number" class="form-control" id="round_off" name="round_off"
-                                value="<?php echo $udhar['round_off']; ?>" step="0.01" onchange="calculateTotals()">
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label"><i class="bi bi-cash-stack"></i> Grand Total</label>
-                            <div class="form-control bg-light" style="font-size: 1.2rem; font-weight: bold;">
-                                ₹<span id="grandTotal">0.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="mb-3">
-                        <label for="notes" class="form-label"><i class="bi bi-sticky"></i> Notes</label>
-                        <textarea class="form-control" id="notes" name="notes"
-                            rows="2"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
-                    </div>
-
-                    <!-- Submit Buttons -->
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="udhar.php" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </a>
-                        <button type="submit" name="update_bill" class="btn btn-warning btn-lg">
-                            <i class="bi bi-check-circle"></i> Update Bill & Create Revision
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Revision History -->
-                <?php if (!empty($revisions)): ?>
-                    <div class="revision-history">
-                        <h5><i class="bi bi-clock-history"></i> Revision History</h5>
-                        <p class="text-muted">This bill has been edited <?php echo count($revisions); ?> time(s)</p>
-
-                        <?php foreach ($revisions as $rev): ?>
-                            <div class="revision-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <strong>Revision #<?php echo $rev['revision_number']; ?></strong>
-                                        <span class="text-muted"> -
-                                            <?php echo date('d M Y, h:i A', strtotime($rev['changed_at'])); ?></span>
-                                    </div>
-                                    <span class="badge bg-info">₹<?php echo number_format($rev['grand_total'], 2); ?></span>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-person"></i> By:
-                                        <?php echo htmlspecialchars($rev['changed_by_name'] ?? 'Unknown'); ?>
-                                    </small>
-                                </div>
-                                <?php if (!empty($rev['change_reason'])): ?>
-                                    <div class="mt-2">
-                                        <small><strong>Reason:</strong>
-                                            <?php echo htmlspecialchars($rev['change_reason']); ?></small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -664,9 +917,133 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
         let itemCounter = 0;
         const items = <?php echo json_encode($items); ?>;
         const existingItems = <?php echo json_encode($udhar_items); ?>;
+        const UDHAR_ID = <?php echo (int) $udhar_id; ?>;
+
+        function storageKey(suffix) {
+            return `edit_bill_${UDHAR_ID}_${suffix}`;
+        }
+
+        function randomPastel() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsla(${hue}, 85%, 95%, 1)`;
+        }
+
+        function getRowColorMap() {
+            try {
+                return JSON.parse(localStorage.getItem(storageKey('rowColors')) || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function setRowColorMap(map) {
+            localStorage.setItem(storageKey('rowColors'), JSON.stringify(map));
+        }
+
+        function isRowColorEnabled() {
+            return localStorage.getItem(storageKey('colorRows')) === '1';
+        }
+
+        function applyRowColor(row, rowIndex) {
+            const map = getRowColorMap();
+            if (!map[rowIndex]) {
+                map[rowIndex] = randomPastel();
+                setRowColorMap(map);
+            }
+            row.style.setProperty('--row-bg', map[rowIndex]);
+            if (isRowColorEnabled()) {
+                row.classList.add('row-colored');
+            } else {
+                row.classList.remove('row-colored');
+            }
+        }
+
+        function toggleRowColors(enabled) {
+            localStorage.setItem(storageKey('colorRows'), enabled ? '1' : '0');
+            document.querySelectorAll('#itemsBody tr').forEach((row) => {
+                if (enabled) {
+                    row.classList.add('row-colored');
+                } else {
+                    row.classList.remove('row-colored');
+                }
+            });
+        }
+
+        function applyColumnWidths() {
+            const table = document.getElementById('itemsTable');
+            if (!table) return;
+            let widths = null;
+            try {
+                widths = JSON.parse(localStorage.getItem(storageKey('colWidths')) || 'null');
+            } catch (e) {
+                widths = null;
+            }
+            if (!Array.isArray(widths)) return;
+            const ths = table.querySelectorAll('thead th');
+            widths.forEach((w, i) => {
+                if (ths[i] && typeof w === 'number' && w > 40) {
+                    ths[i].style.width = w + 'px';
+                }
+            });
+        }
+
+        function saveColumnWidths() {
+            const table = document.getElementById('itemsTable');
+            if (!table) return;
+            const ths = Array.from(table.querySelectorAll('thead th'));
+            const widths = ths.map((th) => th.getBoundingClientRect().width);
+            localStorage.setItem(storageKey('colWidths'), JSON.stringify(widths));
+        }
+
+        function initResizableColumns() {
+            const table = document.getElementById('itemsTable');
+            if (!table) return;
+            applyColumnWidths();
+
+            const ths = Array.from(table.querySelectorAll('thead th'));
+            ths.forEach((th, index) => {
+                const resizer = th.querySelector('.resizer');
+                if (!resizer) return;
+
+                let startX = 0;
+                let startWidth = 0;
+                const minWidth = 60;
+
+                const onMouseMove = (e) => {
+                    const dx = e.clientX - startX;
+                    const newWidth = Math.max(minWidth, startWidth + dx);
+                    th.style.width = newWidth + 'px';
+                    resizer.classList.add('resizing');
+                };
+
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    resizer.classList.remove('resizing');
+                    saveColumnWidths();
+                };
+
+                resizer.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    startX = e.clientX;
+                    startWidth = th.getBoundingClientRect().width;
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+            });
+        }
 
         // Load existing items on page load
         $(document).ready(function () {
+            const toggle = document.getElementById('toggleRowColors');
+            if (toggle) {
+                toggle.checked = isRowColorEnabled();
+                toggle.addEventListener('change', function () {
+                    toggleRowColors(this.checked);
+                });
+            }
+            initResizableColumns();
+
             existingItems.forEach(item => {
                 addItemRow(item);
             });
@@ -677,9 +1054,20 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
             const tbody = document.getElementById('itemsBody');
             const row = document.createElement('tr');
             row.id = 'itemRow_' + itemCounter;
-
-            const defaultItem = itemData || {
-                id: '',
+            row.className = 'item-row';
+            
+            const defaultItem = itemData ? {
+                item_id: itemData.item_id,
+                item_name: itemData.item_name,
+                hsn_code: itemData.hsn_code,
+                unit_price: itemData.unit_price,
+                quantity: itemData.quantity,
+                cgst_rate: itemData.cgst_rate,
+                sgst_rate: itemData.sgst_rate,
+                igst_rate: itemData.igst_rate,
+                unit: itemData.unit
+            } : {
+                item_id: '',
                 item_name: '',
                 hsn_code: '',
                 unit_price: '0.00',
@@ -689,10 +1077,10 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                 igst_rate: '0.00',
                 unit: 'PCS'
             };
-
+            
             row.innerHTML = `
-                <td>
-                    <select class="form-select form-select-sm item-select" name="items[${itemCounter}][item_id]" 
+                <td class="px-3">
+                    <select class="table-input table-select item-select" name="items[${itemCounter}][item_id]" 
                             onchange="updateItemDetails(${itemCounter})" required>
                         <option value="">Select Item</option>
                         ${items.map(item => `
@@ -711,59 +1099,45 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                     </select>
                     <input type="hidden" name="items[${itemCounter}][item_name]" value="${defaultItem.item_name}" class="item-name">
                 </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm item-hsn" 
-                           name="items[${itemCounter}][hsn_code]" value="${defaultItem.hsn_code}" readonly>
+                <td class="px-3">
+                    <input type="text" class="table-input item-hsn font-mono text-xs" 
+                           name="items[${itemCounter}][hsn_code]" value="${defaultItem.hsn_code}" readonly tabindex="-1">
                 </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm quantity" 
+                <td class="px-3">
+                    <input type="number" class="table-input quantity text-center" 
                            name="items[${itemCounter}][quantity]" value="${defaultItem.quantity}" 
                            step="0.01" min="0.01" onchange="calculateItemTotal(${itemCounter})" required>
                 </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm text-center" 
-                           name="items[${itemCounter}][unit]" value="${defaultItem.unit}" readonly>
+                <td class="px-3">
+                    <input type="text" class="table-input text-center font-bold text-[10px] uppercase tracking-widest" 
+                           name="items[${itemCounter}][unit]" value="${defaultItem.unit}" readonly tabindex="-1">
                 </td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text">₹</span>
-                        <input type="number" class="form-control price" 
+                <td class="px-3">
+                    <div class="price-input-wrapper">
+                        <span class="currency-symbol">₹</span>
+                        <input type="number" class="table-input price" 
                                name="items[${itemCounter}][price]" value="${defaultItem.unit_price}" 
                                step="0.01" min="0.01" onchange="calculateItemTotal(${itemCounter})" required>
                     </div>
                 </td>
-                <td>
-                    <div class="row g-1">
-                        <div class="col-4">
-                            <input type="number" class="form-control form-control-sm cgst-rate" 
-                                   name="items[${itemCounter}][cgst_rate]" value="${defaultItem.cgst_rate}" 
-                                   step="0.01" min="0" max="100" placeholder="C" 
-                                   onchange="calculateItemTotal(${itemCounter})">
-                        </div>
-                        <div class="col-4">
-                            <input type="number" class="form-control form-control-sm sgst-rate" 
-                                   name="items[${itemCounter}][sgst_rate]" value="${defaultItem.sgst_rate}" 
-                                   step="0.01" min="0" max="100" placeholder="S" 
-                                   onchange="calculateItemTotal(${itemCounter})">
-                        </div>
-                        <div class="col-4">
-                            <input type="number" class="form-control form-control-sm igst-rate" 
-                                   name="items[${itemCounter}][igst_rate]" value="${defaultItem.igst_rate}" 
-                                   step="0.01" min="0" max="100" placeholder="I" 
-                                   onchange="calculateItemTotal(${itemCounter})">
-                        </div>
-                    </div>
+                <td class="hidden">
+                    <input type="hidden" class="cgst-rate" name="items[${itemCounter}][cgst_rate]" value="${defaultItem.cgst_rate}" />
+                    <input type="hidden" class="sgst-rate" name="items[${itemCounter}][sgst_rate]" value="${defaultItem.sgst_rate}" />
+                    <input type="hidden" class="igst-rate" name="items[${itemCounter}][igst_rate]" value="${defaultItem.igst_rate}" />
                 </td>
-                <td class="text-end fw-bold">₹<span class="item-total">0.00</span></td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-outline-danger border-0" 
-                            onclick="removeItemRow(${itemCounter})">
-                        <i class="bi bi-trash"></i>
+                <td class="px-6 text-right">
+                    <span class="total-display">₹<span class="item-total">0.00</span></span>
+                </td>
+                <td class="px-4 text-center">
+                    <button type="button" class="w-10 h-10 rounded-2xl flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 hover:shadow-sm transition-all" 
+                            onclick="removeItemRow(${itemCounter})" title="Remove Item">
+                        <iconify-icon icon="solar:trash-bin-trash-bold-duotone" class="text-2xl"></iconify-icon>
                     </button>
                 </td>
             `;
 
             tbody.appendChild(row);
+            applyRowColor(row, itemCounter);
             itemCounter++;
             calculateItemTotal(itemCounter - 1);
         }
@@ -841,18 +1215,7 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                 }
             });
 
-            const discount = parseFloat(document.getElementById('discount').value) || 0;
-            const discountType = document.querySelector('select[name="discount_type"]').value;
-            const roundOff = parseFloat(document.getElementById('round_off').value) || 0;
-
-            let discountAmount = 0;
-            if (discountType === 'percentage') {
-                discountAmount = (subtotal * discount) / 100;
-            } else {
-                discountAmount = discount;
-            }
-
-            const grandTotal = subtotal + totalTax - discountAmount + roundOff;
+            const grandTotal = subtotal + totalTax;
             document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
         }
     </script>

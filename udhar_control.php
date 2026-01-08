@@ -421,6 +421,44 @@ if ($udhar_id > 0 && ($action == 'edit' || $action == 'view' || $action == 'prin
         $stmt->execute();
         $udhar_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
+
+        $udhar_items = array_values(array_filter($udhar_items, function ($item) {
+            $qty = isset($item['quantity']) ? (float) $item['quantity'] : 0;
+            $total = isset($item['total_amount']) ? (float) $item['total_amount'] : 0;
+            return $qty > 0 && $total > 0;
+        }));
+
+        $calculated_total_amount = 0.0;
+        foreach ($udhar_items as $item) {
+            $calculated_total_amount += (float) ($item['total_amount'] ?? 0);
+        }
+
+        if (count($udhar_items) === 0) {
+            $udhar['total_amount'] = 0.00;
+            $udhar['grand_total'] = 0.00;
+            $udhar['amount'] = 0.00;
+            $udhar['discount'] = 0.00;
+            $udhar['transportation_charge'] = 0.00;
+            $udhar['round_off'] = 0.00;
+
+            $stmt = $conn->prepare("UPDATE udhar_transactions SET total_amount = 0.00, grand_total = 0.00, amount = 0.00, cgst_amount = 0.00, sgst_amount = 0.00, igst_amount = 0.00, discount = 0.00, transportation_charge = 0.00, round_off = 0.00 WHERE id = ?");
+            $stmt->bind_param("i", $udhar_id);
+            $stmt->execute();
+            $stmt->close();
+        } else {
+            $discount_amount = (float) ($udhar['discount'] ?? 0);
+            $transportation_charge = (float) ($udhar['transportation_charge'] ?? 0);
+            $round_off = (float) ($udhar['round_off'] ?? 0);
+
+            $udhar['total_amount'] = round($calculated_total_amount, 2);
+            $udhar['grand_total'] = round($calculated_total_amount - $discount_amount + $transportation_charge + $round_off, 2);
+            $udhar['amount'] = $udhar['grand_total'];
+
+            $stmt = $conn->prepare("UPDATE udhar_transactions SET total_amount = ?, grand_total = ?, amount = ? WHERE id = ?");
+            $stmt->bind_param("dddi", $udhar['total_amount'], $udhar['grand_total'], $udhar['amount'], $udhar_id);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 }
 
@@ -510,5 +548,79 @@ if (!empty($params)) {
 $stmt->execute();
 $udhar_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+if (!empty($udhar_list)) {
+    $updateZeroStmt = $conn->prepare("UPDATE udhar_transactions SET total_amount = 0.00, grand_total = 0.00, amount = 0.00, cgst_amount = 0.00, sgst_amount = 0.00, igst_amount = 0.00, discount = 0.00, transportation_charge = 0.00, round_off = 0.00 WHERE id = ?");
+    $updateTotalsStmt = $conn->prepare("UPDATE udhar_transactions SET total_amount = ?, grand_total = ?, amount = ? WHERE id = ?");
+
+    $ids = array_map(function ($row) {
+        return (int) ($row['id'] ?? 0);
+    }, $udhar_list);
+    $ids = array_values(array_filter($ids, function ($id) {
+        return $id > 0;
+    }));
+
+    if (!empty($ids)) {
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $types = str_repeat('i', count($ids));
+
+        $sql = "SELECT udhar_id, SUM(total_amount) AS items_total, COUNT(*) AS items_count FROM udhar_items WHERE udhar_id IN ($placeholders) AND quantity > 0 AND total_amount > 0 GROUP BY udhar_id";
+        $sumStmt = $conn->prepare($sql);
+        mysqliBindParamsDynamic($sumStmt, $types, $ids);
+        $sumStmt->execute();
+        $rows = $sumStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $sumStmt->close();
+
+        $byUdharId = [];
+        foreach ($rows as $row) {
+            $byUdharId[(int) $row['udhar_id']] = [
+                'items_total' => (float) ($row['items_total'] ?? 0),
+                'items_count' => (int) ($row['items_count'] ?? 0),
+            ];
+        }
+
+        foreach ($udhar_list as &$entry) {
+            $id = (int) ($entry['id'] ?? 0);
+            $items_total = $byUdharId[$id]['items_total'] ?? 0.0;
+            $items_count = $byUdharId[$id]['items_count'] ?? 0;
+
+            if ($items_count === 0) {
+                $entry['amount'] = 0.00;
+                $entry['total_amount'] = 0.00;
+                $entry['grand_total'] = 0.00;
+
+                if ($updateZeroStmt) {
+                    $updateZeroStmt->bind_param('i', $id);
+                    $updateZeroStmt->execute();
+                }
+            } else {
+                $discount_amount = (float) ($entry['discount'] ?? 0);
+                $transportation_charge = (float) ($entry['transportation_charge'] ?? 0);
+                $round_off = (float) ($entry['round_off'] ?? 0);
+
+                $entry['total_amount'] = round($items_total, 2);
+                $entry['grand_total'] = round($items_total - $discount_amount + $transportation_charge + $round_off, 2);
+                $entry['amount'] = $entry['grand_total'];
+
+                if ($updateTotalsStmt) {
+                    $updateTotalsStmt->bind_param('dddi', $entry['total_amount'], $entry['grand_total'], $entry['amount'], $id);
+                    $updateTotalsStmt->execute();
+                }
+            }
+        }
+        unset($entry);
+
+        $udhar_list = array_values(array_filter($udhar_list, function ($entry) {
+            return (float) ($entry['grand_total'] ?? 0) > 0;
+        }));
+    }
+
+    if ($updateZeroStmt) {
+        $updateZeroStmt->close();
+    }
+    if ($updateTotalsStmt) {
+        $updateTotalsStmt->close();
+    }
+}
 
 $page_title = "Udhar Entry Management";

@@ -16,17 +16,27 @@
 .udhar-card {
     border-radius: 0 0 10px 10px;
     border: none;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
 }
 
 .udhar-table-container {
     overflow-x: auto;
     border-radius: 0 0 10px 10px;
+    padding-bottom: 60px;
+    /* Space for dropdowns */
+    margin-bottom: -60px;
+    /* Offset to keep layout intact */
 }
 
+/* Ensure the table itself can show overflowing dropdowns */
 .udhar-table {
     margin-bottom: 0;
+}
+
+.udhar-row-actions .btn-group {
+    position: static;
+    /* Help Bootstrap Popper position correctly */
 }
 
 .udhar-table thead th {
@@ -189,7 +199,7 @@
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .udhar-stats-cards {
@@ -203,7 +213,7 @@
     background: white;
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     border-left: 4px solid #e74c3c;
 }
@@ -251,7 +261,7 @@
 .bill-form-container {
     background: white;
     border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
 
@@ -430,7 +440,7 @@
 .bill-view-card {
     background: white;
     border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     margin-bottom: 30px;
 }
@@ -450,7 +460,7 @@
 }
 
 .bill-number-badge {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -566,49 +576,49 @@
     .udhar-table-container {
         font-size: 0.9rem;
     }
-    
+
     .udhar-table thead th,
     .udhar-table tbody td {
         padding: 10px 5px;
     }
-    
+
     .udhar-row-actions {
         flex-direction: column;
         gap: 3px;
     }
-    
+
     .bill-form-row {
         grid-template-columns: 1fr;
     }
-    
+
     .bill-items-table {
         display: block;
         overflow-x: auto;
     }
-    
+
     .bill-item-row {
         grid-template-columns: 1fr;
         gap: 10px;
         text-align: center;
     }
-    
+
     .bill-item-row.header {
         display: none;
     }
-    
+
     .bill-info-section {
         grid-template-columns: 1fr;
     }
-    
+
     .udhar-stats-cards {
         grid-template-columns: 1fr;
     }
-    
+
     .udhar-customer-info {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .udhar-customer-avatar {
         margin-right: 0;
         margin-bottom: 10px;
@@ -621,6 +631,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -729,15 +740,20 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Modal Styles for Items Selection */
 .items-modal .modal-content {
     border-radius: 15px;
     border: none;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
 .items-modal .modal-header {

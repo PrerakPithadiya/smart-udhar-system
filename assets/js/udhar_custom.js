@@ -429,39 +429,70 @@ document.getElementById('toggleRowColors')?.addEventListener('change', function 
     }
 });
 
-// Column Resizing Logic
+// Column Resizing Logic with Local Storage Persistence
 document.addEventListener('DOMContentLoaded', function () {
-    const table = document.getElementById('billTable');
-    const cols = table.querySelectorAll('th');
+    const tables = document.querySelectorAll('.resizable-table');
 
-    cols.forEach(col => {
-        const resizer = col.querySelector('.resizer');
-        if (!resizer) return;
+    function saveColumnWidths(table) {
+        if (!table.id) return;
+        const ths = Array.from(table.querySelectorAll('thead th'));
+        const widths = ths.map(th => th.getBoundingClientRect().width);
+        localStorage.setItem(`colWidths_${table.id}`, JSON.stringify(widths));
+    }
 
-        let x = 0;
-        let w = 0;
+    function applyColumnWidths(table) {
+        if (!table.id) return;
+        let widths;
+        try {
+            widths = JSON.parse(localStorage.getItem(`colWidths_${table.id}`));
+        } catch (e) {
+            return;
+        }
 
-        const mouseDownHandler = function (e) {
-            x = e.clientX;
-            const styles = window.getComputedStyle(col);
-            w = parseInt(styles.width, 10);
+        if (Array.isArray(widths)) {
+            const ths = table.querySelectorAll('thead th');
+            widths.forEach((w, i) => {
+                if (ths[i] && w > 30) {
+                    ths[i].style.width = w + 'px';
+                }
+            });
+        }
+    }
 
-            document.addEventListener('mousemove', mouseMoveHandler);
-            document.addEventListener('mouseup', mouseUpHandler);
-            resizer.classList.add('resizing');
-        };
+    tables.forEach(table => {
+        applyColumnWidths(table);
+        const cols = table.querySelectorAll('th');
 
-        const mouseMoveHandler = function (e) {
-            const dx = e.clientX - x;
-            col.style.width = `${w + dx}px`;
-        };
+        cols.forEach(col => {
+            const resizer = col.querySelector('.resizer');
+            if (!resizer) return;
 
-        const mouseUpHandler = function () {
-            document.removeEventListener('mousemove', mouseMoveHandler);
-            document.removeEventListener('mouseup', mouseUpHandler);
-            resizer.classList.remove('resizing');
-        };
+            let x = 0;
+            let w = 0;
 
-        resizer.addEventListener('mousedown', mouseDownHandler);
+            const mouseDownHandler = function (e) {
+                x = e.clientX;
+                const styles = window.getComputedStyle(col);
+                w = parseInt(styles.width, 10);
+
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+                resizer.classList.add('resizing');
+            };
+
+            const mouseMoveHandler = function (e) {
+                const dx = e.clientX - x;
+                col.style.width = `${w + dx}px`;
+            };
+
+            const mouseUpHandler = function () {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                resizer.classList.remove('resizing');
+                saveColumnWidths(table);
+            };
+
+            resizer.addEventListener('mousedown', mouseDownHandler);
+        });
     });
 });

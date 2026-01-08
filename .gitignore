@@ -30,3 +30,8 @@ cache/
 
 # Temporary files
 tmp/
+.tmp/
+
+# Google OAuth credentials
+credentials.json
+token.json

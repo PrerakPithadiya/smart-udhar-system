@@ -36,7 +36,11 @@
 
 .search-suggestion-item:hover,
 .search-suggestion-item.active {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.05),
+    rgba(168, 85, 247, 0.05)
+  );
   transform: translateX(4px);
   z-index: 2;
 }
@@ -134,22 +138,50 @@
 
 .resizable-table th,
 .resizable-table td {
-  white-space: normal !important;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 50px;
+}
+
+/* Specific Column Truncation */
+.col-bill-no {
+  max-width: 120px;
+}
+
+.col-customer {
+  max-width: 200px;
+}
+
+.col-date {
+  max-width: 100px;
+}
+
+.col-amount {
+  max-width: 100px;
+}
+
+.col-due-date {
+  max-width: 100px;
 }
 
 .resizer {
   position: absolute;
   top: 0;
   right: 0;
-  width: 8px;
+  width: 5px;
   cursor: col-resize;
   user-select: none;
   height: 100%;
   z-index: 10;
-  transition: background 0.2s;
+  border-right: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.resizer:hover,
+.resizer.resizing {
+  border-right-color: #6366f1;
+  background: rgba(99, 102, 241, 0.05);
 }
 
 /* Summary Input Styles */

@@ -23,6 +23,18 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/udhar_custom.css">
 
+    <?php
+    if (!function_exists('getUdharListUrl')) {
+        function getUdharListUrl($page)
+        {
+            $params = $_GET;
+            $params['action'] = 'list';
+            $params['page'] = max(1, (int) $page);
+            return 'udhar.php?' . http_build_query($params);
+        }
+    }
+    ?>
+
     <style>
         :root {
             --bg-airy: #f8fafc;
@@ -304,14 +316,19 @@
                                         </div>
                                     <?php else: ?>
                                         <div class="udhar-table-container">
-                                            <table class="table udhar-table">
+                                            <table class="table udhar-table resizable-table" id="udharTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Bill No.</th>
-                                                        <th>Customer</th>
-                                                        <th>Date</th>
-                                                        <th>Amount</th>
-                                                        <th>Due Date</th>
+                                                        <th class="col-bill-no">Bill No. <div class="resizer"></div>
+                                                        </th>
+                                                        <th class="col-customer">Customer <div class="resizer"></div>
+                                                        </th>
+                                                        <th class="col-date">Date <div class="resizer"></div>
+                                                        </th>
+                                                        <th class="col-amount">Amount <div class="resizer"></div>
+                                                        </th>
+                                                        <th class="col-due-date">Due Date <div class="resizer"></div>
+                                                        </th>
                                                         <th>Status</th>
                                                         <th>Options</th>
                                                     </tr>
@@ -319,11 +336,11 @@
                                                 <tbody>
                                                     <?php foreach ($udhar_list as $entry): ?>
                                                         <tr class="bill-card">
-                                                            <td>
+                                                            <td class="col-bill-no">
                                                                 <strong
                                                                     class="udhar-bill-number"><?php echo htmlspecialchars($entry['bill_no']); ?></strong>
                                                             </td>
-                                                            <td>
+                                                            <td class="col-customer">
                                                                 <div class="udhar-customer-info">
                                                                     <div class="udhar-customer-avatar">
                                                                         <?php echo strtoupper(substr($entry['customer_name'], 0, 1)); ?>
@@ -340,15 +357,15 @@
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td>
+                                                            <td class="col-date">
                                                                 <span
                                                                     class="udhar-date"><?php echo date('d M Y', strtotime($entry['transaction_date'])); ?></span>
                                                             </td>
-                                                            <td>
+                                                            <td class="col-amount">
                                                                 <span
                                                                     class="udhar-amount">₹<?php echo number_format($entry['amount'], 2); ?></span>
                                                             </td>
-                                                            <td>
+                                                            <td class="col-due-date">
                                                                 <?php if (!empty($entry['due_date'])): ?>
                                                                     <span
                                                                         class="udhar-date"><?php echo date('d M Y', strtotime($entry['due_date'])); ?></span>
@@ -384,9 +401,17 @@
                                                             </td>
                                                             <td>
                                                                 <div class="udhar-row-actions">
+                                                                    <!-- Print Tax Invoice (New) -->
+                                                                    <a href="print_bill_tax_invoice.php?id=<?php echo $entry['id']; ?>"
+                                                                        class="btn btn-sm btn-outline-primary"
+                                                                        title="Print Tax Invoice">
+                                                                        <i class="bi bi-file-earmark-text"></i>
+                                                                    </a>
+
+                                                                    <!-- Print Standard Bill (Old) -->
                                                                     <a href="print_bill.php?id=<?php echo $entry['id']; ?>"
-                                                                        class="btn btn-sm btn-outline-primary" title="Print Bill"
-                                                                        target="_blank">
+                                                                        class="btn btn-sm btn-outline-secondary"
+                                                                        title="Print Standard Bill">
                                                                         <i class="bi bi-printer"></i>
                                                                     </a>
                                                                     <a href="udhar.php?action=view&id=<?php echo $entry['id']; ?>"
@@ -415,7 +440,7 @@
                                                 <ul class="pagination justify-content-center">
                                                     <li class="page-item <?php echo $page == 1 ? 'disabled' : ''; ?>">
                                                         <a class="page-link"
-                                                            href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&customer=<?php echo $customer_filter; ?>&page=<?php echo $page - 1; ?>">
+                                                            href="<?php echo getUdharListUrl($page - 1); ?>">
                                                             <i class="bi bi-chevron-left"></i>
                                                         </a>
                                                     </li>
@@ -423,7 +448,7 @@
                                                     <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                                         <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
                                                             <a class="page-link"
-                                                                href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&customer=<?php echo $customer_filter; ?>&page=<?php echo $i; ?>">
+                                                                href="<?php echo getUdharListUrl($i); ?>">
                                                                 <?php echo $i; ?>
                                                             </a>
                                                         </li>
@@ -431,7 +456,7 @@
 
                                                     <li class="page-item <?php echo $page == $total_pages ? 'disabled' : ''; ?>">
                                                         <a class="page-link"
-                                                            href="?action=list&search=<?php echo urlencode($search); ?>&status=<?php echo $status_filter; ?>&customer=<?php echo $customer_filter; ?>&page=<?php echo $page + 1; ?>">
+                                                            href="<?php echo getUdharListUrl($page + 1); ?>">
                                                             <i class="bi bi-chevron-right"></i>
                                                         </a>
                                                     </li>
@@ -664,79 +689,126 @@
                                     </div>
                                     <div class="bill-view-body">
                                         <?php if ($action == 'edit'): ?>
-                                            <form method="POST" action="">
-                                                <input type="hidden" name="udhar_id" value="<?php echo $udhar['id']; ?>">
-
-                                                <div class="bill-info-section">
-                                                    <div class="bill-info-card">
-                                                        <h5>Bill info</h5>
-                                                        <table class="bill-info-table">
-                                                            <tr>
-                                                                <td class="bill-info-label">Bill Number:</td>
-                                                                <td class="bill-info-value">
-                                                                    <?php echo htmlspecialchars($udhar['bill_no']); ?>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="bill-info-label">Customer:</td>
-                                                                <td class="bill-info-value">
-                                                                    <?php echo htmlspecialchars($udhar['customer_name']); ?>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="bill-info-label">Bill Date:</td>
-                                                                <td class="bill-info-value">
-                                                                    <?php echo date('d M Y', strtotime($udhar['transaction_date'])); ?>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </div>
-
-                                                    <div class="bill-info-card">
-                                                        <h5>Change details</h5>
-                                                        <div class="bill-form-group">
-                                                            <label for="due_date">Due Date</label>
-                                                            <input type="date" class="bill-form-control" id="due_date"
-                                                                name="due_date"
-                                                                value="<?php echo !empty($udhar['due_date']) ? $udhar['due_date'] : ''; ?>">
+                                            <div class="glass-card overflow-hidden">
+                                                <div
+                                                    class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+                                                    <div class="flex items-center gap-3">
+                                                        <div
+                                                            class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl">
+                                                            <i class="bi bi-pencil"></i>
                                                         </div>
-
-                                                        <div class="bill-form-group">
-                                                            <label for="status">Status</label>
-                                                            <select class="bill-form-control" id="status" name="status"
-                                                                required>
-                                                                <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
-                                                                    Pending</option>
-                                                                <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>
-                                                                    Partially Paid</option>
-                                                                <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid</option>
-                                                            </select>
+                                                        <div>
+                                                            <h4 class="text-lg font-black text-slate-800 tracking-tight mb-0">
+                                                                Edit Bill</h4>
+                                                            <p
+                                                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0">
+                                                                <?php echo htmlspecialchars($udhar['bill_no']); ?>
+                                                            </p>
                                                         </div>
                                                     </div>
+                                                    <a href="udhar.php?action=view&id=<?php echo $udhar['id']; ?>"
+                                                        class="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">Back</a>
                                                 </div>
 
-                                                <div class="bill-form-group">
-                                                    <label for="notes">Notes</label>
-                                                    <textarea class="bill-form-control" id="notes" name="notes"
-                                                        rows="3"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
-                                                </div>
+                                                <form method="POST" action="" class="p-6 md:p-8">
+                                                    <input type="hidden" name="udhar_id" value="<?php echo $udhar['id']; ?>">
 
-                                                <div class="d-flex justify-content-between mt-4">
-                                                    <div>
-                                                        <button type="submit" name="update_udhar" class="btn btn-primary">
-                                                            <i class="bi bi-check-circle"></i> Save Changes
+                                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                        <div class="glass-card p-6">
+                                                            <div class="flex items-center gap-3 mb-4">
+                                                                <iconify-icon icon="solar:user-id-bold-duotone"
+                                                                    class="text-xl text-slate-400"></iconify-icon>
+                                                                <h5
+                                                                    class="text-sm font-black text-slate-800 tracking-tight mb-0">
+                                                                    Bill Info</h5>
+                                                            </div>
+
+                                                            <div class="space-y-3 text-sm">
+                                                                <div class="flex justify-between items-center">
+                                                                    <span
+                                                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</span>
+                                                                    <span
+                                                                        class="font-black text-slate-800 tracking-tight"><?php echo htmlspecialchars($udhar['customer_name']); ?></span>
+                                                                </div>
+                                                                <div class="flex justify-between items-center">
+                                                                    <span
+                                                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bill
+                                                                        Date</span>
+                                                                    <span
+                                                                        class="font-black text-slate-800 tracking-tight"><?php echo date('d M Y', strtotime($udhar['transaction_date'])); ?></span>
+                                                                </div>
+                                                                <div class="flex justify-between items-center">
+                                                                    <span
+                                                                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bill
+                                                                        No</span>
+                                                                    <span
+                                                                        class="font-black text-slate-800 tracking-tight"><?php echo htmlspecialchars($udhar['bill_no']); ?></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="glass-card p-6">
+                                                            <div class="flex items-center gap-3 mb-4">
+                                                                <iconify-icon icon="solar:settings-bold-duotone"
+                                                                    class="text-xl text-slate-400"></iconify-icon>
+                                                                <h5
+                                                                    class="text-sm font-black text-slate-800 tracking-tight mb-0">
+                                                                    Update Details</h5>
+                                                            </div>
+
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <label for="due_date"
+                                                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Due
+                                                                        Date</label>
+                                                                    <input type="date" id="due_date" name="due_date"
+                                                                        value="<?php echo !empty($udhar['due_date']) ? $udhar['due_date'] : ''; ?>"
+                                                                        class="form-control"
+                                                                        style="height: 48px; border-radius: 16px;" />
+                                                                </div>
+                                                                <div>
+                                                                    <label for="status"
+                                                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status</label>
+                                                                    <select id="status" name="status" required
+                                                                        class="form-select"
+                                                                        style="height: 48px; border-radius: 16px;">
+                                                                        <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
+                                                                            Pending</option>
+                                                                        <option value="partially_paid" <?php echo $udhar['status'] == 'partially_paid' ? 'selected' : ''; ?>>Partially Paid</option>
+                                                                        <option value="paid" <?php echo $udhar['status'] == 'paid' ? 'selected' : ''; ?>>Paid</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mt-4">
+                                                                <label for="notes"
+                                                                    class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Notes</label>
+                                                                <textarea id="notes" name="notes" rows="3" class="form-control"
+                                                                    style="border-radius: 16px;"><?php echo htmlspecialchars($udhar['notes']); ?></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="flex flex-col md:flex-row justify-between gap-3 mt-6">
+                                                        <div class="flex flex-col sm:flex-row gap-3">
+                                                            <button type="submit" name="update_udhar" class="btn btn-primary"
+                                                                style="border-radius: 16px; font-weight: 800;">
+                                                                <i class="bi bi-check-circle"></i> Save Changes
+                                                            </button>
+                                                            <a href="udhar.php?action=view&id=<?php echo $udhar['id']; ?>"
+                                                                class="btn btn-outline-secondary"
+                                                                style="border-radius: 16px; font-weight: 800;">
+                                                                <i class="bi bi-x-circle"></i> Cancel
+                                                            </a>
+                                                        </div>
+                                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                                            data-bs-target="#deleteModal"
+                                                            style="border-radius: 16px; font-weight: 800;">
+                                                            <i class="bi bi-trash"></i> Delete Bill
                                                         </button>
-                                                        <a href="udhar.php?action=view&id=<?php echo $udhar['id']; ?>"
-                                                            class="btn btn-outline-secondary">
-                                                            <i class="bi bi-x-circle"></i> Cancel
-                                                        </a>
                                                     </div>
-                                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
-                                                        data-bs-target="#deleteModal">
-                                                        <i class="bi bi-trash"></i> Delete Bill
-                                                    </button>
-                                                </div>
-                                            </form>
+                                                </form>
+                                            </div>
                                         <?php else: ?>
                                             <!-- View Mode -->
                                             <div class="bill-info-section">
@@ -876,32 +948,39 @@
                                                                     <?php echo number_format($item['quantity'], 2); ?>
                                                                 </div>
                                                                 <div class="bill-item-price">
-                                                                    ₹<?php echo number_format($item['unit_price'], 2); ?></div>
-                                                                <div class="bill-item-total-view">
-                                                                    ₹<?php echo number_format($item['total_amount'], 2); ?></td>
+                                                                    ₹<?php echo number_format($item['unit_price'], 2); ?>
                                                                 </div>
-                                                            <?php endforeach; ?>
-                                                        <?php endif; ?>
-                                                    </div>
+                                                                <div class="bill-item-total-view">
+                                                                    ₹<?php echo number_format($item['total_amount'], 2); ?>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
                                                 </div>
+                                            </div>
 
-                                                <div class="d-flex justify-content-between mt-4">
-                                                    <a href="print_bill.php?id=<?php echo $udhar['id']; ?>"
-                                                        class="btn btn-primary" target="_blank">
-                                                        <i class="bi bi-printer"></i> Print
+                                            <div class="d-flex justify-content-between mt-4">
+                                                <div class="d-flex gap-2">
+                                                    <a href="print_bill_tax_invoice.php?id=<?php echo $udhar['id']; ?>"
+                                                        class="btn btn-primary">
+                                                        <i class="bi bi-file-earmark-text"></i> Print Tax Invoice
                                                     </a>
-                                                    <div>
-                                                        <a href="udhar.php?action=edit&id=<?php echo $udhar['id']; ?>"
-                                                            class="btn btn-warning">
-                                                            <i class="bi bi-pencil"></i> Edit
-                                                        </a>
-                                                        <a href="udhar.php" class="btn btn-outline-secondary">
-                                                            <i class="bi bi-arrow-left"></i> Back to List
-                                                        </a>
-                                                    </div>
+                                                    <a href="print_bill.php?id=<?php echo $udhar['id']; ?>"
+                                                        class="btn btn-outline-primary">
+                                                        <i class="bi bi-printer"></i> Print Standard Bill
+                                                    </a>
                                                 </div>
-                                            <?php endif; ?>
-                                        </div>
+                                                <div>
+                                                    <a href="udhar.php?action=edit&id=<?php echo $udhar['id']; ?>"
+                                                        class="btn btn-warning">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                    <a href="udhar.php" class="btn btn-outline-secondary">
+                                                        <i class="bi bi-arrow-left"></i> Back to List
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
@@ -956,12 +1035,12 @@
                 </div>
 
                 <!-- Items Modal for Selection -->
+
                 <div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="itemsModalLabel">Choose items</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>

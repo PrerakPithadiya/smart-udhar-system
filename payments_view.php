@@ -119,7 +119,10 @@
             } else {
                 $params[$param] = $value;
             }
-            $params['page'] = 1; 
+            // When changing filters, reset to page 1. But when paginating, keep the requested page.
+            if ($param !== 'page') {
+                $params['page'] = 1;
+            }
             return '?' . http_build_query($params);
         }
     }
