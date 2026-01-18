@@ -168,7 +168,7 @@
                     </nav>
                     <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
                         <iconify-icon icon="solar:cash-out-bold-duotone" class="text-indigo-500"></iconify-icon>
-                        Treasury Flow
+                        Payments
                     </h1>
                 </div>
             </div>
@@ -177,12 +177,12 @@
                 <?php if ($action == 'list'): ?>
                         <a href="payments.php?action=add" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
                             <iconify-icon icon="solar:add-circle-bold" class="text-xl"></iconify-icon>
-                            Receive Payment
+                            Add Payment
                         </a>
                 <?php else: ?>
                         <a href="payments.php" class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center gap-2 transition-all">
                             <iconify-icon icon="solar:arrow-left-bold" class="text-xl"></iconify-icon>
-                            Return to Vault
+                            Back to Payments
                         </a>
                 <?php endif; ?>
             </div>
@@ -211,7 +211,7 @@
                         $total_result = $total_stmt->get_result()->fetch_assoc();
                         $total_stmt->close();
                         ?>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Inflow</p>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Received</p>
                         <h2 class="text-3xl font-black text-slate-800 tracking-tight">₹<?php echo number_format($total_result['total'] ?? 0, 2); ?></h2>
                     </div>
 
@@ -221,7 +221,7 @@
                             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-2xl">
                                 <iconify-icon icon="solar:check-circle-bold-duotone"></iconify-icon>
                             </div>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Used</span>
                         </div>
                         <?php
                         $allocated_stmt = $conn->prepare("SELECT SUM(allocated_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.is_allocated = 1");
@@ -230,7 +230,7 @@
                         $allocated_result = $allocated_stmt->get_result()->fetch_assoc();
                         $allocated_stmt->close();
                         ?>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Allocated Capital</p>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Used Amount</p>
                         <h2 class="text-3xl font-black text-slate-800 tracking-tight text-emerald-600">₹<?php echo number_format($allocated_result['total'] ?? 0, 2); ?></h2>
                     </div>
 
@@ -240,7 +240,7 @@
                             <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl">
                                 <iconify-icon icon="solar:bill-list-bold-duotone"></iconify-icon>
                             </div>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Floating</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unused</span>
                         </div>
                         <?php
                         $unallocated_stmt = $conn->prepare("SELECT SUM(remaining_amount) as total FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.remaining_amount > 0");
@@ -249,7 +249,7 @@
                         $unallocated_result = $unallocated_stmt->get_result()->fetch_assoc();
                         $unallocated_stmt->close();
                         ?>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Unallocated Funds</p>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Unused Amount</p>
                         <h2 class="text-3xl font-black text-slate-800 tracking-tight text-amber-600">₹<?php echo number_format($unallocated_result['total'] ?? 0, 2); ?></h2>
                     </div>
 
@@ -259,7 +259,7 @@
                             <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl">
                                 <iconify-icon icon="solar:hand-stars-bold-duotone"></iconify-icon>
                             </div>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Daily Heat</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today</span>
                         </div>
                         <?php
                         $today_stmt = $conn->prepare("SELECT COUNT(*) as count FROM payments p JOIN customers c ON p.customer_id = c.id WHERE c.user_id = ? AND p.payment_date = CURDATE()");
@@ -268,8 +268,8 @@
                         $today_result = $today_stmt->get_result()->fetch_assoc();
                         $today_stmt->close();
                         ?>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Today's Transactions</p>
-                        <h2 class="text-3xl font-black text-slate-800 tracking-tight"><?php echo number_format($today_result['count'] ?? 0); ?> Events</h2>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Payments Today</p>
+                        <h2 class="text-3xl font-black text-slate-800 tracking-tight"><?php echo number_format($today_result['count'] ?? 0); ?> Payments</h2>
                     </div>
                 </div>
 
@@ -280,7 +280,7 @@
                         <input type="hidden" name="customer" value="<?php echo $customer_filter; ?>">
 
                         <div class="md:col-span-3">
-                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Protocol Filter</label>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Payment Type</label>
                             <select name="payment_mode" class="w-full form-input-clean" onchange="this.form.submit()">
                                 <option value="">All Payment Modes</option>
                                 <option value="cash" <?php echo $payment_mode_filter == 'cash' ? 'selected' : ''; ?>>Physical Cash</option>
@@ -292,7 +292,7 @@
                         </div>
 
                         <div class="md:col-span-4">
-                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Temporal Range</label>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Date Range</label>
                             <div class="flex items-center gap-2">
                                 <input type="date" class="flex-1 form-input-clean" name="date_from" value="<?php echo htmlspecialchars($date_from); ?>">
                                 <span class="text-slate-300">to</span>
@@ -301,11 +301,11 @@
                         </div>
 
                         <div class="md:col-span-3">
-                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Global Search</label>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Search</label>
                             <div class="relative">
                                 <iconify-icon icon="solar:magnifer-linear" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon>
                                 <input type="text" name="search" id="customer-search-payments" class="w-full form-input-clean pl-10" 
-                                    placeholder="Hash, ID, Name..." 
+                                    placeholder="Name, note, reference..." 
                                     value="<?php echo htmlspecialchars($search); ?>"
                                     data-api-url="api/search_customers.php?has_payments=1">
                             </div>
@@ -314,7 +314,7 @@
                         <div class="md:col-span-2">
                             <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                                 <iconify-icon icon="solar:filter-bold-duotone"></iconify-icon>
-                                Execute
+                                Apply
                             </button>
                         </div>
                     </form>
@@ -325,17 +325,17 @@
                     <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
                         <h3 class="text-xl font-extrabold text-slate-800 flex items-center gap-2">
                             <iconify-icon icon="solar:database-bold-duotone" class="text-indigo-500"></iconify-icon>
-                            Historical Settlements
+                            Payment History
                         </h3>
-                        <span class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-500 uppercase"><?php echo $total_payments; ?> Records Linked</span>
+                        <span class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-500 uppercase"><?php echo $total_payments; ?> Records</span>
                     </div>
 
                     <div>
                         <?php if (empty($payments_list)): ?>
                                 <div class="py-24 text-center">
                                     <iconify-icon icon="solar:ghost-line-duotone" class="text-8xl text-slate-200 mb-6"></iconify-icon>
-                                    <h4 class="text-slate-400 font-bold italic tracking-wide">Data stream currently silent...</h4>
-                                    <p class="text-slate-300 text-sm">Initiate a payment to populate the ledger.</p>
+                                    <h4 class="text-slate-400 font-bold italic tracking-wide">No payments found</h4>
+                                    <p class="text-slate-300 text-sm">Add a payment to see it here.</p>
                                 </div>
                         <?php else: ?>
                                 <table class="w-full">
@@ -343,25 +343,25 @@
                                         <tr>
                                             <th class="px-8 py-5 text-left">
                                                 <a href="<?php echo getSortUrl('p.payment_date', $order_by, $order_dir); ?>" class="hover:text-indigo-600 transition-colors flex items-center gap-2">
-                                                    Timeline
+                                                    Date
                                                     <?php echo getSortIcon('p.payment_date', $order_by, $order_dir); ?>
                                                 </a>
                                             </th>
                                             <th class="px-8 py-5 text-left">
                                                 <a href="<?php echo getSortUrl('c.name', $order_by, $order_dir); ?>" class="hover:text-indigo-600 transition-colors flex items-center gap-2">
-                                                    Entity
+                                                    Customer
                                                     <?php echo getSortIcon('c.name', $order_by, $order_dir); ?>
                                                 </a>
                                             </th>
                                             <th class="px-8 py-5 text-right">
                                                 <a href="<?php echo getSortUrl('p.amount', $order_by, $order_dir); ?>" class="hover:text-indigo-600 transition-colors justify-end flex items-center gap-2">
-                                                    Credit Amount
+                                                    Amount
                                                     <?php echo getSortIcon('p.amount', $order_by, $order_dir); ?>
                                                 </a>
                                             </th>
-                                            <th class="px-8 py-5 text-center">Settlement Mode</th>
-                                            <th class="px-8 py-5 text-center">Allocation Logic</th>
-                                            <th class="px-8 py-5 text-center">Kernel</th>
+                                            <th class="px-8 py-5 text-center">Payment Mode</th>
+                                            <th class="px-8 py-5 text-center">Status</th>
+                                            <th class="px-8 py-5 text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
@@ -417,7 +417,7 @@
                                                                 $ac = 'text-amber-500 bg-amber-50 border-amber-100';
                                                             ?>
                                                             <span class="status-pill border <?php echo $ac; ?>">
-                                                                <?php echo ($payment_item['is_allocated'] && $payment_item['remaining_amount'] == 0) ? 'Fully Linked' : ($payment_item['is_allocated'] ? 'Split' : 'Floating'); ?>
+                                                                <?php echo ($payment_item['is_allocated'] && $payment_item['remaining_amount'] == 0) ? 'Used' : ($payment_item['is_allocated'] ? 'Partly Used' : 'Not Used'); ?>
                                                             </span>
                                                             <?php if ($payment_item['is_allocated']): ?>
                                                                     <div class="w-16 h-1 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
@@ -475,7 +475,7 @@
                                 <iconify-icon icon="<?php echo $action == 'add' ? 'solar:cloud-plus-bold-duotone' : 'solar:pen-bold-duotone'; ?>"></iconify-icon>
                             </div>
                             <div>
-                                <h2 class="text-3xl font-black text-indigo-900 tracking-tighter"><?php echo $action == 'add' ? 'Initiate Receipt' : 'Update Protocol'; ?></h2>
+                                <h2 class="text-3xl font-black text-indigo-900 tracking-tighter"><?php echo $action == 'add' ? 'Add Payment' : 'Edit Payment'; ?></h2>
                                 <p class="text-indigo-500/70 text-sm font-bold uppercase tracking-widest">Transaction Kernel Module v4.7</p>
                             </div>
                         </div>
@@ -488,34 +488,34 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div class="md:col-span-2 relative">
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Linked Customer Entity *</label>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Customer *</label>
                                         <div class="relative group">
                                             <iconify-icon icon="solar:user-circle-bold" class="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-slate-300 group-focus-within:text-indigo-500 transition-colors"></iconify-icon>
                                             <?php if ($action == 'add'): ?>
                                                     <input type="text" class="w-full form-input-clean pl-12 py-5 text-lg font-bold" id="customer_search"
-                                                        placeholder="Begin identifying entity..." autocomplete="off"
+                                                        placeholder="Type customer name or phone..." autocomplete="off"
                                                         value="<?php echo htmlspecialchars($selected_customer_name ?? ''); ?>" required>
                                                     <input type="hidden" id="customer_id" name="customer_id" value="<?php echo $customer_id ? $customer_id : ''; ?>" required>
                                                     <div id="customer_results" class="absolute left-0 right-0 top-full mt-2 glass-panel z-50 overflow-hidden hidden"></div>
                                             <?php else: ?>
                                                     <input type="text" class="w-full form-input-clean pl-12 py-5 text-lg font-bold bg-slate-50 opacity-60" value="<?php echo htmlspecialchars($payment['customer_name']); ?>" disabled>
-                                                    <p class="text-[10px] text-rose-400 font-bold uppercase mt-2 italic px-2">Encryption Lock: Entity immutability active for established records.</p>
+                                                    <p class="text-[10px] text-rose-400 font-bold uppercase mt-2 italic px-2">Customer cannot be changed for an existing payment.</p>
                                             <?php endif; ?>
                                         </div>
                                         <div id="customerBalanceInfo" class="mt-4 flex items-center gap-2 hidden">
                                             <iconify-icon icon="solar:info-circle-bold-duotone" class="text-indigo-500"></iconify-icon>
-                                            <span class="text-xs font-black text-slate-500 uppercase">Live Exposure: <span id="customerBalance" class="text-rose-600 font-extrabold">0.00</span></span>
+                                            <span class="text-xs font-black text-slate-500 uppercase">Current Due: <span id="customerBalance" class="text-rose-600 font-extrabold">0.00</span></span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Temporal Tag *</label>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Payment Date *</label>
                                         <input type="date" class="w-full form-input-clean" name="payment_date" 
                                             value="<?php echo $action == 'add' ? date('Y-m-d') : $payment['payment_date']; ?>" required>
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Capital Value (INR) *</label>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Amount (INR) *</label>
                                         <div class="relative">
                                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
                                             <input type="number" class="w-full form-input-clean pl-10 text-xl font-black text-indigo-600 tracking-tighter" name="amount" step="0.01" min="0.01" 
@@ -524,25 +524,25 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Gateway Protocol *</label>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Payment Mode *</label>
                                         <select class="w-full form-input-clean" name="payment_mode" required>
-                                            <option value="cash" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'cash') ? 'selected' : ''; ?>>Physical Cash Handover</option>
-                                            <option value="bank_transfer" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'bank_transfer') ? 'selected' : ''; ?>>Direct Ledger Transfer</option>
-                                            <option value="upi" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'upi') ? 'selected' : ''; ?>>Digital Merchant (UPI)</option>
-                                            <option value="cheque" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'cheque') ? 'selected' : ''; ?>>Instrumented Check</option>
-                                            <option value="other" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'other') ? 'selected' : ''; ?>>Alternative Settlement</option>
+                                            <option value="cash" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'cash') ? 'selected' : ''; ?>>Cash</option>
+                                            <option value="bank_transfer" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'bank_transfer') ? 'selected' : ''; ?>>Bank Transfer</option>
+                                            <option value="upi" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'upi') ? 'selected' : ''; ?>>UPI</option>
+                                            <option value="cheque" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'cheque') ? 'selected' : ''; ?>>Cheque</option>
+                                            <option value="other" <?php echo ($action == 'edit' && $payment['payment_mode'] == 'other') ? 'selected' : ''; ?>>Other</option>
                                         </select>
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">External Reference Hash</label>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Reference Number (Optional)</label>
                                         <input type="text" class="w-full form-input-clean" name="reference_no" 
                                             placeholder="UTI / TXN NO..." value="<?php echo $action == 'edit' ? htmlspecialchars($payment['reference_no']) : ''; ?>">
                                     </div>
 
                                     <div class="md:col-span-2">
-                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Internal Annotation</label>
-                                        <textarea class="w-full form-input-clean h-32 resize-none" name="notes" placeholder="Metadata relating to this inflow..."><?php echo $action == 'edit' ? htmlspecialchars($payment['notes']) : ''; ?></textarea>
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-3">Notes (Optional)</label>
+                                        <textarea class="w-full form-input-clean h-32 resize-none" name="notes" placeholder="Add a note (optional)..."><?php echo $action == 'edit' ? htmlspecialchars($payment['notes']) : ''; ?></textarea>
                                     </div>
 
                                     <?php if ($action == 'add'): ?>
@@ -550,8 +550,8 @@
                                             <label class="flex items-center gap-3 cursor-pointer group">
                                                 <input type="checkbox" name="auto_allocate" value="1" checked class="w-6 h-6 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500">
                                                 <div>
-                                                    <p class="text-sm font-black text-slate-700 tracking-tight">Activate Autonomous Allocation</p>
-                                                    <p class="text-[10px] text-slate-500 font-bold italic uppercase tracking-widest mt-0.5">FIFO Algorithm: Link capital to oldest outstanding debits automatically.</p>
+                                                    <p class="text-sm font-black text-slate-700 tracking-tight">Auto apply to old due bills</p>
+                                                    <p class="text-[10px] text-slate-500 font-bold italic uppercase tracking-widest mt-0.5">We will use this payment for the oldest pending bills first.</p>
                                                 </div>
                                             </label>
                                         </div>
@@ -561,9 +561,9 @@
                                 <div class="flex items-center gap-4 pt-6">
                                     <button type="submit" name="<?php echo $action == 'add' ? 'add_payment' : 'update_payment'; ?>" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-black text-lg tracking-tight shadow-xl shadow-indigo-100 transition-all hover:scale-[1.02]">
                                         <iconify-icon icon="solar:check-read-linear" class="mr-2"></iconify-icon>
-                                        Commit Transaction
+                                        Save Payment
                                     </button>
-                                    <a href="payments.php" class="px-8 py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors">Discard</a>
+                                    <a href="payments.php" class="px-8 py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors">Cancel</a>
                                 </div>
                             </form>
                         </div>
@@ -582,7 +582,7 @@
                                 </svg>
                             </div>
                             <div class="relative z-10">
-                                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300 mb-2">Authenticated Receipt</p>
+                                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300 mb-2">Payment Receipt</p>
                                 <h2 class="text-5xl font-black tracking-tighter">Settlement #<?php echo str_pad($payment['id'], 6, '0', STR_PAD_LEFT); ?></h2>
                             </div>
                             <div class="text-right relative z-10">
@@ -594,36 +594,36 @@
                         <div class="p-12">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                                 <div class="space-y-6">
-                                    <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest border-b pb-2">Entry Metadata</h4>
+                                    <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest border-b pb-2">Payment Details</h4>
                                     <div class="space-y-4">
                                         <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                            <span class="text-xs font-bold text-slate-500 uppercase">Entity</span>
+                                            <span class="text-xs font-bold text-slate-500 uppercase">Customer</span>
                                             <span class="text-sm font-black text-slate-800"><?php echo htmlspecialchars($payment['customer_name']); ?></span>
                                         </div>
                                         <div class="flex justify-between items-center p-4 rounded-xl border border-slate-100">
-                                            <span class="text-xs font-bold text-slate-500 uppercase">Reference Channel</span>
-                                            <span class="text-sm font-bold text-slate-800 italic"><?php echo $payment['reference_no'] ?: 'Direct Inflow'; ?></span>
+                                            <span class="text-xs font-bold text-slate-500 uppercase">Reference</span>
+                                            <span class="text-sm font-bold text-slate-800 italic"><?php echo $payment['reference_no'] ?: 'None'; ?></span>
                                         </div>
                                         <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                            <span class="text-xs font-bold text-slate-500 uppercase">System Stamp</span>
+                                            <span class="text-xs font-bold text-slate-500 uppercase">Created On</span>
                                             <span class="text-sm font-bold text-slate-800"><?php echo date('D, d M Y | H:i', strtotime($payment['created_at'])); ?></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="space-y-6">
-                                    <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest border-b pb-2">Allocation Status</h4>
+                                    <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest border-b pb-2">Used / Unused</h4>
                                     <div class="space-y-4">
                                         <div class="flex justify-between items-center bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                                            <span class="text-xs font-bold text-emerald-600 uppercase">Linked Assets</span>
+                                            <span class="text-xs font-bold text-emerald-600 uppercase">Used Amount</span>
                                             <span class="text-sm font-black text-emerald-700">₹<?php echo number_format($payment['allocated_amount'], 2); ?></span>
                                         </div>
                                         <div class="flex justify-between items-center bg-amber-50/50 p-4 rounded-xl border border-amber-100">
-                                            <span class="text-xs font-bold text-amber-600 uppercase">Residual Capital</span>
+                                            <span class="text-xs font-bold text-amber-600 uppercase">Unused Amount</span>
                                             <span class="text-sm font-black text-amber-700">₹<?php echo number_format($payment['remaining_amount'], 2); ?></span>
                                         </div>
                                         <?php if ($payment['remaining_amount'] > 0): ?>
-                                                <a href="payments.php?action=allocate&id=<?php echo $payment['id']; ?>" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-center text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 mt-4 block transition-all hover:bg-indigo-700">Link Floating Funds</a>
+                                                <a href="payments.php?action=allocate&id=<?php echo $payment['id']; ?>" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-black text-center text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 mt-4 block transition-all hover:bg-indigo-700">Use Unused Amount</a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -633,7 +633,7 @@
                                     <div class="mt-16">
                                         <h4 class="text-xs font-black uppercase text-slate-400 tracking-widest mb-6 flex items-center gap-2">
                                             <iconify-icon icon="solar:link-bold-duotone" class="text-indigo-500 text-lg"></iconify-icon>
-                                            Linked Udhar Nodes
+                                            Used For These Bills
                                         </h4>
                                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                             <?php foreach ($allocations as $alloc): ?>
@@ -653,8 +653,8 @@
                             <?php endif; ?>
 
                             <div class="mt-16 pt-8 border-t border-slate-100 flex items-center gap-4">
-                                <a href="payments.php?action=edit&id=<?php echo $payment['id']; ?>" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-4 rounded-2xl font-black text-center transition-all">Update Document</a>
-                                <button onclick="confirmDelete(<?php echo $payment['id']; ?>, '<?php echo htmlspecialchars(addslashes($payment['customer_name'])); ?>')" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-4 rounded-2xl font-black transition-all">Purge Record</button>
+                                <a href="payments.php?action=edit&id=<?php echo $payment['id']; ?>" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-4 rounded-2xl font-black text-center transition-all">Edit</a>
+                                <button onclick="confirmDelete(<?php echo $payment['id']; ?>, '<?php echo htmlspecialchars(addslashes($payment['customer_name'])); ?>')" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 py-4 rounded-2xl font-black transition-all">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -670,12 +670,12 @@
                                     <iconify-icon icon="solar:link-broken-bold-duotone" class="animate-pulse"></iconify-icon>
                                 </div>
                                 <div>
-                                    <h2 class="text-3xl font-black text-amber-900 tracking-tighter">Settlement Mapping</h2>
+                                    <h2 class="text-3xl font-black text-amber-900 tracking-tighter">Use Payment</h2>
                                     <p class="text-amber-600/70 text-xs font-black uppercase tracking-widest">Customer ID: <?php echo str_pad($payment['customer_id'], 6, '0', STR_PAD_LEFT); ?> | Balance: ₹<?php echo number_format($payment['amount'], 2); ?></p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-[10px] text-amber-500 font-black uppercase mb-1">Available Liquidity</p>
+                                <p class="text-[10px] text-amber-500 font-black uppercase mb-1">Amount Available</p>
                                 <h3 class="text-2xl font-black text-amber-700 tracking-tighter">₹<?php echo number_format($payment['remaining_amount'], 2); ?></h3>
                             </div>
                         </div>
@@ -684,9 +684,9 @@
                             <?php if (empty($udhar_entries)): ?>
                                     <div class="py-24 text-center">
                                         <iconify-icon icon="solar:shield-check-bold-duotone" class="text-8xl text-emerald-200 mb-6"></iconify-icon>
-                                        <h4 class="text-slate-700 font-black italic">Perfect Equilibrium Reached</h4>
-                                        <p class="text-slate-400 text-sm">No pending udhar nodes discovered for this entity.</p>
-                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="mt-8 bg-slate-800 text-white px-8 py-3 rounded-xl font-bold inline-block">Return to Vault</a>
+                                        <h4 class="text-slate-700 font-black italic">No pending bills</h4>
+                                        <p class="text-slate-400 text-sm">This customer has no pending udhar bills.</p>
+                                        <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="mt-8 bg-slate-800 text-white px-8 py-3 rounded-xl font-bold inline-block">Back to Payment</a>
                                     </div>
                             <?php else: ?>
                                     <form method="POST" action="" id="allocateForm" class="space-y-8">
@@ -695,8 +695,8 @@
                                         <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100/50 flex items-start gap-4">
                                             <iconify-icon icon="solar:info-circle-bold-duotone" class="text-2xl text-indigo-500 mt-1"></iconify-icon>
                                             <div>
-                                                <p class="text-sm font-black text-indigo-900 tracking-tight">Algorithmic Guidance</p>
-                                                <p class="text-xs text-indigo-600/80 leading-relaxed font-medium">Distribute the available capital (₹<?php echo number_format($payment['remaining_amount'], 2); ?>) across the pending debts below. You can use the 'Simulate Auto-Link' function to prioritize the oldest entries.</p>
+                                                <p class="text-sm font-black text-indigo-900 tracking-tight">How to use this payment</p>
+                                                <p class="text-xs text-indigo-600/80 leading-relaxed font-medium">Enter how much of the available amount (₹<?php echo number_format($payment['remaining_amount'], 2); ?>) you want to apply to each pending bill below. You can use the 'Auto Fill' button to fill oldest bills first.</p>
                                             </div>
                                         </div>
 
@@ -706,9 +706,9 @@
                                                     <tr>
                                                         <th class="px-6 py-4 text-left">Bill Reference</th>
                                                         <th class="px-6 py-4 text-left">Description</th>
-                                                        <th class="px-6 py-4 text-right">Exposure</th>
-                                                        <th class="px-6 py-4 text-center">Residual</th>
-                                                        <th class="px-6 py-4 text-right">Mapping Input</th>
+                                                        <th class="px-6 py-4 text-right">Bill Amount</th>
+                                                        <th class="px-6 py-4 text-center">Amount Due</th>
+                                                        <th class="px-6 py-4 text-right">Pay Now</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="divide-y divide-slate-50">
@@ -743,12 +743,12 @@
                                                 <tfoot class="bg-slate-900 text-white">
                                                     <tr>
                                                         <td colspan="4" class="px-8 py-6 text-right">
-                                                            <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 block mb-1">Total Mapped Capital</span>
+                                                            <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 block mb-1">Total Amount Used</span>
                                                             <span class="text-2xl font-black tracking-tighter">₹<span id="totalAllocated">0.00</span></span>
                                                         </td>
                                                         <td class="px-8 py-6 text-right">
                                                             <button type="button" onclick="autoAllocate()" class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-xs font-black uppercase tracking-widest transition-all">
-                                                                Simulate Auto-Link
+                                                                Auto Fill
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -765,9 +765,9 @@
 
                                         <div class="pt-10 flex items-center gap-4">
                                             <button type="submit" name="allocate_payment" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-5 rounded-2xl font-black text-xl tracking-tighter shadow-xl shadow-amber-100 transition-all">
-                                                Confirm Mapping
+                                                Save
                                             </button>
-                                            <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="px-8 py-5 text-slate-400 font-bold hover:text-slate-600">Discard Task</a>
+                                            <a href="payments.php?action=view&id=<?php echo $payment['id']; ?>" class="px-8 py-5 text-slate-400 font-bold hover:text-slate-600">Cancel</a>
                                         </div>
                                     </form>
                             <?php endif; ?>
@@ -785,7 +785,7 @@
     <script>
         // Clean Modern confirmDelete
         function confirmDelete(id, name) {
-            const confirmed = confirm(`[SECURITY ALERT] Are you sure you wish to purge the payment record for ${name}? This action is immutable and will dissolve all associated udhar links.`);
+            const confirmed = confirm(`Are you sure you want to delete this payment for ${name}? This will also remove its bill links.`);
             if (confirmed) {
                 const form = document.createElement('form');
                 form.method = 'POST';

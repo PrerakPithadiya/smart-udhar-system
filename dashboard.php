@@ -368,24 +368,26 @@ $stmt->close();
                             class="px-8 py-6 flex justify-between items-center border-b border-slate-100 bg-emerald-50/50">
                             <div class="flex items-center gap-3">
                                 <div class="w-2 h-8 bg-emerald-500 rounded-full"></div>
-                                <h3 class="text-xl font-extrabold text-slate-800">Live Inflow Feed</h3>
+                                <h3 class="text-xl font-extrabold text-slate-800">Recent Payments</h3>
                             </div>
                         </div>
                         <div class="p-6 overflow-x-auto">
                             <table class="w-full">
                                 <thead>
                                     <tr class="text-[10px] uppercase font-black text-slate-400 border-b border-slate-100">
-                                        <th class="px-4 py-3 text-left">Entity</th>
-                                        <th class="px-4 py-3 text-right">Settlement</th>
-                                        <th class="px-4 py-3 text-center">Protocol</th>
+                                        <th class="px-4 py-3 text-left">Customer</th>
+                                        <th class="px-4 py-3 text-right">Amount</th>
+                                        <th class="px-4 py-3 text-center">Payment Mode</th>
                                     </tr>
                                 </thead>
+
                                 <tbody class="divide-y divide-slate-100">
                                     <?php foreach ($recent_payments as $payment): ?>
                                         <tr class="group hover:bg-emerald-50/40 transition-colors">
                                             <td class="px-4 py-4">
                                                 <div class="flex items-center gap-3">
                                                     <i class="bi bi-arrow-down-left-circle text-emerald-500 text-lg"></i>
+                                                    <span class="text-xs font-bold text-slate-700"><?php echo htmlspecialchars($payment['customer_name']); ?></span>
                                                     <span
                                                         class="text-xs font-bold text-slate-700"><?php echo htmlspecialchars($payment['customer_name']); ?></span>
                                                 </div>

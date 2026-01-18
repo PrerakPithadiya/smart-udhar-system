@@ -21,3 +21,23 @@ function updateTime() {
 
 setInterval(updateTime, 1000);
 updateTime();
+
+document.addEventListener("keydown", function (e) {
+  if (e.defaultPrevented) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+  const target = e.target;
+  const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+  const isTypingTarget =
+    tag === "input" ||
+    tag === "textarea" ||
+    tag === "select" ||
+    (target && target.isContentEditable);
+
+  if (isTypingTarget) return;
+
+  if (e.key === "s" || e.key === "S") {
+    e.preventDefault();
+    window.location.href = "udhar.php?action=add&focus=customer_search";
+  }
+});

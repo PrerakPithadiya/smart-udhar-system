@@ -141,6 +141,20 @@
             position: relative;
             z-index: 1000;
         }
+
+        .sort-link {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .sort-link:hover {
+            color: #6366f1;
+        }
+
+        .sort-icon {
+            margin-left: 5px;
+        }
     </style>
 </head>
 
@@ -319,15 +333,40 @@
                                             <table class="table udhar-table resizable-table" id="udharTable">
                                                 <thead>
                                                     <tr>
-                                                        <th class="col-bill-no">Bill No. <div class="resizer"></div>
+                                                        <th class="col-bill-no">
+                                                            <a href="?<?php $p = $_GET;
+                                                                        $p['order_by'] = 'ut.bill_no';
+                                                                        $p['order_dir'] = ($order_by == 'ut.bill_no' && $order_dir == 'ASC') ? 'DESC' : 'ASC';
+                                                                        echo http_build_query($p); ?>" class="sort-link">Bill No.<?php if ($order_by == 'ut.bill_no') { echo '<i class="bi bi-chevron-' . ($order_dir == 'ASC' ? 'up' : 'down') . ' sort-icon"></i>'; } else { echo '<i class="bi bi-arrow-down-up sort-icon text-muted" style="opacity: 0.3;"></i>'; } ?></a>
+                                                            <div class="resizer"></div>
                                                         </th>
-                                                        <th class="col-customer">Customer <div class="resizer"></div>
+                                                        <th class="col-customer">
+                                                            <a href="?<?php $p = $_GET;
+                                                                        $p['order_by'] = 'c.name';
+                                                                        $p['order_dir'] = ($order_by == 'c.name' && $order_dir == 'ASC') ? 'DESC' : 'ASC';
+                                                                        echo http_build_query($p); ?>" class="sort-link">Customer<?php if ($order_by == 'c.name') { echo '<i class="bi bi-chevron-' . ($order_dir == 'ASC' ? 'up' : 'down') . ' sort-icon"></i>'; } else { echo '<i class="bi bi-arrow-down-up sort-icon text-muted" style="opacity: 0.3;"></i>'; } ?></a>
+                                                            <div class="resizer"></div>
                                                         </th>
-                                                        <th class="col-date">Date <div class="resizer"></div>
+                                                        <th class="col-date">
+                                                            <a href="?<?php $p = $_GET;
+                                                                        $p['order_by'] = 'ut.transaction_date';
+                                                                        $p['order_dir'] = ($order_by == 'ut.transaction_date' && $order_dir == 'ASC') ? 'DESC' : 'ASC';
+                                                                        echo http_build_query($p); ?>" class="sort-link">Date<?php if ($order_by == 'ut.transaction_date') { echo '<i class="bi bi-chevron-' . ($order_dir == 'ASC' ? 'up' : 'down') . ' sort-icon"></i>'; } else { echo '<i class="bi bi-arrow-down-up sort-icon text-muted" style="opacity: 0.3;"></i>'; } ?></a>
+                                                            <div class="resizer"></div>
                                                         </th>
-                                                        <th class="col-amount">Amount <div class="resizer"></div>
+                                                        <th class="col-amount">
+                                                            <a href="?<?php $p = $_GET;
+                                                                        $p['order_by'] = 'ut.amount';
+                                                                        $p['order_dir'] = ($order_by == 'ut.amount' && $order_dir == 'ASC') ? 'DESC' : 'ASC';
+                                                                        echo http_build_query($p); ?>" class="sort-link">Amount<?php if ($order_by == 'ut.amount') { echo '<i class="bi bi-chevron-' . ($order_dir == 'ASC' ? 'up' : 'down') . ' sort-icon"></i>'; } else { echo '<i class="bi bi-arrow-down-up sort-icon text-muted" style="opacity: 0.3;"></i>'; } ?></a>
+                                                            <div class="resizer"></div>
                                                         </th>
-                                                        <th class="col-due-date">Due Date <div class="resizer"></div>
+                                                        <th class="col-due-date">
+                                                            <a href="?<?php $p = $_GET;
+                                                                        $p['order_by'] = 'ut.due_date';
+                                                                        $p['order_dir'] = ($order_by == 'ut.due_date' && $order_dir == 'ASC') ? 'DESC' : 'ASC';
+                                                                        echo http_build_query($p); ?>" class="sort-link">Due Date<?php if ($order_by == 'ut.due_date') { echo '<i class="bi bi-chevron-' . ($order_dir == 'ASC' ? 'up' : 'down') . ' sort-icon"></i>'; } else { echo '<i class="bi bi-arrow-down-up sort-icon text-muted" style="opacity: 0.3;"></i>'; } ?></a>
+                                                            <div class="resizer"></div>
                                                         </th>
                                                         <th>Status</th>
                                                         <th>Options</th>
@@ -1030,7 +1069,7 @@
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
-                        </div>
+                            </div>
                     </div>
                 </div>
 
@@ -1105,7 +1144,7 @@
     <script>
         // Inline script for PHP-dependent initialization
         <?php if ($action == 'add'): ?>
-            window.addEventListener('DOMContentLoaded', function () {
+            window.addEventListener('DOMContentLoaded', function() {
                 <?php if ($item_id > 0): ?>
                     // Add pre-selected item
                     <?php

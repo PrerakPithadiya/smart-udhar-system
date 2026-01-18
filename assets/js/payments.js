@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <p class="text-xs font-black ${c.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}">
                                         ₹${parseFloat(c.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                     </p>
-                                    <span class="text-[8px] font-black uppercase tracking-tighter text-slate-300">Outstanding</span>
+                                    <span class="text-[8px] font-black uppercase tracking-tighter text-slate-300">Due</span>
                                 </div>
                             </div>
                         </div>
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function () {
         resultsDiv.innerHTML = html;
         resultsDiv.classList.remove('hidden');
       } else {
-        resultsDiv.innerHTML = '<div class="p-6 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">No entities found in databank</div>';
+        resultsDiv.innerHTML = '<div class="p-6 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">No customers found</div>';
         resultsDiv.classList.remove('hidden');
       }
     });
@@ -117,13 +117,13 @@ document.getElementById("paymentForm")?.addEventListener("submit", function (e) 
 
   if (!customerId) {
     e.preventDefault();
-    alert("[SECURITY BREACH] Entity identifier missing. Please select a customer.");
+    alert("Please select a customer.");
     return false;
   }
 
   if (isNaN(amount) || amount <= 0) {
     e.preventDefault();
-    alert("[PROTOCOL ERROR] Capital value must be a positive non-zero aggregate.");
+    alert("Please enter an amount greater than 0.");
     amountInput?.focus();
     return false;
   }
@@ -160,7 +160,7 @@ function updateTotalAllocation() {
   if (warningDiv && warningMsg) {
     if (total > remainingAmount) {
       warningDiv.classList.remove('hidden');
-      warningMsg.textContent = `CRITICAL: Over-Allocation (₹${total.toFixed(2)} > ₹${remainingAmount.toFixed(2)})`;
+      warningMsg.textContent = `Amount is too high. Total (₹${total.toFixed(2)}) is more than available (₹${remainingAmount.toFixed(2)}).`;
       if (warningContainer) {
         warningContainer.classList.remove('bg-indigo-50', 'text-indigo-600', 'bg-emerald-50', 'text-emerald-600');
         warningContainer.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-100');
@@ -168,7 +168,7 @@ function updateTotalAllocation() {
     } else if (total > 0) {
       warningDiv.classList.remove('hidden');
       const residual = (remainingAmount - total).toFixed(2);
-      warningMsg.textContent = `Valid Chain: ₹${total.toFixed(2)} mapped | Residual: ₹${residual}`;
+      warningMsg.textContent = `Total used: ₹${total.toFixed(2)}. Amount left: ₹${residual}.`;
       if (warningContainer) {
         warningContainer.classList.remove('bg-rose-50', 'text-rose-600', 'bg-indigo-50', 'text-indigo-600');
         warningContainer.classList.add('bg-emerald-50', 'text-emerald-600', 'border-emerald-100');
@@ -210,13 +210,13 @@ document.getElementById("allocateForm")?.addEventListener("submit", function (e)
 
   if (total <= 0) {
     e.preventDefault();
-    alert("[ALLOCATION ERROR] Null mapping detected. Please distribute capital.");
+    alert("Please enter an amount for at least one bill.");
     return false;
   }
 
   if (total > remainingAmount) {
     e.preventDefault();
-    alert(`[LIMIT OVERFLOW] Total mapping (₹${total.toFixed(2)}) exceeds available liquidity (₹${remainingAmount.toFixed(2)}).`);
+    alert(`Total amount (₹${total.toFixed(2)}) is more than available (₹${remainingAmount.toFixed(2)}).`);
     return false;
   }
 

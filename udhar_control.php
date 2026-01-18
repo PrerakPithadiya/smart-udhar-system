@@ -526,14 +526,19 @@ $offset = ($page - 1) * $limit;
 $total_pages = ceil($total_udhar / $limit);
 
 // Get udhar entries with pagination
-$order_by = isset($_GET['order_by']) ? sanitizeInput($_GET['order_by']) : 'ut.transaction_date';
+$order_by = isset($_GET['order_by']) ? sanitizeInput($_GET['order_by']) : 'ut.bill_no';
 $order_dir = isset($_GET['order_dir']) ? sanitizeInput($_GET['order_dir']) : 'DESC';
 
-$allowed_columns = ['ut.transaction_date', 'c.name', 'ut.amount', 'ut.status', 'ut.bill_no'];
-$order_by = in_array($order_by, $allowed_columns) ? $order_by : 'ut.transaction_date';
+$allowed_columns = ['ut.transaction_date', 'c.name', 'ut.amount', 'ut.status', 'ut.bill_no', 'ut.due_date'];
+$order_by = in_array($order_by, $allowed_columns) ? $order_by : 'ut.bill_no';
 $order_dir = in_array(strtoupper($order_dir), ['ASC', 'DESC']) ? strtoupper($order_dir) : 'DESC';
 
-$query = "SELECT ut.*, c.name as customer_name, c.mobile as customer_mobile FROM udhar_transactions ut JOIN customers c ON ut.customer_id = c.id $where_clause ORDER BY $order_by $order_dir LIMIT ? OFFSET ?";
+$order_clause = $order_by;
+if ($order_by == 'ut.bill_no') {
+    $order_clause = "CAST(SUBSTRING_INDEX(ut.bill_no, '-', -1) AS UNSIGNED)";
+}
+
+$query = "SELECT ut.*, c.name as customer_name, c.mobile as customer_mobile FROM udhar_transactions ut JOIN customers c ON ut.customer_id = c.id $where_clause ORDER BY $order_clause $order_dir LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($query);
 
 if (!empty($params)) {

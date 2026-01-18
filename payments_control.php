@@ -26,15 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors = [];
 
         if ($customer_id <= 0) {
-            $errors[] = "Please select a customer";
+            $errors[] = "Please select a customer.";
         }
 
         if (empty($payment_date)) {
-            $errors[] = "Payment date is required";
+            $errors[] = "Please select a payment date.";
         }
 
         if ($amount <= 0) {
-            $errors[] = "Amount must be greater than 0";
+            $errors[] = "Amount must be greater than 0.";
         }
 
         if (empty($errors)) {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->close();
 
                 if (!$customer) {
-                    throw new Exception("Customer not found");
+                    throw new Exception("Customer not found.");
                 }
 
                 // Insert payment
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt->bind_param("isssdssd", $customer_id, $customer['name'], $payment_date, $amount, $payment_mode, $reference_no, $notes, $remaining_amount);
 
                 if (!$stmt->execute()) {
-                    throw new Exception("Error adding payment: " . $stmt->error);
+                    throw new Exception("Could not add payment. " . $stmt->error);
                 }
 
                 $payment_id = $stmt->insert_id;
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 $conn->commit();
 
-                setMessage("Payment added successfully!", "success");
+                setMessage("Payment saved.", "success");
                 header("Location: payments.php?action=view&id=$payment_id");
                 exit();
             } catch (Exception $e) {
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $allocations = $_POST['allocations'] ?? [];
 
         if (empty($allocations)) {
-            setMessage("Please select at least one udhar entry to allocate", "warning");
+            setMessage("Please enter an amount for at least one bill.", "warning");
         } else {
             $conn->begin_transaction();
 
@@ -114,11 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $check_stmt->close();
 
                         if (!$udhar) {
-                            throw new Exception("Invalid udhar entry selected");
+                            throw new Exception("Invalid bill selected.");
                         }
 
                         if ($alloc_amount > $udhar['remaining_amount']) {
-                            throw new Exception("Allocation amount cannot exceed remaining amount");
+                            throw new Exception("Amount cannot be more than the bill due amount.");
                         }
 
                         // Insert allocation
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $alloc_stmt->bind_param("iid", $payment_id, $udhar_id, $alloc_amount);
 
                         if (!$alloc_stmt->execute()) {
-                            throw new Exception("Error creating allocation: " . $alloc_stmt->error);
+                            throw new Exception("Could not save allocation. " . $alloc_stmt->error);
                         }
                         $alloc_stmt->close();
 
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $update_stmt->bind_param("ddi", $alloc_amount, $alloc_amount, $udhar_id);
 
                         if (!$update_stmt->execute()) {
-                            throw new Exception("Error updating udhar entry: " . $update_stmt->error);
+                            throw new Exception("Could not update bill. " . $update_stmt->error);
                         }
                         $update_stmt->close();
 
@@ -148,13 +148,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $payment_stmt->bind_param("ddi", $total_allocated, $total_allocated, $payment_id);
 
                 if (!$payment_stmt->execute()) {
-                    throw new Exception("Error updating payment: " . $payment_stmt->error);
+                    throw new Exception("Could not update payment. " . $payment_stmt->error);
                 }
                 $payment_stmt->close();
 
                 $conn->commit();
 
-                setMessage("Payment allocated successfully! Total allocated: ₹" . number_format($total_allocated, 2), "success");
+                setMessage("Payment updated. Amount used: ₹" . number_format($total_allocated, 2), "success");
                 header("Location: payments.php?action=view&id=$payment_id");
                 exit();
             } catch (Exception $e) {
@@ -177,11 +177,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("sdsssii", $payment_date, $amount, $payment_mode, $reference_no, $notes, $id, $_SESSION['user_id']);
 
         if ($stmt->execute()) {
-            setMessage("Payment updated successfully!", "success");
+            setMessage("Payment saved.", "success");
             header("Location: payments.php?action=view&id=$id");
             exit();
         } else {
-            setMessage("Error updating payment: " . $stmt->error, "danger");
+            setMessage("Could not save payment. " . $stmt->error, "danger");
         }
         $stmt->close();
     }

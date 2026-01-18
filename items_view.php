@@ -234,7 +234,7 @@
                     </nav>
                     <h1 class="text-4xl font-black text-slate-800 tracking-tighter flex items-center gap-3">
                         <iconify-icon icon="solar:box-bold-duotone" class="text-indigo-500"></iconify-icon>
-                        Inventory Catalog
+                        Items
                     </h1>
                 </div>
             </div>

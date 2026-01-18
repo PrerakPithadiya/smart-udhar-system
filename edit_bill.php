@@ -1,6 +1,6 @@
 <?php
 // File: smart-udhar-system/edit_bill.php
-// Comprehensive bill editing with revision tracking
+// Direct bill editing without revision tracking
 
 require_once 'config/database.php';
 requireLogin();
@@ -14,94 +14,10 @@ if ($udhar_id <= 0) {
     exit();
 }
 
-// Function to create revision before editing
-function createBillRevision($conn, $udhar_id, $change_reason = '')
-{
-    // Get current bill data
-    $stmt = $conn->prepare("
-        SELECT ut.*, 
-               (SELECT JSON_ARRAYAGG(
-                   JSON_OBJECT(
-                       'item_id', ui.item_id,
-                       'item_name', ui.item_name,
-                       'hsn_code', ui.hsn_code,
-                       'quantity', ui.quantity,
-                       'unit_price', ui.unit_price,
-                       'cgst_rate', ui.cgst_rate,
-                       'sgst_rate', ui.sgst_rate,
-                       'igst_rate', ui.igst_rate,
-                       'cgst_amount', ui.cgst_amount,
-                       'sgst_amount', ui.sgst_amount,
-                       'igst_amount', ui.igst_amount,
-                       'total_amount', ui.total_amount
-                   )
-               ) FROM udhar_items ui WHERE ui.udhar_id = ut.id) as items_json
-        FROM udhar_transactions ut
-        WHERE ut.id = ?
-    ");
-    $stmt->bind_param("i", $udhar_id);
-    $stmt->execute();
-    $bill = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if (!$bill)
-        return false;
-
-    // Get next revision number
-    $revision_num = ($bill['revision_number'] ?? 0) + 1;
-
-    // Insert revision
-    $stmt = $conn->prepare("
-        INSERT INTO bill_revisions (
-            udhar_id, revision_number, user_id, customer_id, bill_no,
-            transaction_date, due_date, total_amount, cgst_amount, sgst_amount,
-            igst_amount, discount, discount_type, round_off, grand_total,
-            description, notes, status, category, items_data, change_reason, changed_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $grand_total = $bill['total_amount'] + $bill['cgst_amount'] + $bill['sgst_amount'] +
-        $bill['igst_amount'] - $bill['discount'] + $bill['round_off'];
-
-    $stmt->bind_param(
-        "iiissssdddddssdssssssi",
-        $udhar_id,
-        $revision_num,
-        $bill['user_id'],
-        $bill['customer_id'],
-        $bill['bill_no'],
-        $bill['transaction_date'],
-        $bill['due_date'],
-        $bill['total_amount'],
-        $bill['cgst_amount'],
-        $bill['sgst_amount'],
-        $bill['igst_amount'],
-        $bill['discount'],
-        $bill['discount_type'],
-        $bill['round_off'],
-        $grand_total,
-        $bill['description'],
-        $bill['notes'],
-        $bill['status'],
-        $bill['category'],
-        $bill['items_json'],
-        $change_reason,
-        $_SESSION['user_id']
-    );
-
-    return $stmt->execute();
-}
-
 // Handle bill update
 if (isset($_POST['update_bill'])) {
-    $change_reason = sanitizeInput($_POST['change_reason']);
-
     // Validate
     $errors = [];
-
-    if (empty($change_reason)) {
-        $errors[] = "Please provide a reason for editing this bill";
-    }
 
     if (!isset($_POST['items']) || count($_POST['items']) == 0) {
         $errors[] = "Please add at least one item";
@@ -111,11 +27,6 @@ if (isset($_POST['update_bill'])) {
         $conn->begin_transaction();
 
         try {
-            // Create revision before updating
-            if (!createBillRevision($conn, $udhar_id, $change_reason)) {
-                throw new Exception("Failed to create bill revision");
-            }
-
             // Get bill data
             $transaction_date = sanitizeInput($_POST['transaction_date']);
             $due_date = sanitizeInput($_POST['due_date']);
@@ -166,16 +77,12 @@ if (isset($_POST['update_bill'])) {
                     description = ?,
                     notes = ?,
                     status = ?,
-                    category = ?,
-                    revision_number = revision_number + 1,
-                    last_edited_by = ?,
-                    last_edited_at = NOW(),
                     updated_at = NOW()
                 WHERE id = ?
             ");
 
             $stmt->bind_param(
-                "ssdddddssssssii",
+                "ssdddddsssssii",
                 $transaction_date,
                 $due_date,
                 $total_amount,
@@ -188,8 +95,6 @@ if (isset($_POST['update_bill'])) {
                 $description,
                 $notes,
                 $status,
-                $category,
-                $_SESSION['user_id'],
                 $udhar_id
             );
 
@@ -253,9 +158,7 @@ if (isset($_POST['update_bill'])) {
 
             $conn->commit();
 
-            setMessage("Bill updated successfully! Revision created for audit trail.", "success");
-            header("Location: udhar.php?action=view&id=$udhar_id");
-            exit();
+            setMessage("Bill updated successfully!", "success");
 
         } catch (Exception $e) {
             $conn->rollback();
@@ -303,19 +206,6 @@ $stmt = $conn->prepare("SELECT id, item_name, item_code, hsn_code, price, cgst_r
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-// Get revision history
-$stmt = $conn->prepare("
-    SELECT br.*, u.username as changed_by_name
-    FROM bill_revisions br
-    LEFT JOIN users u ON br.changed_by = u.id
-    WHERE br.udhar_id = ?
-    ORDER BY br.revision_number DESC
-");
-$stmt->bind_param("i", $udhar_id);
-$stmt->execute();
-$revisions = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
@@ -586,12 +476,6 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                             <h4 class="text-lg font-black text-slate-800 tracking-tight mb-0">Bill No:
                                 <?php echo htmlspecialchars($udhar['bill_no']); ?></h4>
                         </div>
-                        <?php if (isset($udhar['revision_number']) && $udhar['revision_number'] > 1): ?>
-                            <span
-                                class="px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                Revision #<?php echo (int) $udhar['revision_number']; ?>
-                            </span>
-                        <?php endif; ?>
                     </div>
 
                     <div class="p-6 md:p-8">
@@ -607,36 +491,16 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                     </p>
                                 </div>
                             </div>
-                        </div>
 
-                        <form method="POST" action="" id="editBillForm" class="space-y-6">
-                            <!-- Change Reason -->
-                            <div class="glass-card accent-card-amber overflow-hidden">
-                                <div class="section-header-bar">
-                                    <iconify-icon icon="solar:chat-round-line-bold-duotone"
-                                        class="text-amber-500 text-xl"></iconify-icon>
-                                    <h5 class="text-sm font-black text-slate-800 tracking-tight mb-0">Reason for Editing
-                                        *</h5>
-                                </div>
-                                <div class="p-6">
-                                    <textarea
-                                        class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-200 transition-all"
-                                        id="change_reason" name="change_reason" rows="2"
-                                        placeholder="E.g., Correcting item quantity, Updating price, Customer requested changes..."
-                                        required></textarea>
-                                    <p class="text-[10px] font-bold text-slate-400 mt-2">This will be logged in the
-                                        revision history for transparency.</p>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div class="glass-card accent-card-indigo p-6">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <iconify-icon icon="solar:user-bold-duotone"
-                                            class="text-indigo-500 text-xl"></iconify-icon>
-                                        <h6
-                                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0">
-                                            Customer</h6>
+                            <form method="POST" action="" id="editBillForm" class="space-y-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="glass-card accent-card-indigo p-6">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <iconify-icon icon="solar:user-bold-duotone"
+                                                class="text-indigo-500 text-xl"></iconify-icon>
+                                            <h6
+                                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0">
+                                                Customer</h6>
                                         </div>
                                         <div class="inner-field-card">
                                             <span class="text-sm font-black text-slate-800">
@@ -663,11 +527,12 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                         </div>
                                         <div class="inner-field-card">
                                             <span class="text-sm font-black text-slate-800"><?php echo htmlspecialchars($udhar['bill_no']); ?></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class=" glass-card accent-card-indigo overflow-hidden">
+                            <div class="glass-card accent-card-indigo overflow-hidden mt-8">
                                                 <div class="section-header-bar">
                                                     <iconify-icon icon="solar:calendar-bold-duotone"
                                                         class="text-indigo-500 text-xl"></iconify-icon>
@@ -679,11 +544,10 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                                         <div>
                                                             <label for="transaction_date"
                                                                 class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Bill
-                                                                Date *</label>
+                                                                Date</label>
                                                             <input type="date" id="transaction_date"
                                                                 name="transaction_date"
                                                                 value="<?php echo $udhar['transaction_date']; ?>"
-                                                                required
                                                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all" />
                                                         </div>
                                                         <div>
@@ -696,9 +560,8 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                                         </div>
                                                         <div>
                                                             <label for="status"
-                                                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status
-                                                                *</label>
-                                                            <select id="status" name="status" required
+                                                                class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status</label>
+                                                            <select id="status" name="status"
                                                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all">
                                                                 <option value="pending" <?php echo $udhar['status'] == 'pending' ? 'selected' : ''; ?>>
                                                                     Pending</option>
@@ -711,7 +574,7 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                         </div>
 
                                         <!-- Billing Details (Category & Description) -->
-                                        <div class="glass-card accent-card-violet overflow-hidden">
+                                        <div class="glass-card accent-card-violet overflow-hidden mt-8">
                                             <div class="section-header-bar">
                                                 <iconify-icon icon="solar:folder-with-files-bold-duotone"
                                                     class="text-violet-500 text-xl"></iconify-icon>
@@ -750,12 +613,14 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                         </div>
 
                                         <!-- Items Section -->
-                                        <div class="glass-card accent-card-emerald overflow-hidden">
+                                        <div class="glass-card accent-card-emerald overflow-hidden mt-8">
                                             <div class="section-header-bar justify-between">
                                                 <div class="flex items-center gap-3">
                                                     <iconify-icon icon="solar:box-bold-duotone"
                                                         class="text-emerald-500 text-xl"></iconify-icon>
                                                     <h4 class="text-lg font-black text-slate-800 tracking-tight mb-0">
+                                                        Items
+                                                    </h4>
                                                         Bill Items</h4>
                                                 </div>
                                                 <div class="flex items-center gap-4">
@@ -856,14 +721,15 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                             </div>
                                         </div>
 
-                                        <div class="flex flex-col md:flex-row justify-between gap-3">
+                                        <!-- Action Buttons -->
+                                        <div class="flex flex-col md:flex-row justify-between gap-3 mt-8">
                                             <a href="udhar.php"
                                                 class="bg-white hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-bold border border-slate-200 flex items-center justify-center gap-2 transition-all">
                                                 <iconify-icon icon="solar:arrow-left-bold"
                                                     class="text-xl"></iconify-icon>
                                                 Cancel
                                             </a>
-                                            <button type="submit" name="update_bill"
+                                            <button type="button" onclick="confirmUpdateBill()"
                                                 class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all">
                                                 <iconify-icon icon="solar:check-circle-bold"
                                                     class="text-xl"></iconify-icon>
@@ -872,39 +738,6 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                                         </div>
                         </form>
 
-                        <!-- Revision History -->
-                        <?php if (!empty($revisions)): ?>
-                            <div class="revision-history">
-                                <h5><i class="bi bi-clock-history"></i> Revision History</h5>
-                                <p class="text-muted">This bill has been edited <?php echo count($revisions); ?> time(s)</p>
-
-                                <?php foreach ($revisions as $rev): ?>
-                                    <div class="revision-item">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <strong>Revision #<?php echo $rev['revision_number']; ?></strong>
-                                                <span class="text-muted"> -
-                                                    <?php echo date('d M Y, h:i A', strtotime($rev['changed_at'])); ?></span>
-                                            </div>
-                                            <span
-                                                class="badge bg-info">₹<?php echo number_format($rev['grand_total'], 2); ?></span>
-                                        </div>
-                                        <div class="mt-2">
-                                            <small class="text-muted">
-                                                <i class="bi bi-person"></i> By:
-                                                <?php echo htmlspecialchars($rev['changed_by_name'] ?? 'Unknown'); ?>
-                                            </small>
-                                        </div>
-                                        <?php if (!empty($rev['change_reason'])): ?>
-                                            <div class="mt-2">
-                                                <small><strong>Reason:</strong>
-                                                    <?php echo htmlspecialchars($rev['change_reason']); ?></small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -1050,7 +883,84 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
             calculateTotals();
         });
 
+        function confirmUpdateBill() {
+            // Create confirmation modal
+            const modalHtml = `
+                <div id="confirmUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" style="display: none;">
+                    <div class="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl transform transition-all">
+                        <div class="text-center">
+                            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                                <iconify-icon icon="solar:danger-triangle-bold-duotone" class="text-3xl text-red-600"></iconify-icon>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 mb-4">Confirm Bill Update</h3>
+                            <div class="text-slate-600 mb-6 space-y-3">
+                                <p class="font-semibold text-lg">⚠️ Important Warning</p>
+                                <p>Once you update this bill, the original version will be permanently replaced and you will NOT be able to recover the previous bill details.</p>
+                                <p class="text-sm text-slate-500">This action will create a revision for audit purposes, but the original bill data cannot be restored.</p>
+                            </div>
+                            <div class="flex gap-3 justify-center">
+                                <button type="button" onclick="closeConfirmModal()" 
+                                    class="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-bold transition-all">
+                                    Cancel
+                                </button>
+                                <button type="button" onclick="proceedWithUpdate()" 
+                                    class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold transition-all">
+                                    Yes, Update Bill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            document.getElementById('confirmUpdateModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmUpdateModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function proceedWithUpdate() {
+            // Client-side validation: Check if there are any items
+            const itemRows = document.querySelectorAll('#itemsBody tr');
+            if (itemRows.length === 0) {
+                displayClientErrorMessage('Please add at least one item to the bill.');
+                return;
+            }
+            
+            // Clear any existing client-side error messages before proceeding
+            const existingError = document.querySelector('.bg-red-100.border-red-red-400');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add hidden input to indicate confirmation
+            const form = document.getElementById('editBillForm');
+            const confirmedInput = document.createElement('input');
+            confirmedInput.type = 'hidden';
+            confirmedInput.name = 'update_bill';
+            confirmedInput.value = 'confirmed';
+            form.appendChild(confirmedInput);
+            
+            // Close modal and submit form
+            closeConfirmModal();
+            form.submit();
+        }
+
         function addItemRow(itemData = null) {
+            // Remove any existing client-side error message
+            const existingError = document.querySelector('.bg-red-100.border-red-red-400');
+            if (existingError) {
+                existingError.remove();
+            }
+            
             const tbody = document.getElementById('itemsBody');
             const row = document.createElement('tr');
             row.id = 'itemRow_' + itemCounter;
@@ -1081,7 +991,7 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
             row.innerHTML = `
                 <td class="px-3">
                     <select class="table-input table-select item-select" name="items[${itemCounter}][item_id]" 
-                            onchange="updateItemDetails(${itemCounter})" required>
+                            onchange="updateItemDetails(${itemCounter})">
                         <option value="">Select Item</option>
                         ${items.map(item => `
                             <option value="${item.id}" 
@@ -1117,7 +1027,7 @@ $page_title = "Edit Bill - " . htmlspecialchars($udhar['bill_no']);
                         <span class="currency-symbol">₹</span>
                         <input type="number" class="table-input price" 
                                name="items[${itemCounter}][price]" value="${defaultItem.unit_price}" 
-                               step="0.01" min="0.01" onchange="calculateItemTotal(${itemCounter})" required>
+                               step="0.01" min="0.01" onchange="calculateItemTotal(${itemCounter})">
                     </div>
                 </td>
                 <td class="hidden">
