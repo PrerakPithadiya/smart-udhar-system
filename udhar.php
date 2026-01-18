@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Udhar Entry Management Page
  * This file is now a wrapper that Includes separated logic and view files.

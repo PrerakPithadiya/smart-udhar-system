@@ -478,6 +478,19 @@ $stmt->execute();
 $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// Get items grouped by category for sidebar
+$items_by_category = [];
+$categories = [];
+foreach ($items as $item) {
+    $category = $item['category'] ?? 'Others';
+    if (!isset($items_by_category[$category])) {
+        $items_by_category[$category] = [];
+        $categories[] = $category;
+    }
+    $items_by_category[$category][] = $item;
+}
+sort($categories);
+
 // Get all udhar entries for listing
 $search = isset($_GET['search']) ? sanitizeInput($_GET['search']) : '';
 $status_filter = isset($_GET['status']) ? sanitizeInput($_GET['status']) : '';

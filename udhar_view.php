@@ -19,8 +19,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="assets/css/udhar.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/reports.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/udhar.css">
     <link rel="stylesheet" href="assets/css/udhar_custom.css">
 
     <?php
@@ -501,21 +503,22 @@
                                                     </li>
                                                 </ul>
                                             </nav>
-                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </div>
 
+                        <?php endif; ?>
+
                         <?php elseif ($action == 'add'): ?>
                             <!-- Add New Udhar Entry Form -->
-                            <div class="bill-form-container" style="position: relative; z-index: 100;">
-                                <div class="bill-form-header">
-                                    <h3><i class="bi bi-plus-circle"></i> Add New Udhar Bill</h3>
-                                </div>
-                                <div class="bill-form-body">
-                                    <form method="POST" action="" id="udharForm">
-                                        <div class="bill-form-section">
-                                            <h5><i class="bi bi-info-circle"></i> Basic Details</h5>
+                            <div class="row">
+                                <!-- Main Form -->
+                                <div class="col-md-8">
+                                    <div class="bill-form-container" style="position: relative; z-index: 100;">
+                                        <div class="bill-form-header">
+                                            <h3><i class="bi bi-plus-circle"></i> Add New Udhar Bill</h3>
+                                        </div>
+                                        <div class="bill-form-body">
                                             <div class="bill-form-row">
                                                 <div class="bill-form-group" style="grid-column: span 2;">
                                                     <label for="customer_search"><i class="bi bi-person"></i> Customer
@@ -709,10 +712,52 @@
                                             <button type="submit" name="add_udhar" class="btn btn-primary btn-lg">
                                                 <i class="bi bi-check-circle"></i> Save & Print Bill
                                             </button>
-                                        </div>
                                     </form>
                                 </div>
                             </div>
+
+                            <!-- Right Sidebar - Categories and Items (Overlay) -->
+                            <div class="sidebar-overlay" id="sidebarOverlay">
+                                <div class="sidebar-content" id="sidebarContent">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0"><i class="bi bi-tags"></i> Categories & Items</h6>
+                                            <button type="button" class="btn-close btn-sm text-white" id="closeSidebar">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                        <div class="card-body p-0" style="height: calc(100% - 56px); overflow: hidden;">
+                                            <!-- Categories List -->
+                                            <div class="border-bottom" style="height: 200px; overflow-y: auto;">
+                                                <div class="list-group list-group-flush">
+                                                    <?php foreach ($categories as $category): ?>
+                                                        <button type="button" class="list-group-item list-group-item-action category-btn" 
+                                                                data-category="<?php echo htmlspecialchars($category); ?>">
+                                                            <i class="bi bi-folder"></i> <?php echo htmlspecialchars($category); ?>
+                                                        </button>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Items Search -->
+                                            <div class="p-2 border-bottom bg-light">
+                                                <input type="text" class="form-control form-control-sm" id="sidebarItemSearch" 
+                                                       placeholder="Search by name or code...">
+                                            </div>
+                                            
+                                            <!-- Items List -->
+                                            <div id="sidebarItemsList" style="height: calc(100% - 280px); overflow-y: auto;">
+                                                <div class="list-group list-group-flush">
+                                                    <div class="text-center p-3 text-muted">
+                                                        Select a category to view items
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <?php elseif (($action == 'edit' || $action == 'view') && $udhar): ?>
                             <!-- Edit/View Udhar Entry -->
@@ -1131,15 +1176,399 @@
         // Global data from PHP
         const ITEMS_LIST = <?php echo json_encode($items); ?>;
         const PRE_SELECTED_ITEM_ID = <?php echo $item_id; ?>;
-        const CURRENT_ACTION = '<?php echo $action; ?>';
-        const CUSTOMER_ID = <?php echo $customer_id; ?>;
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/search_suggestions.js"></script>
-    <script src="assets/js/common.js"></script>
-    <script src="assets/js/udhar_custom.js"></script>
+        <?php if (empty($udhar_items)): ?>
+            <div class="text-center py-4">
+                <p class="text-muted">No items in this bill</p>
+            </div>
+        <?php else: ?>
+            <?php foreach ($udhar_items as $index => $item): ?>
+                <div class="bill-item-row">
+                    <div class="bill-item-sno"><?php echo $index + 1; ?></div>
+                    <div class="bill-item-name">
+                        <?php echo htmlspecialchars($item['item_name']); ?>
+                    </div>
+                    <div class="bill-item-qty">
+                        <?php echo number_format($item['quantity'], 2); ?>
+                    </div>
+                    <div class="bill-item-price">
+                        ₹<?php echo number_format($item['unit_price'], 2); ?>
+                    </div>
+                    <div class="bill-item-total-view">
+                        ₹<?php echo number_format($item['total_amount'], 2); ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-4">
+    <div class="d-flex gap-2">
+        <a href="print_bill_tax_invoice.php?id=<?php echo $udhar['id']; ?>"
+            class="btn btn-primary">
+            <i class="bi bi-file-earmark-text"></i> Print Tax Invoice
+        </a>
+        <a href="print_bill.php?id=<?php echo $udhar['id']; ?>"
+            class="btn btn-outline-primary">
+            <i class="bi bi-printer"></i> Print Standard Bill
+        </a>
+    </div>
+    <div>
+        <a href="udhar.php?action=edit&id=<?php echo $udhar['id']; ?>"
+            class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a href="udhar.php" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<?php if ($action == 'edit'): ?>
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete bill?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Warning:</strong> Are you sure you want to delete this bill?
+                    </div>
+                    <p class="mb-0">
+                        Bill No:
+                        <strong><?php echo htmlspecialchars($udhar['bill_no']); ?></strong><br>
+                        Customer:
+                        <strong><?php echo htmlspecialchars($udhar['customer_name']); ?></strong><br>
+                        Amount:
+                        <strong>₹<?php echo number_format($udhar['amount'], 2); ?></strong>
+                    </p>
+                    <p class="mt-2 text-danger">
+                        This cannot be undone. Items and payments linked to this bill will also
+                        be deleted.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="">
+                        <input type="hidden" name="udhar_id"
+                            value="<?php echo $udhar['id']; ?>">
+                        <button type="submit" name="delete_udhar" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete Forever
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+</div>
+</div>
+</div>
+
+<!-- Items Modal for Selection -->
+
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
+                    <table class="table table-hover" id="itemsSelectTable">
+                        <thead>
+                            <tr>
+                                <th width="5%">Pick</th>
+                                <th width="30%">Item</th>
+                                <th width="15%">HSN</th>
+                                <th width="15%">Price</th>
+                                <th width="15%">Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $itm): ?>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="form-check-input item-checkbox"
+                                            value="<?php echo (int) $itm['id']; ?>">
+                                    </td>
+                                    <td><?php echo htmlspecialchars($itm['item_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($itm['hsn_code']); ?></td>
+                                    <td>₹<?php echo number_format($itm['price'], 2); ?></td>
+                                    <td><?php echo htmlspecialchars($itm['unit']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addSelectedItems()">Add selected
+                    items</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Initialization and Data passing to External Script -->
+<script>
+    // Global data from PHP
+    const ITEMS_LIST = <?php echo json_encode($items); ?>;
+    const PRE_SELECTED_ITEM_ID = <?php echo $item_id; ?>;
+    const CURRENT_ACTION = '<?php echo $action; ?>';
+    const CUSTOMER_ID = <?php echo $customer_id; ?>;
+    const ITEMS_BY_CATEGORY = <?php echo json_encode($items_by_category); ?>;
+</script>
+
+<script>
+    // Sidebar functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        if (CURRENT_ACTION !== 'add') return;
+
+        let currentCategory = null;
+        let currentItems = [];
+        let selectedIndex = -1;
+        let hideTimeout = null;
+
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const itemsList = document.getElementById('sidebarItemsList');
+        const searchInput = document.getElementById('sidebarItemSearch');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+
+        // Category click handler
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                selectCategory(category);
+            });
+        });
+
+        // Close sidebar button
+        closeSidebarBtn.addEventListener('click', function() {
+            hideSidebar();
+        });
+
+        // Search input handler
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterItems(query);
+        });
+
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', function(e) {
+            const items = itemsList.querySelectorAll('.sidebar-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelection(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelection(items);
+            } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                const item = items[selectedIndex];
+                if (item) {
+                    addItemToBill(item.dataset.itemData);
+                }
+            }
+        });
+
+        // Monitor item fields for focus
+        function setupItemFieldListeners() {
+            const itemFields = document.querySelectorAll('#itemsBody input, #itemsBody select, #itemsBody textarea');
+            
+            itemFields.forEach(field => {
+                field.addEventListener('focus', function() {
+                    showSidebar();
+                    clearHideTimeout();
+                });
+                
+                field.addEventListener('blur', function() {
+                    // Delay hiding to allow for tab navigation
+                    setTimeout(() => {
+                        if (!document.activeElement || !document.activeElement.closest('#itemsBody')) {
+                            hideSidebar();
+                        }
+                    }, 200);
+                });
+            });
+        }
+
+        function showSidebar() {
+            sidebarOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+
+        function hideSidebar() {
+            sidebarOverlay.classList.remove('show');
+            document.body.style.overflow = ''; // Restore background scroll
+            clearHideTimeout();
+        }
+
+        function clearHideTimeout() {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        }
+
+        function selectCategory(category) {
+            // Update active state
+            categoryBtns.forEach(btn => {
+                btn.classList.remove('active', 'bg-primary', 'text-white');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active', 'bg-primary', 'text-white');
+                }
+            });
+
+            currentCategory = category;
+            currentItems = ITEMS_BY_CATEGORY[category] || [];
+            displayItems(currentItems);
+            selectedIndex = -1;
+        }
+
+        function displayItems(items) {
+            if (!itemsList) return;
+            
+            if (items.length === 0) {
+                itemsList.innerHTML = '<div class="text-center p-3 text-muted">No items in this category</div>';
+                return;
+            }
+
+            let html = '<div class="list-group list-group-flush">';
+            items.forEach(item => {
+                const itemData = JSON.stringify(item);
+                html += `
+                    <div class="list-group-item list-group-item-action sidebar-item" 
+                         data-item-data='${itemData.replace(/'/g, '&apos;')}'
+                         ondblclick="addItemToBill(this.dataset.itemData)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${item.item_name}</strong>
+                                <small class="text-muted d-block">${item.item_code || ''}</small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">${item.unit || 'PCS'}</small><br>
+                                <strong>₹${parseFloat(item.price || 0).toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            itemsList.innerHTML = html;
+
+            // Add click handlers for single click (selection)
+            const itemElements = itemsList.querySelectorAll('.sidebar-item');
+            itemElements.forEach((el, index) => {
+                el.addEventListener('click', function() {
+                    selectedIndex = index;
+                    updateSelection(itemElements);
+                });
+            });
+        }
+
+        function filterItems(query) {
+            if (!currentCategory) return;
+            
+            let filtered = currentItems;
+            if (query) {
+                filtered = currentItems.filter(item => 
+                    item.item_name.toLowerCase().includes(query) ||
+                    (item.item_code && item.item_code.toLowerCase().includes(query))
+                );
+            }
+            displayItems(filtered);
+            selectedIndex = -1;
+        }
+
+        function updateSelection(items) {
+            items.forEach((item, index) => {
+                item.classList.remove('active', 'bg-primary', 'text-white');
+                if (index === selectedIndex) {
+                    item.classList.add('active', 'bg-primary', 'text-white');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+
+        function addItemToBill(itemDataStr) {
+            try {
+                const item = JSON.parse(itemDataStr);
+                // Call existing addItemRow function with item data
+                if (typeof addItemRow === 'function') {
+                    addItemRow(item);
+                    
+                    // Auto-hide sidebar after adding item
+                    hideTimeout = setTimeout(() => {
+                        hideSidebar();
+                    }, 500);
+                }
+            } catch (e) {
+                console.error('Error parsing item data:', e);
+            }
+        }
+
+        // Auto-select first category if none selected
+        if (categoryBtns.length > 0 && !currentCategory) {
+            selectCategory(categoryBtns[0].dataset.category);
+        }
+
+        // Setup item field listeners
+        setupItemFieldListeners();
+
+        // Setup listeners for dynamically added items
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1) { // Element node
+                            const inputs = node.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => {
+                                input.addEventListener('focus', function() {
+                                    showSidebar();
+                                    clearHideTimeout();
+                                });
+                                
+                                input.addEventListener('blur', function() {
+                                    setTimeout(() => {
+                                        if (!document.activeElement || !document.activeElement.closest('#itemsBody')) {
+                                            hideSidebar();
+                                        }
+                                    }, 200);
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        // Start observing the itemsBody for dynamic changes
+        const itemsBody = document.getElementById('itemsBody');
+        if (itemsBody) {
+            observer.observe(itemsBody, { childList: true, subtree: true });
+        }
+    });
+</script>
+    <script src="assets/js/udhar_custom.js?v=<?php echo file_exists('assets/js/udhar_custom.js') ? filemtime('assets/js/udhar_custom.js') : time(); ?>"></script>
 
     <script>
         // Inline script for PHP-dependent initialization

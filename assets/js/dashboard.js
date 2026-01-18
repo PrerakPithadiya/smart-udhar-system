@@ -13,14 +13,16 @@ function updateTime() {
     minute: "2-digit",
     second: "2-digit",
   };
-  document.getElementById("currentTime").textContent = now.toLocaleDateString(
-    "en-US",
-    options
-  );
+  const currentTimeEl = document.getElementById("currentTime");
+  if (!currentTimeEl) return;
+
+  currentTimeEl.textContent = now.toLocaleDateString("en-US", options);
 }
 
-setInterval(updateTime, 1000);
-updateTime();
+if (document.getElementById("currentTime")) {
+  setInterval(updateTime, 1000);
+  updateTime();
+}
 
 document.addEventListener("keydown", function (e) {
   if (e.defaultPrevented) return;

@@ -101,4 +101,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     console.log(`${TOGGLE_LOG_PREFIX} Engine initialized.`);
+
+    // Keyboard Shortcuts Engine
+    document.addEventListener('keydown', (e) => {
+        // Only trigger if not in an input field or similar
+        const activeElement = document.activeElement;
+        const isInput = activeElement.tagName === 'INPUT' || 
+                        activeElement.tagName === 'TEXTAREA' || 
+                        activeElement.tagName === 'SELECT' || 
+                        activeElement.isContentEditable;
+        
+        if (isInput) return;
+
+        // 'S' key for Search Customer in New Udhar
+        if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const currentPath = window.location.pathname;
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // If already on the add udhar page, just focus the field
+            if (currentPath.endsWith('udhar.php') && urlParams.get('action') === 'add') {
+                const searchField = document.getElementById('customer_search');
+                if (searchField) {
+                    e.preventDefault();
+                    searchField.focus();
+                }
+            } else {
+                // Otherwise redirect to it with focus param
+                window.location.href = 'udhar.php?action=add&focus=customer_search';
+            }
+        }
+    });
 });

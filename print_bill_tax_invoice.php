@@ -530,7 +530,8 @@ $amount_in_words = amountToWords($calculated_grand_total);
     <!-- Print buttons -->
     <div class="print-button-container no-print">
         <button class="print-btn" onclick="window.print()"> Print Bill</button>
-        <button class="print-btn back-btn" onclick="window.location.href='udhar.php'"> Back to List</button>
+        <button class="print-btn back-btn" onclick="window.location.href='reports.php'"> Back to Report</button>
+        <button class="print-btn back-btn" onclick="window.location.href='udhar.php'"> Back to Udhar Entry</button>
     </div>
 
     <!-- Bill Content -->
